@@ -26,4 +26,9 @@ def create_table(database_cursor):
 	database_cursor.execute(sql)
 
 def add_db_entry(database_cursor):
-	database_cursor.executemany("insert into archivedcontent values (%s)")
+# this is very stubby and is derived from old code which had to stagger
+# multiple inserts simultaneously which shouldn't be necessary here, but
+# should be fairly self-explanatory
+	XMLentries = []
+	XMLentries.append((journal_uuid, sha1_value, issue_url))
+	database_cursor.executemany("insert into archivedcontent (journal_uuid, sha1_value, issue_url) values (%s, %s, %s)", XMLentries)
