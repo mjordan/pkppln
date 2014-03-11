@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 10, 2014 at 03:03 PM
+-- Generation Time: Mar 11, 2014 at 07:47 AM
 -- Server version: 5.5.35-0ubuntu0.13.10.2
 -- PHP Version: 5.5.3-1ubuntu2.1
 
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `archivedcontent` (
   `journal_uuid` varchar(38) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `issue_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `size` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
