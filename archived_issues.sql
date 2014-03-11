@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 11, 2014 at 07:47 AM
+-- Generation Time: Mar 11, 2014 at 07:59 AM
 -- Server version: 5.5.35-0ubuntu0.13.10.2
 -- PHP Version: 5.5.3-1ubuntu2.1
 
@@ -23,12 +23,12 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `archivedcontent`
+-- Table structure for table `archived_issues`
 --
 
-CREATE TABLE IF NOT EXISTS `archivedcontent` (
+CREATE TABLE IF NOT EXISTS `archived_issues` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `journal_uuid` varchar(38) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `issue_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
