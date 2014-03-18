@@ -63,7 +63,3 @@ if action == 'modifyDeposit':
     print 'Modifying Deposit on behalf of ' + content_provider
     r = requests.put(server_base_url + cont_iri + content_provider + '/' + content_uuid + '/edit', data=atom, headers=headers)
     print r.status_code
-
-    
-
-
