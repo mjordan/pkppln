@@ -58,21 +58,19 @@ def create_deposit(on_behalf_of):
 @get('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/state')
 def sword_statement(on_behalf_of, deposit_uuid):
     """
-    SWORD state terms applicable to a PKP PLN deposit:
-        failed: the deposit failed
-        notinlom: deposit not yet in LOCKSS-O-Matic
-        notharvested: deposit is is LOCKSS-O-Matic but not yet harvested by the PKP PLN
-        harvestednoagreement: deposit has been harvested into the PKP PLN but the boxes
-            are not reporting 100% Agreement.
+    SWORD state terms applicable to a deposit to the PKP PLN (taken from the
+        LOCKSS-O-Matic SWORD API state terms but with modified descriptions):
+        failed: The deposit to the PKP PLN staging server (or LOCKSS-O-Matic) has failed.
+        disagreement: The PKP LOCKSS network is not in agreement on content checksums.
+        agreement: The PKP LOCKSS network agrees internally on content checksums.
             
-        @todo: Develop logic to determine the above states. We will need to issue Statement
-            request to LOM for notharvested and harvestednoagreement.
+        @todo: Develop logic to determine the above states, i.e., pass through LOCKSS-O-Matic's
+        state terms.
     """
     states = {
-        'failed': 'Deposit failed',
-        'notinlom': 'Deposit successful but not yet registered with the PKP PLN',
-        'notharvested': 'Deposit registered with the PKP PLN but not fully harvested yet',
-        'harvestednoagreement': 'Deposit harvested into PKP PLN but polling still in progress'
+        'failed': 'The deposit to the PKP PLN staging server (or LOCKSS-O-Matic) has failed',
+        'disagreement': 'The PKP LOCKSS network is not in agreement on content checksums',
+        'agreement': 'The PKP LOCKSS network agrees internally on content checksums'
     }
     con = mdb.connect(db_host, db_user, db_password, db_name)
     try:
