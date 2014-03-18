@@ -2,19 +2,21 @@
 Simple SWORD server for the PKP Private LOCKSS Network staging server.
 """
 
+import ConfigParser
 import xml.etree.ElementTree as et
 import MySQLdb as mdb
 from datetime import datetime
 from bottle import run, request, template, get, post, put, HTTPResponse
 
-sword_server_host = 'localhost'
-sword_server_port = '9999'
-sword_server_base_url = 'http://' + sword_server_host + ':' + sword_server_port
+config = ConfigParser.ConfigParser()
+config.read('../config_dev.cfg')
 
-db_host = 'localhost'
-db_name = 'pkppln'
-db_user = 'foo'
-db_password = 'bar'
+sword_server_base_url = config.get('URLs', 'sword_server_base_url')
+
+db_host = config.get('Database', 'db_host')
+db_name = config.get('Database', 'db_name')
+db_user = config.get('Database', 'db_user')
+db_password = config.get('Database', 'db_password')
 
 namespaces = {'entry': 'http://www.w3.org/2005/Atom',
     'lom': 'http://lockssomatic.info/SWORD2',
