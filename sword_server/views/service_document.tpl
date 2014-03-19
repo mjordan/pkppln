@@ -7,9 +7,8 @@
     <sword:maxUploadSize>1000</sword:maxUploadSize>
     <lom:uploadChecksumType>SHA-1</lom:uploadChecksumType>
     <workspace>
-        <atom:title>PKP PLN deposit for {{journal}}</atom:title>     
+        <atom:title>PKP PLN deposit for {{on_behalf_of}}</atom:title>     
         <collection href="{{sword_server_base_url}}/api/sword/2.0/col-iri/{{on_behalf_of}}">
-            <atom:title>{{ journal }}</atom:title>
             <accept>application/atom+xml;type=entry</accept> 
             <sword:mediation>true</sword:mediation>
         </collection>
