@@ -1,3 +1,8 @@
+"""
+Script to check files harvested from OJS journals participating in the 
+PKP PLN for viruses.
+"""
+
 import os
 import sys
 # http://xael.org/norman/python/pyclamd/
