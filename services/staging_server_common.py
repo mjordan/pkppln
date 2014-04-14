@@ -3,6 +3,7 @@ Functions shared by PKP PLN microservices.
 """
 
 import sys
+import os
 import ConfigParser
 import MySQLdb as mdb
 
@@ -57,3 +58,16 @@ def log_microservice(microservice, deposit_uuid, started_on, finished_on, outcom
         print "Error %d: %s" % (e.args[0],e.args[1])
         sys.exit(1)
 
+def create_microservice_directory(microservice_state, deposit_uuid):
+    # @todo: Wrap in a try/except.
+    path_to_directory = os.path.join(config.get('Paths', 'processing_root'), microservice_state, deposit_uuid)
+    if not os.path.exists(path_to_directory):
+        os.makedirs(path_to_directory)
+    return path_to_directory
+    
+def get_input_path(previous_microservice_state, deposit_uuid, deposit_filename=None):
+    if deposit_filename is None:
+        path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid)
+    else:
+        path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid, deposit_filename)
+    return path

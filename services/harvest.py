@@ -8,9 +8,6 @@ import requests
 import ConfigParser
 from datetime import datetime
 
-config = ConfigParser.ConfigParser()
-config.read('../config_dev.cfg')
-
 import staging_server_common
 
 # Each microservice must declare a name and a state, for use in the database
@@ -23,11 +20,8 @@ def harvest(deposit):
     deposit_url = deposit[7]
     error = ''
     started_on = datetime.now()
-    path_to_harvested_directory = os.path.join(config.get('Paths', 'processing_root'), microservice_state, deposit_uuid)
     
-    # @todo: Wrap in a try/except.
-    if not os.path.exists(path_to_harvested_directory):
-        os.makedirs(path_to_harvested_directory)
+    path_to_harvested_directory = staging_server_common.create_microservice_directory(microservice_state, deposit_uuid)
     path_to_harvested_bag = os.path.join(path_to_harvested_directory, deposit_url.split('/')[-1])
     
     print "Path: " + path_to_harvested_bag
@@ -36,7 +30,7 @@ def harvest(deposit):
     r = requests.get(deposit_url, stream=True)
     with open(path_to_harvested_bag, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024): 
-            if chunk: # filter out keep-alive new chunks
+            if chunk:
                 f.write(chunk)
                 f.flush()
 

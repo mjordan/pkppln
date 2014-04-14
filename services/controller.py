@@ -33,9 +33,7 @@ next microservice can identify the deposit for consumption.
 # Harvest: needs state 'depositedByJournal', sets state to 'harvested'
 if microservice == 'harvest_deposits':
     deposits = staging_server_common.get_deposits('depositedByJournal')
-    # if len(deposits):
     if deposits:
-        print "We have deposits"
         for deposit in deposits:
             harvest.harvest(deposit)
 
