@@ -24,12 +24,24 @@ microservice_state = 'virusChecked'
 # knows where to find content to act on.
 previous_microservice_state = 'unserialized'
 
-# cd = pyclamd.ClamdUnixSocket()
+def check(deposit):
+    # cd = pyclamd.ClamdUnixSocket()
+    path_to_unserialized_deposit = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid)
+    
+    # Write results of the virus check to virus_check.txt in the Bag's /data directory.
+    path_to_virus_check_report = path = os.path.join(config.get('Paths', 'processing_root'),
+        previous_microservice_state, deposit_uuid, 'virus_check.txt')
+        
+    f = open(path_to_virus_check_report, 'w')
+    for root, _, files in os.walk(path_to_unserialized_deposit):
+        for f in files:
+            fname = os.path.join(os.getcwd(), root, f)
+            # result = cd.scan_file(fname)
+            if result is not None:
+                 f.write("WARNING: Virus found: " + fname + "\n")
+    f.close()
 
-for root, _, files in os.walk(sys.argv[1]):
-    for f in files:
-        fname = os.path.join(os.getcwd(), root, f)
-        print "Checking " + fname + " for virus"
-        # result = cd.scan_file(fname)
-        if result is not None:
-            print "WARNING: Virus found: " + fname
+    outcome = 'success'
+    error = '' # @todo: check for errors
+    staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
+    staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)
