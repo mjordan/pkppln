@@ -71,3 +71,6 @@ def get_input_path(previous_microservice_state, deposit_uuid, deposit_filename=N
     else:
         path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid, deposit_filename)
     return path
+
+def get_deposit_filename(url):
+    return url.split('/')[-1]

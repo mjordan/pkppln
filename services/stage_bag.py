@@ -24,16 +24,17 @@ previous_microservice_state = 'reserialized'
 def reserialize_bag(deposit):
     journal_uuid = deposit[5]
     deposit_uuid = deposit[3]
+    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
     started_on = datetime.now()
-    # @todo: Move the zipped deposit Bag from where it was reserialized to the PLN staging
-    # area.
     
-    # @todo: Don't use deposit_filename here, use normalized reserialzied Bag filename. 
+    # Don't use deposit_filename here, use normalized reserialzied Bag filename of
+    # journal_uuid.issue_uuid.zip
+    file_to_stage = journal_uuid + '.' + deposit_uuid + '.zip'
     path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)
-    staging_directory = os.path.join(config.get('Paths', 'staging_root'), journal_uuid, deposit_uuid)
+    path_to_staged_file = os.path.join(config.get('Paths', 'staging_root'), journal_uuid, file_to_stage)
     if not os.path.exists(staging_directory):
         os.makedirs(staging_directory)
-    # shutil.move()
+    shutil.move(path_to_input_file, path_to_staged_file)
     
     finished_on = datetime.now()
     

@@ -25,10 +25,14 @@ previous_microservice_state = 'contentVerified'
 
 def reserialize_bag(deposit):
     started_on = datetime.now()
+    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
     # @todo: 1) Add these tags to bag-info.txt: Bagging-Date, External-Description [value of the journal title and issue number],
     # External-Identifier [value of the deposit URL], PKP-PLN-Journal-UUID, PKP-PLN-Deposit-UUID.
     # 2) Reserialize the Bag and assign it a filename using the pattern
-    # journaluuid.journal_title.issueuuid.zip (max 255 chars including extension).
+    # journaluuid.issueuuid.zip (max 255 chars including extension).
+    
+    # @todo: Recreate Bag and serialize it (using .zip) with the deposit filename.
+    path_to_unserialized_deposit = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid)
     
     finished_on = datetime.now()
     

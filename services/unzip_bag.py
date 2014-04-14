@@ -25,11 +25,10 @@ previous_microservice_state = 'harvested'
 def unserialize(deposit):
     deposit_uuid = deposit[3]
     deposit_url = deposit[7]
-    deposit_filename = deposit_url.split('/')[-1]
+    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
     error = ''
     started_on = datetime.now()
     
-    # Define paths.
     path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)
     path_to_unserialized_directory = staging_server_common.create_microservice_directory(microservice_state, deposit_uuid)
 

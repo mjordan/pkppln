@@ -17,12 +17,12 @@ microservice_state = 'harvested'
 
 def harvest(deposit):
     deposit_uuid = deposit[3]
-    deposit_url = deposit[7]
+    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
     error = ''
     started_on = datetime.now()
     
     path_to_harvested_directory = staging_server_common.create_microservice_directory(microservice_state, deposit_uuid)
-    path_to_harvested_bag = os.path.join(path_to_harvested_directory, deposit_url.split('/')[-1])
+    path_to_harvested_bag = os.path.join(path_to_harvested_directory, deposit_filename)
     
     print "Path: " + path_to_harvested_bag
     
