@@ -86,7 +86,7 @@ def sword_statement(on_behalf_of, deposit_uuid):
     try:
         with con:
             cur = con.cursor()
-            cur.execute("SELECT issue_url FROM deposits WHERE deposit_uuid = %s", deposit_uuid)
+            cur.execute("SELECT deposit_url FROM deposits WHERE deposit_uuid = %s", deposit_uuid)
     except mdb.Error, e:
         print "Error %d: %s" % (e.args[0],e.args[1])
         sys.exit(1)
@@ -136,7 +136,7 @@ def insert_deposit(action, email, deposit_uuid, on_behalf_of, checksum_value, ur
             cur = con.cursor()
             cur.execute("INSERT INTO deposits " +
                 "(action, contact_email, deposit_uuid, date_deposited, journal_uuid, \
-                  sha1_value, issue_url, size, state, outcome, harvested, deposited_lom) " +
+                  sha1_value, deposit_url, size, state, outcome, harvested, deposited_lom) " +
                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, email, deposit_uuid,
                  datetime.now(), on_behalf_of, checksum_value, url, size, state, outcome, None, None))
         return True
