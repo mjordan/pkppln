@@ -2,9 +2,7 @@
 
 import sys
 import ConfigParser
-import xml.etree.ElementTree as et
 import MySQLdb as mdb
-from datetime import datetime
 
 import staging_server_common
 import harvest
