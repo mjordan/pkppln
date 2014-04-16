@@ -6,6 +6,7 @@ import MySQLdb as mdb
 
 import staging_server_common
 import harvest
+import verify_payload
 import unzip_bag
 import virus_check
 import verify_export
@@ -40,7 +41,7 @@ elif microservice == 'verify_payload':
     deposits = staging_server_common.get_deposits('harvested')
     if deposits:
         for deposit in deposits:
-            harvest.harvest(deposit)            
+            verify_payload.verify_payload(deposit)            
 
 # Unserialize Bags: needs state 'payloadVerified', sets state to 'unserialized'
 elif microservice == 'unzip_deposit_bags':

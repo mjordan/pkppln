@@ -1,9 +1,10 @@
 """
-Script to verify that the reported file size and SHA1 checksum match
+Script to verify that the reported file size and SHA-1 checksum match
 those reported in the SWORD deposit.
 """
 
 import os
+import hashlib
 import ConfigParser
 from datetime import datetime
 
@@ -21,16 +22,44 @@ microservice_state = 'payloadVerified'
 # knows where to find content to act on.
 previous_microservice_state = 'harvested'
 
-def verify_export(deposit):
+def verify_payload(deposit):
     started_on = datetime.now()
-    sha1_value = deposit[6]
-    deposit_size = deposit[8]
+    deposit_uuid = deposit[3]
+    reported_sha1_value = deposit[6]
+    reported_deposit_size = deposit[8]
+    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
+    outcome = 'success'
     
-    # @todo: Check to make sure the sha1 checksum and the deposit size are as reported.
+    path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)
+    
+    # Verify SHA-1 checksum.
+    input_file = open(path_to_input_file, 'rb')
+    verified_sha1_value = hashlib.sha1()
+    while True:
+        # Read the file in 10 mb chunks so we don't run out of memory.
+        buf = input_file.read(10 * 1024 * 1024)
+        if not buf:
+            break
+        verified_sha1_value.update(buf)
+    input_file.close()
+    
+    sha1_error = ''
+    if reported_sha1_value != verified_sha1_value.hexdigest():
+        outcome = 'failure'
+        sha1_error = 'Reported SHA-1 value of %s differs from verified value of %s' % (reported_sha1_value, verified_sha1_value.hexdigest())
+    
+    # Get file size.
+    filesize_error = ''
+    statinfo = os.stat(path_to_input_file)
+    if reported_deposit_size != statinfo.st_size:
+        outcome = 'failure'
+        filesize_error = 'Reported file size of %s differs from verified file size of %s' % (reported_deposit_size, statinfo.st_size)
     
     finished_on = datetime.now()
     
-    outcome = 'success'
-    error = '' # @todo: check for errors
+    if (len(sha1_error) or len(filesize_error)):
+        error = sha1_error + ' ' + filesize_error
+    else:
+        error = ''
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)

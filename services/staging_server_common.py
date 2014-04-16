@@ -28,7 +28,7 @@ smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
 def get_deposits(state):
-    print state
+    print "State:" + state
     # Get the deposits that have the indicated state value
     # and return them to the microservice for processing.
     try:
@@ -58,8 +58,6 @@ def update_deposit(deposit_uuid, state, outcome):
             (state, outcome, deposit_uuid))
         con.commit()
         # @todo: check to make sure cur.rowcount == 1 and not 0.
-        print "Just executed update_deposit"
-        print "Number of rows updated: %d" % cur.rowcount
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
@@ -76,8 +74,6 @@ def log_microservice(microservice, deposit_uuid, started_on, finished_on, outcom
             finished_on, outcome, error))
         con.commit()
         # @todo: check to make sure cur.rowcount == 1 and not 0.
-        print "Just executed log_microservice"
-        print "Number of rows updated: %d" % cur.rowcount
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
