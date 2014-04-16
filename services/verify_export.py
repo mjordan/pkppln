@@ -23,8 +23,9 @@ previous_microservice_state = 'virusChecked'
 
 def verify_export(deposit):
     started_on = datetime.now()
-    sha1_value = deposit[6]
-    deposit_size = deposit[8]
+    deposit_uuid = deposit[3]
+    outcome = 'success'
+    error = ''
     
     # @todo: Check for root elements of either <issues> (for issue-level exports) or
     # <articles> (for issue-less journals). Verify this with Chris and James.
@@ -32,8 +33,6 @@ def verify_export(deposit):
     # for imports "Your XML file must validate."
     
     finished_on = datetime.now()
-    
-    outcome = 'success'
-    error = '' # @todo: check for errors
+
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)

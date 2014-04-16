@@ -22,23 +22,27 @@ microservice_state = 'staged'
 previous_microservice_state = 'reserialized'
 
 def reserialize_bag(deposit):
+    started_on = datetime.now()
     journal_uuid = deposit[5]
     deposit_uuid = deposit[3]
     deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
-    started_on = datetime.now()
+    outcome = 'success'
+    error = '' 
     
     # Don't use deposit_filename here, use normalized reserialzied Bag filename of
     # journal_uuid.issue_uuid.zip
     file_to_stage = journal_uuid + '.' + deposit_uuid + '.zip'
     path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)
     path_to_staged_file = os.path.join(config.get('Paths', 'staging_root'), journal_uuid, file_to_stage)
-    if not os.path.exists(staging_directory):
-        os.makedirs(staging_directory)
-    shutil.move(path_to_input_file, path_to_staged_file)
+    try:
+        if not os.path.exists(staging_directory):
+            os.makedirs(staging_directory)
+        shutil.move(path_to_input_file, path_to_staged_file)
+    except Exception as e:
+        error = e
+        outcome = 'failure'
     
     finished_on = datetime.now()
     
-    outcome = 'success'
-    error = '' # @todo: check for errors
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)

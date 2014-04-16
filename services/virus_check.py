@@ -25,26 +25,33 @@ microservice_state = 'virusChecked'
 previous_microservice_state = 'unserialized'
 
 def check(deposit):
-    # cd = pyclamd.ClamdUnixSocket()
+    started_on = datetime.now()
+    deposit_uuid = deposit[3]
+    outcome = 'success'
+    error = ''
+
     path_to_unserialized_deposit = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid)
     
     # Write results of the virus check to virus_check.txt in the Bag's /data directory.
     path_to_virus_check_report = path = os.path.join(config.get('Paths', 'processing_root'),
         previous_microservice_state, deposit_uuid, 'virus_check.txt')
-        
-    f = open(path_to_virus_check_report, 'w')
-    for root, _, files in os.walk(path_to_unserialized_deposit):
-        for f in files:
-            fname = os.path.join(os.getcwd(), root, f)
-            # result = cd.scan_file(fname)
-            # @todo: Include the virus name if possible.
-            if result is None:
-                f.write("No virus found: " + fname + "\n")
-            else:
-                f.write("WARNING: Virus found: " + fname + "\n")
-    f.close()
 
-    outcome = 'success'
-    error = '' # @todo: check for errors
+    try:
+        # cd = pyclamd.ClamdUnixSocket()
+        f = open(path_to_virus_check_report, 'w')
+        for root, _, files in os.walk(path_to_unserialized_deposit):
+            for f in files:
+                fname = os.path.join(os.getcwd(), root, f)
+                # result = cd.scan_file(fname)
+                # @todo: Include the virus name if possible.
+                if result is None:
+                    f.write("No virus found: " + fname + "\n")
+                else:
+                    f.write("WARNING: Virus found: " + fname + "\n")
+        f.close()
+    except Exception as e:
+        error = e
+        outcome = 'failure'
+
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)
