@@ -48,7 +48,7 @@ elif microservice == 'unzip_deposit_bags':
     deposits = staging_server_common.get_deposits('payloadVerified')
     if deposits:
         for deposit in deposits:
-            unzip_bag.unserialize(deposit)
+            unzip_bag.unzip_bag(deposit)
 
 # Check for viruses: needs state 'unserialized', sets state to 'virusChecked'
 elif microservice == 'check_deposit_for_viruses':

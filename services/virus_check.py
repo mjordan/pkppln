@@ -37,8 +37,11 @@ def check(deposit):
         for f in files:
             fname = os.path.join(os.getcwd(), root, f)
             # result = cd.scan_file(fname)
-            if result is not None:
-                 f.write("WARNING: Virus found: " + fname + "\n")
+            # @todo: Include the virus name if possible.
+            if result is None:
+                f.write("No virus found: " + fname + "\n")
+            else:
+                f.write("WARNING: Virus found: " + fname + "\n")
     f.close()
 
     outcome = 'success'
