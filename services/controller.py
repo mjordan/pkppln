@@ -35,9 +35,16 @@ if microservice == 'harvest_deposits':
         for deposit in deposits:
             harvest.harvest(deposit)
 
-# Unserialize Bags: needs state 'harvested', sets state to 'unserialized'
-elif microservice == 'unzip_deposit_bags':
+# Verify payload: needs state 'harvested', sets state to 'payloadVerified'
+elif microservice == 'verify_payload':
     deposits = staging_server_common.get_deposits('harvested')
+    if deposits:
+        for deposit in deposits:
+            harvest.harvest(deposit)            
+
+# Unserialize Bags: needs state 'payloadVerified', sets state to 'unserialized'
+elif microservice == 'unzip_deposit_bags':
+    deposits = staging_server_common.get_deposits('payloadVerified')
     if deposits:
         for deposit in deposits:
             unzip_bag.unserialize(deposit)

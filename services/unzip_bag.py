@@ -20,7 +20,7 @@ microservice_state = 'unserialized'
 # If this microservice follows another (only the 'harvest' microservice doesn't),
 # the previous microservice's state value must be declared as well, so the microservice
 # knows where to find content to act on.
-previous_microservice_state = 'harvested'
+previous_microservice_state = 'payloadVerified'
 
 def unserialize(deposit):
     deposit_uuid = deposit[3]

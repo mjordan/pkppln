@@ -1,6 +1,6 @@
 """
-Script to verify OJS export XML, etc. from OJS journals participating in the 
-PKP PLN for viruses.
+Script to verify that the reported file size and SHA1 checksum match
+those reported in the SWORD deposit.
 """
 
 import os
@@ -14,22 +14,19 @@ config.read('../config_dev.cfg')
 
 # Each microservice must declare a name and a state, for use in the database
 # and file paths.
-microservice_name = 'verify_deposit_structure'
-microservice_state = 'contentVerified'
+microservice_name = 'verify_payload'
+microservice_state = 'payloadVerified'
 # If this microservice follows another (only the 'harvest' microservice doesn't),
 # the previous microservice's state value must be declared as well, so the microservice
 # knows where to find content to act on.
-previous_microservice_state = 'virusChecked'
+previous_microservice_state = 'harvested'
 
 def verify_export(deposit):
     started_on = datetime.now()
     sha1_value = deposit[6]
     deposit_size = deposit[8]
     
-    # @todo: Check for root elements of either <issues> (for issue-level exports) or
-    # <articles> (for issue-less journals). Verify this with Chris and James.
-    # Then, validate with xmllint, since http://pkp.sfu.ca/wiki/index.php/Importing_and_Exporting_Data says
-    # for imports "Your XML file must validate."
+    # @todo: Check to make sure the sha1 checksum and the deposit size are as reported.
     
     finished_on = datetime.now()
     

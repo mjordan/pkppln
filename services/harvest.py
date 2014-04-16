@@ -5,12 +5,13 @@ created by the PKP PLN plugin.
 
 import os
 import requests
-import logging
-import logging.handlers
 import ConfigParser
 from datetime import datetime
 
 import staging_server_common
+
+config = ConfigParser.ConfigParser()
+config.read('../config_dev.cfg')
 
 # Each microservice must declare a name and a state, for use in the database
 # and file paths.
@@ -35,8 +36,6 @@ def harvest(deposit):
         r = requests.get(deposit_url, stream=True)
         if r.status_code == 404:
             raise Exception("Deposit URL %s not found" % (deposit_url))
-            error = e
-            outcome = failure
         f = open(path_to_harvested_bag, 'wb')
         for chunk in r.iter_content(chunk_size=1024): 
             if chunk:
@@ -49,3 +48,4 @@ def harvest(deposit):
     finished_on = datetime.now()
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)
+    print "End of harvest microservice"
