@@ -26,7 +26,7 @@ previous_microservice_state = 'unserialized'
 
 def reserialize_bag(deposit):
     started_on = datetime.now()
-    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
+    deposit_uuid = deposit.deposit_uuid
     outcome = 'success'
     error = ''
     # @todo: 1) Add these tags to bag-info.txt: Bagging-Date, External-Description [value of the journal title and issue number],
@@ -39,6 +39,7 @@ def reserialize_bag(deposit):
     
     # @todo: Recreate Bag and serialize it (using .zip) with the deposit filename.
     path_to_unserialized_deposit = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid)
+    # deposit_filename = staging_server_common.get_deposit_filename(deposit_url)
     
     finished_on = datetime.now()
 

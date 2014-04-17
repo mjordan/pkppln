@@ -3,8 +3,8 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 14, 2014 at 10:18 AM
--- Server version: 5.5.35-0ubuntu0.13.10.2
+-- Generation Time: Apr 17, 2014 at 10:49 AM
+-- Server version: 5.5.35-0ubuntu0.13.10.2-log
 -- PHP Version: 5.5.3-1ubuntu2.3
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -36,11 +36,12 @@ CREATE TABLE IF NOT EXISTS `deposits` (
   `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `size` int(11) NOT NULL,
-  `state` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `processing_state` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `deposited_lom` timestamp NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=58 ;
 
 -- --------------------------------------------------------
 
@@ -57,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `microservices` (
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `error` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=39 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

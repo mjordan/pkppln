@@ -27,15 +27,16 @@ smtp_handler = logging.handlers.SMTPHandler(mailhost="localhost",
 smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
-def get_deposits(state):
-    print "State:" + state
-    # Get the deposits that have the indicated state value
+def get_deposits(processing_state):
+    print "State:" + processing_state
+    # Get the deposits that have the indicated processing state value
     # and return them to the microservice for processing.
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
-            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'),
+            cursorclass=MySQLdb.cursors.DictCursor)
         cur = con.cursor()
-        cur.execute("SELECT * FROM deposits WHERE state = %s AND outcome = 'success'", state)
+        cur.execute("SELECT * FROM deposits WHERE processing_state = %s AND outcome = 'success'", processing_state)
     except MySQLdb.Error, e:
         print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
@@ -47,15 +48,15 @@ def get_deposits(state):
             deposits.append(row)
         return deposits
 
-def update_deposit(deposit_uuid, state, outcome):
-    print "State from update_deposit is " + state
+def update_deposit(deposit_uuid, processing_state, outcome):
+    print "State from update_deposit is " + processing_state
     print "Outcome from update_deposit is " + outcome
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
-        cur.execute("UPDATE deposits SET state = %s, outcome = %s WHERE deposit_uuid = %s",
-            (state, outcome, deposit_uuid))
+        cur.execute("UPDATE deposits SET processing_state = %s, outcome = %s WHERE deposit_uuid = %s",
+            (processing_state, outcome, deposit_uuid))
         con.commit()
         # @todo: check to make sure cur.rowcount == 1 and not 0.
     except MySQLdb.Error, e:

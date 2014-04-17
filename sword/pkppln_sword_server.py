@@ -129,16 +129,16 @@ def edit_deposit(on_behalf_of, deposit_uuid):
         # how do we record this in the database?
         return HTTPResponse(status=201)
 
-def insert_deposit(action, email, deposit_uuid, on_behalf_of, checksum_value, url, size, state, outcome):
+def insert_deposit(action, email, deposit_uuid, on_behalf_of, checksum_value, url, processing_size, state, outcome):
     con = mdb.connect(db_host, db_user, db_password, db_name)
     try:
         with con:
             cur = con.cursor()
             cur.execute("INSERT INTO deposits " +
                 "(action, contact_email, deposit_uuid, date_deposited, journal_uuid, \
-                  sha1_value, deposit_url, size, state, outcome, harvested, deposited_lom) " +
-                "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, email, deposit_uuid,
-                 datetime.now(), on_behalf_of, checksum_value, url, size, state, outcome, None, None))
+                  sha1_value, deposit_url, size, processing_state, outcome, harvested, pln_state, deposited_lom) " +
+                "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, email, deposit_uuid,
+                 datetime.now(), on_behalf_of, checksum_value, url, size, processing_state, outcome, None, 'in_progress', None))
         return True
     except mdb.Error, e:
         print "Error %d: %s" % (e.args[0],e.args[1])

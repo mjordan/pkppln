@@ -23,9 +23,9 @@ previous_microservice_state = 'reserialized'
 
 def reserialize_bag(deposit):
     started_on = datetime.now()
-    journal_uuid = deposit[5]
-    deposit_uuid = deposit[3]
-    deposit_filename = staging_server_common.get_deposit_filename(deposit[7])
+    journal_uuid = deposit.journal_uuid
+    deposit_uuid = deposit.deposit_uuid
+    deposit_filename = staging_server_common.get_deposit_filename(deposit.deposit_url)
     outcome = 'success'
     error = '' 
     
