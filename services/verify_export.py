@@ -29,8 +29,7 @@ def verify_export(deposit):
     
     # @todo: Check for root elements of either <issues> (for issue-level exports) or
     # <articles> (for issue-less journals). Verify this with Chris and James.
-    # Then, validate with xmllint, since http://pkp.sfu.ca/wiki/index.php/Importing_and_Exporting_Data says
-    # for imports "Your XML file must validate."
+    # Then, validate with a call to xmllint (xmllint --noout --valid articles.xml).
     
     finished_on = datetime.now()
 
