@@ -21,10 +21,11 @@ formatter = logging.Formatter("%(levelname)s - %(message)s")
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 # Create email handler and set level to error.
-smtp_handler = logging.handlers.SMTPHandler(mailhost="localhost",
-                                            fromaddr="mjordan@sfu.ca", 
-                                            toaddrs=config.get('Paths', 'error_email'),
-                                            subject="Database error in PKP PLN staging server")
+smtp_handler = logging.handlers.SMTPHandler(
+    mailhost=config.get('Email', 'error_email_mailhost'),
+    fromaddr=config.get('Email', 'error_email_fromaddr'), 
+    toaddrs=config.get('Email', 'error_email_toaddrs'),
+    subject=config.get('Email', 'error_email_subject'))
 smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
