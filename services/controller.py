@@ -2,7 +2,6 @@
 
 import sys
 import ConfigParser
-import MySQLdb as mdb
 
 import staging_server_common
 import harvest

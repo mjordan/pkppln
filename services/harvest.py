@@ -20,9 +20,9 @@ microservice_state = 'harvested'
 
 def harvest(deposit):
     started_on = datetime.now()
-    deposit_uuid = deposit.deposit_uuid
-    deposit_url = deposit.deposit_url
-    deposit_filename = staging_server_common.get_deposit_filename(deposit.deposit_url)
+    deposit_uuid = deposit['deposit_uuid']
+    deposit_url = deposit['deposit_url']
+    deposit_filename = staging_server_common.get_deposit_filename(deposit_url)
     error = ''
     outcome = 'success'
     

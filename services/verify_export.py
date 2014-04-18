@@ -23,7 +23,7 @@ previous_microservice_state = 'virusChecked'
 
 def verify_export(deposit):
     started_on = datetime.now()
-    deposit_uuid = deposit.deposit_uuid
+    deposit_uuid = deposit['deposit_uuid']
     outcome = 'success'
     error = ''
     

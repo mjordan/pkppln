@@ -24,10 +24,10 @@ previous_microservice_state = 'harvested'
 
 def verify_payload(deposit):
     started_on = datetime.now()
-    deposit_uuid = deposit.deposit_uuid
-    reported_sha1_value = deposit.sha1_value
-    reported_deposit_size = deposit.size
-    deposit_filename = staging_server_common.get_deposit_filename(deposit.deposit_url)
+    deposit_uuid = deposit['deposit_uuid']
+    reported_sha1_value = deposit['sha1_value']
+    reported_deposit_size = deposit['size']
+    deposit_filename = staging_server_common.get_deposit_filename(deposit['deposit_url'])
     outcome = 'success'
     
     path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)

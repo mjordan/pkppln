@@ -8,6 +8,7 @@ import logging
 import logging.handlers
 import ConfigParser
 import MySQLdb
+import MySQLdb.cursors
 
 config = ConfigParser.ConfigParser()
 config.read('../config_dev.cfg')
