@@ -8,7 +8,7 @@ import harvest
 import verify_payload
 import validate_bag
 import virus_check
-import verify_export
+import validate_export
 import reserialize_bag
 import stage_bag
 import deposit_to_pln
@@ -61,7 +61,7 @@ elif microservice == 'verify_deposit_structure':
     deposits = staging_server_common.get_deposits('virusChecked')
     if deposits:
         for deposit in deposits:
-            verify_export.verify_export(deposit)
+            validate_export.validate_export(deposit)
 
 # Reserialize Bags: needs state 'contentVerified', sets state to 'reserialized'
 elif microservice == 'reserialize_deposit_bags':
