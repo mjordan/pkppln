@@ -18,11 +18,9 @@ config.read('../config_dev.cfg')
 # and file paths.
 microservice_name = 'reserialize_deposit_bags'
 microservice_state = 'reserialized'
-# If this microservice follows another (only the 'harvest' microservice doesn't),
-# the previous microservice's state value must be declared as well, so the microservice
-# knows where to find content to act on. We use 'unserialized' here instead of
-# 'contentVerified' even though the last microservice was 'verify_deposit_structure'.
-previous_microservice_state = 'unserialized'
+# The name of the directory under the processing root directory. One of
+# 'havested', 'unserialized', or 'reserialized'.
+input_directory = 'unserialized'
 
 def reserialize_bag(deposit):
     started_on = datetime.now()
@@ -35,10 +33,10 @@ def reserialize_bag(deposit):
     # journaluuid.issueuuid.zip (max 255 chars including extension).
     
     # @todo: add the virus report to the Bag
-    # path_to_virus_check_report = path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid, 'virus_check.txt')    
+    # path_to_virus_check_report = path = os.path.join(config.get('Paths', 'processing_root'), input_directory, deposit_uuid, 'virus_check.txt')    
     
     # @todo: Recreate Bag and serialize it (using .zip) with the deposit filename.
-    path_to_unserialized_deposit = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid)
+    path_to_unserialized_deposit = staging_server_common.get_input_path(input_directory, deposit_uuid)
     # deposit_filename = staging_server_common.get_deposit_filename(deposit_url)
     
     finished_on = datetime.now()

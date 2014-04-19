@@ -17,10 +17,9 @@ config.read('../config_dev.cfg')
 # and file paths.
 microservice_name = 'verify_payload'
 microservice_state = 'payloadVerified'
-# If this microservice follows another (only the 'harvest' microservice doesn't),
-# the previous microservice's state value must be declared as well, so the microservice
-# knows where to find content to act on.
-previous_microservice_state = 'harvested'
+# The name of the directory under the processing root directory. One of
+# 'havested', 'unserialized', or 'reserialized'.
+input_directory = 'harvested'
 
 def verify_payload(deposit):
     started_on = datetime.now()
@@ -30,7 +29,7 @@ def verify_payload(deposit):
     deposit_filename = staging_server_common.get_deposit_filename(deposit['deposit_url'])
     outcome = 'success'
     
-    path_to_input_file = staging_server_common.get_input_path(previous_microservice_state, deposit_uuid, deposit_filename)
+    path_to_input_file = staging_server_common.get_input_path(input_directory, [deposit_uuid], deposit_filename)
     
     # Verify SHA-1 checksum.
     input_file = open(path_to_input_file, 'rb')

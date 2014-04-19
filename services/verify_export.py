@@ -16,10 +16,9 @@ config.read('../config_dev.cfg')
 # and file paths.
 microservice_name = 'verify_deposit_structure'
 microservice_state = 'contentVerified'
-# If this microservice follows another (only the 'harvest' microservice doesn't),
-# the previous microservice's state value must be declared as well, so the microservice
-# knows where to find content to act on.
-previous_microservice_state = 'virusChecked'
+# The name of the directory under the processing root directory. One of
+# 'havested', 'unserialized', or 'reserialized'.
+input_directory = 'unserialized'
 
 def verify_export(deposit):
     started_on = datetime.now()

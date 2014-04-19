@@ -6,7 +6,7 @@ import ConfigParser
 import staging_server_common
 import harvest
 import verify_payload
-import unzip_bag
+import validate_bag
 import virus_check
 import verify_export
 import reserialize_bag
@@ -42,16 +42,16 @@ elif microservice == 'verify_payload':
         for deposit in deposits:
             verify_payload.verify_payload(deposit)            
 
-# Unserialize Bags: needs state 'payloadVerified', sets state to 'unserialized'
-elif microservice == 'unzip_deposit_bags':
+# Validate Bag: needs state 'payloadVerified', sets state to 'bagValidated'
+elif microservice == 'validate_deposit_bag':
     deposits = staging_server_common.get_deposits('payloadVerified')
     if deposits:
         for deposit in deposits:
-            unzip_bag.unzip_bag(deposit)
+            validate_bag.validate_bag(deposit)
 
 # Check for viruses: needs state 'unserialized', sets state to 'virusChecked'
 elif microservice == 'check_deposit_for_viruses':
-    deposits = staging_server_common.get_deposits('unserialized')
+    deposits = staging_server_common.get_deposits('bagValidated')
     if deposits:
         for deposit in deposits:
             virus_check.check(deposit)

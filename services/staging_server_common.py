@@ -89,11 +89,12 @@ def create_microservice_directory(microservice_state, deposit_uuid):
         os.makedirs(path_to_directory)
     return path_to_directory
     
-def get_input_path(previous_microservice_state, deposit_uuid, deposit_filename=None):
+def get_input_path(input_directory, dirs, deposit_filename=None):
+    intermediate_path = os.sep.join(dirs)
     if deposit_filename is None:
-        path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid)
+        path = os.path.join(config.get('Paths', 'processing_root'), input_directory, intermediate_path)
     else:
-        path = os.path.join(config.get('Paths', 'processing_root'), previous_microservice_state, deposit_uuid, deposit_filename)
+        path = os.path.join(config.get('Paths', 'processing_root'), input_directory, intermediate_path, deposit_filename)
     return path
 
 def get_deposit_filename(url):
