@@ -11,9 +11,8 @@ import sys
 import shutil
 import ConfigParser
 import base64
-from xml.etree import ElementTree
+import clamd
 from datetime import datetime
-import clamd 
 
 import staging_server_common
 
@@ -25,7 +24,7 @@ config.read('../config_dev.cfg')
 microservice_name = 'check_deposit_for_viruses'
 microservice_state = 'virusChecked'
 # The name of the directory under the processing root directory. One of
-# 'havested', 'unserialized', or 'reserialized'.    
+# 'havested', 'bagValidated', or 'reserialized'.    
 input_directory = 'bagValidated'
 
 def check(deposit):
@@ -51,18 +50,18 @@ def check(deposit):
         else:
             raise Exception("Can't find export XML file in %s" % (path_to_unserialized_deposit))
         document = ElementTree.parse(path_to_xml)
+        # Increment a counter to use as a directory name for each file
+        # to ensure we don't overwrite files with duplicate names.
         file_counter = 0
         for embed in document.findall('.//embed'):
             filename = embed.get('filename')
             if len(filename):
-                file_counter =+ 1
-                print str(file_counter) + '/' + filename
-                # @todo: check for duplicate filenames
+                # Increment the counter to get the directory name for the current file.
+                file_counter = file_counter + 1
                 path_to_file_to_scan = os.path.join(path_to_temp_directory, str(file_counter))
                 if not os.path.exists(path_to_file_to_scan):
                     os.makedirs(path_to_file_to_scan)
                 file_to_scan = open(os.path.join(path_to_file_to_scan, filename), "w")
-                # file_to_scan = open(os.path.join(path_to_temp_directory, filename), "w")
                 file_to_scan.write(base64.decodestring(embed.text))
                 file_to_scan.close()
     except Exception as e:
@@ -72,7 +71,6 @@ def check(deposit):
         finished_on = datetime.now()
         staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
         staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)
-        print error
         sys.exit(1)
 
     # Write results of the virus check to virus_check.txt in same directory
@@ -93,6 +91,8 @@ def check(deposit):
                 else:
                     report_file.write("WARNING: Virus found: " + fname.split(os.sep)[-1] + ':' + result[fname][1] + "\n")
         report_file.close()
+        # Remove temporary directory and its contents.
+        shutil.rmtree(path_to_temp_directory)
     except Exception as e:
         error = e
         outcome = 'failure'
