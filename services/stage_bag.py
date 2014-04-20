@@ -17,10 +17,10 @@ config.read('../config_dev.cfg')
 microservice_name = 'stage_deposit_bags'
 microservice_state = 'staged'
 # The name of the directory under the processing root directory. One of
-# 'havested', 'unserialized', or 'reserialized'.
+# 'havested', 'bagValidated', or 'reserialized'.
 input_directory = 'reserialized'
 
-def reserialize_bag(deposit):
+def stage_bag(deposit):
     started_on = datetime.now()
     journal_uuid = deposit['journal_uuid']
     deposit_uuid = deposit['deposit_uuid']
@@ -30,9 +30,10 @@ def reserialize_bag(deposit):
     
     # Don't use deposit_filename here, use normalized reserialzied Bag filename of
     # journal_uuid.issue_uuid.zip
-    file_to_stage = journal_uuid + '.' + deposit_uuid + '.zip'
-    path_to_input_file = staging_server_common.get_input_path(input_directory, deposit_uuid, deposit_filename)
-    path_to_staged_file = os.path.join(config.get('Paths', 'staging_root'), journal_uuid, file_to_stage)
+    file_to_stage = '.'.join([deposit['journal_uuid'], deposit['deposit_uuid'], 'tar.gz'])
+    path_to_input_file = staging_server_common.get_input_path(input_directory, None, file_to_stage)
+    staging_directory = os.path.join(config.get('Paths', 'staging_root'), journal_uuid)
+    path_to_staged_file = os.path.join(staging_directory, file_to_stage)
     try:
         if not os.path.exists(staging_directory):
             os.makedirs(staging_directory)
