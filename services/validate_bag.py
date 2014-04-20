@@ -1,6 +1,5 @@
 """
-Script to validate Bags harvested from OJS journals 
-participating in the PKP PLN.
+Script to validate Bags harvested from OJS journals participating in the PKP PLN.
 """
 
 import os
@@ -19,7 +18,7 @@ config.read('../config_dev.cfg')
 microservice_name = 'validate_deposit_bag'
 microservice_state = 'bagValidated'
 # The name of the directory under the processing root directory. One of
-# 'havested', 'unserialized', or 'reserialized'.
+# 'havested', 'bagValidated', or 'reserialized'.
 input_directory = 'harvested'
 
 def validate_bag(deposit):

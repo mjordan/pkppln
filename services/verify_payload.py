@@ -18,7 +18,7 @@ config.read('../config_dev.cfg')
 microservice_name = 'verify_payload'
 microservice_state = 'payloadVerified'
 # The name of the directory under the processing root directory. One of
-# 'havested', 'unserialized', or 'reserialized'.
+# 'havested', 'bagValidated', or 'reserialized'.
 input_directory = 'harvested'
 
 def verify_payload(deposit):
@@ -31,7 +31,7 @@ def verify_payload(deposit):
     
     path_to_input_file = staging_server_common.get_input_path(input_directory, [deposit_uuid], deposit_filename)
     
-    # Verify SHA-1 checksum.
+    # Verify SHA-1 checksum reported in the SWORD deposit.
     input_file = open(path_to_input_file, 'rb')
     verified_sha1_value = hashlib.sha1()
     while True:
@@ -47,7 +47,7 @@ def verify_payload(deposit):
         outcome = 'failure'
         sha1_error = 'Reported SHA-1 value of %s differs from verified value of %s' % (reported_sha1_value, verified_sha1_value.hexdigest())
     
-    # Get file size.
+    # Get file size reported in the SWORD deposit.
     filesize_error = ''
     statinfo = os.stat(path_to_input_file)
     if reported_deposit_size != statinfo.st_size:

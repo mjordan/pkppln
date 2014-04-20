@@ -1,6 +1,7 @@
 """
 Wrapper around the SWORD client used to deposit journals into the PKP PLN
-via LOCKSS-O-Matic's SWORD server.
+via LOCKSS-O-Matic's SWORD server. SWORD Statement requests are handled
+separately.
 """
 
 client = 'pkppln_lockssomatic_sword_client.py' # @todo: add path to client as a congig param.

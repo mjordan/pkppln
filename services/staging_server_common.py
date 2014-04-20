@@ -30,7 +30,7 @@ smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
 def get_deposits(processing_state):
-    print "State:" + processing_state
+    print "Debug: Processing state is " + processing_state
     # Get the deposits that have the indicated processing state value
     # and return them to the microservice for processing.
     try:
@@ -62,7 +62,7 @@ def update_deposit(deposit_uuid, processing_state, outcome):
         con.commit()
         # @todo: check to make sure cur.rowcount == 1 and not 0.
     except MySQLdb.Error, e:
-        print "Error %d: %s" % (e.args[0],e.args[1])
+        # print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
         sys.exit(1)
 
@@ -78,16 +78,19 @@ def log_microservice(microservice, deposit_uuid, started_on, finished_on, outcom
         con.commit()
         # @todo: check to make sure cur.rowcount == 1 and not 0.
     except MySQLdb.Error, e:
-        print "Error %d: %s" % (e.args[0],e.args[1])
+        # print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
         sys.exit(1)
 
 def create_microservice_directory(microservice_state, deposit_uuid):
-    # @todo: Wrap in a try/except and log/email error.
-    path_to_directory = os.path.join(config.get('Paths', 'processing_root'), microservice_state, deposit_uuid)
-    if not os.path.exists(path_to_directory):
-        os.makedirs(path_to_directory)
-    return path_to_directory
+    try:
+        path_to_directory = os.path.join(config.get('Paths', 'processing_root'), microservice_state, deposit_uuid)
+        if not os.path.exists(path_to_directory):
+            os.makedirs(path_to_directory)
+        return path_to_directory
+    except Exception as e:
+        logging.exception(e)
+        sys.exit(1)
     
 def get_input_path(input_directory, dirs, deposit_filename=None):
     if dirs is None:

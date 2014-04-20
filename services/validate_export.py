@@ -19,7 +19,7 @@ config.read('../config_dev.cfg')
 microservice_name = 'verify_deposit_structure'
 microservice_state = 'contentVerified'
 # The name of the directory under the processing root directory. One of
-# 'havested', 'unserialized', or 'reserialized'.
+# 'havested', 'bagValidated', or 'reserialized'.
 input_directory = 'bagValidated'
 
 def validate_export(deposit):
@@ -40,15 +40,15 @@ def validate_export(deposit):
             
         # Confirm that the XML file we are validating uses a PKP DTD by reading the
         # first two lines of the file and matching on the DOCTYPE declation.
-        n=2
-        f=open(path_to_export_xml)
-        for i in range(n):
-            line = f.next().strip()
+        num_lines = 2
+        xml_file = open(path_to_export_xml)
+        for i in range(num_lines):
+            line = xml_file.next().strip()
             if i == 1:
                 # Test to make sure the DTD is from http://pkp.sfu.ca.
                 if not re.match(r'<!DOCTYPE.*PUBLIC.*http://pkp.sfu.ca/.*/dtds', line):
                     raise Exception("Suspicious DOCTYPE definition in export XML file %s: %s" % (path_to_export_xml, line))
-        f.close()
+        xml_file.close()
         # Validate the XML file and capture any errors.
         try:
             subprocess.check_output(["xmllint", "--noout", "--valid", path_to_export_xml], stderr=subprocess.STDOUT)

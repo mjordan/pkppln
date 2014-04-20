@@ -28,9 +28,7 @@ def harvest(deposit):
     
     path_to_harvested_directory = staging_server_common.create_microservice_directory(microservice_state, deposit_uuid)
     path_to_harvested_bag = os.path.join(path_to_harvested_directory, deposit_filename)
-    
-    print "Path: " + path_to_harvested_bag
-    
+
     # Download the file at deposit_url. We stream it to handle large files gracefully.
     try:
         r = requests.get(deposit_url, stream=True)
@@ -48,4 +46,3 @@ def harvest(deposit):
     finished_on = datetime.now()
     staging_server_common.update_deposit(deposit_uuid, microservice_state, outcome)
     staging_server_common.log_microservice(microservice_name, deposit_uuid, started_on, finished_on, outcome, error)
-    print "End of harvest microservice"

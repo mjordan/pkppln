@@ -47,7 +47,6 @@ def reserialize_bag(deposit):
     # temporary directory, where the new Bag will be created
     path_to_source_files = staging_server_common.get_input_path(input_directory, [deposit_uuid, deposit_uuid, 'data'])
     path_to_temp_directory = staging_server_common.create_microservice_directory(microservice_state, deposit_uuid)
-    print path_to_temp_directory
     source_files = os.listdir(path_to_source_files)
     for source_file in source_files:
         # 'virus_check.txt' was not in the original Bag so we skip it.
@@ -65,11 +64,11 @@ def reserialize_bag(deposit):
             copied_file.close()
             if md5s[source_file] != md5_value.hexdigest():
                 raise Exception("md5 checksums don't match for %s" % (path_to_copied_file))
-    
-    
-    # Add these tags to bag-info.txt: Bagging-Date, External-Description [value of the journal title and issue number],
+
+    # Add the following tags to bag-info.txt: Bagging-Date,
+    # External-Description [value of the journal title, ISSN, and issue number],
     # External-Identifier [value of the deposit URL], PKP-PLN-Journal-UUID, PKP-PLN-Deposit-UUID.
-    # @todo: Get journal title and issue number.
+    # @todo: Get journal title, ISSN, and issue number.
     tags = {
         'External-Identifier': deposit['deposit_url'],
         'PKP-PLN-Journal-UUID': deposit['journal_uuid'],
@@ -78,6 +77,7 @@ def reserialize_bag(deposit):
     bag = bagit.make_bag(path_to_temp_directory, tags)
 
     # Reserialize the Bag and assign it a filename using the pattern journaluuid.deposituuid.zip.
+    # @todo: Use Zip instead of Tar?
     serialized_bag_filename = '.'.join([deposit['journal_uuid'], deposit['deposit_uuid'], 'tar.gz'])
     serialzied_bag_path = os.path.join(config.get('Paths', 'processing_root'), microservice_state, serialized_bag_filename)
     with tarfile.open(serialzied_bag_path, "w:gz") as tar:
