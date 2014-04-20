@@ -1,11 +1,12 @@
 """
-Functions shared by PKP PLN microservices.
+Functions shared by PKP PLN microservices, plus most database functions.
 """
 
 import sys
 import os
 import logging
 import logging.handlers
+from datetime import datetime
 import ConfigParser
 import MySQLdb
 import MySQLdb.cursors
@@ -49,6 +50,38 @@ def get_deposits(processing_state):
         for row in cur:
             deposits.append(row)
         return deposits
+
+def insert_deposit(action, email, deposit_uuid, on_behalf_of, checksum_value, url, processing_size, state, outcome):
+    con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+    try:
+        cur = con.cursor()
+        cur.execute("INSERT INTO deposits " +
+            "(action, contact_email, deposit_uuid, date_deposited, journal_uuid, \
+              sha1_value, deposit_url, size, processing_state, outcome, harvested, pln_state, deposited_lom) " +
+            "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, email, deposit_uuid,
+             datetime.now(), on_behalf_of, checksum_value, url, size, processing_state, outcome, None, 'in_progress', None))
+        con.commit()
+        return True # Do we need this?
+    except MySQLdb.Error, e:
+        print "Error %d: %s" % (e.args[0],e.args[1])
+        logging.exception(e)
+        sys.exit(1)
+
+def insert_journal(journal_uuid, title, issn, email, deposit_uuid):
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+        cur = con.cursor()
+        cur.execute("INSERT INTO journals " +
+            "(journal_uuid, title, issn, contact_email, deposit_uuid, date_deposited) " +
+            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, deposit_uuid, datetime.now()))
+        con.commit()
+        # @todo: check to make sure cur.rowcount == 1 and not 0.
+    except MySQLdb.Error, e:
+        # print "Error %d: %s" % (e.args[0],e.args[1])
+        logging.exception(e)
+        sys.exit(1)
 
 def update_deposit(deposit_uuid, processing_state, outcome):
     print "State from update_deposit is " + processing_state
