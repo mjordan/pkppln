@@ -1,5 +1,9 @@
 """
 Script to stage Bags containing deposits to the PKP PLN.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
 import os

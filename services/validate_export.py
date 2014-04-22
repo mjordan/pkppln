@@ -1,6 +1,10 @@
 """
 Script to verify OJS export XML, etc. from OJS journals participating in the 
 PKP PLN for viruses.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
 import os

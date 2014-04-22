@@ -1,6 +1,10 @@
 """
 Script to harvest files from OJS journals identified in SWORD deposits
 created by the PKP PLN plugin.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
 import os

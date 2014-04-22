@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
-# Basic SWORD client for use on the PKP PLN staging server. For use
-# with the LOCKSS-O-Matic SWORD server.
-#
-# Usage: pkppln_lockssomatic_sword_client.py action depositUUID
-#
-# Needs further development as indicated in comments below.
-#
-# Distributed under the MIT License, http://opensource.org/licenses/MIT.
+"""
+Basic SWORD client for use on the PKP PLN staging server. For use
+with the LOCKSS-O-Matic SWORD server. Needs further development as
+indicated in comments below.
+
+Usage: pkppln_lockssomatic_sword_client.py action depositUUID
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
+"""
 
 import os 
 import sys

@@ -1,6 +1,10 @@
 """
 Script to verify that the reported file size and SHA-1 checksum match
 those reported in the SWORD deposit.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
 import os

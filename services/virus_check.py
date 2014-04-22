@@ -3,6 +3,10 @@ Script to check files harvested from OJS journals participating in the
 PKP PLN for viruses. Decodes base64 encoded files in <embed> elements,
 writes them to a temp directory, checks them for viruses, then deletes
 the temp directory.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
 import os
