@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 17, 2014 at 10:49 AM
+-- Generation Time: Apr 22, 2014 at 11:18 AM
 -- Server version: 5.5.35-0ubuntu0.13.10.2-log
 -- PHP Version: 5.5.3-1ubuntu2.3
 
@@ -39,9 +39,26 @@ CREATE TABLE IF NOT EXISTS `deposits` (
   `processing_state` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `deposited_lom` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `deposited_lom` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=58 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `journals`
+--
+
+CREATE TABLE IF NOT EXISTS `journals` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `journal_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
+  `title` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `issn` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
+  `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -58,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `microservices` (
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `error` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=39 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=187 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
