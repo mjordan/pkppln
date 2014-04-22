@@ -1,4 +1,4 @@
-## Microservices used in preparing content for preservation in the Public Knowledge Project Private LOCKSS Network. See https://github.com/mjordan/pkppln/wiki for details.
+Microservices used in preparing content for preservation in the Public Knowledge Project Private LOCKSS Network. See https://github.com/mjordan/pkppln/wiki for details.
 
 Requirements:
 
