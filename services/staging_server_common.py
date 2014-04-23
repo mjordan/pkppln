@@ -55,15 +55,15 @@ def get_deposits(processing_state):
             deposits.append(row)
         return deposits
 
-def insert_deposit(action, email, deposit_uuid, on_behalf_of, checksum_value, url, processing_size, state, outcome):
+def insert_deposit(action, deposit_uuid, deposit_details, on_behalf_of, checksum_value, url, processing_size, state, outcome):
     con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
     try:
         cur = con.cursor()
         cur.execute("INSERT INTO deposits " +
-            "(action, contact_email, deposit_uuid, date_deposited, journal_uuid, \
+            "(action, deposit_uuid, deposit_details, date_deposited, journal_uuid, \
               sha1_value, deposit_url, size, processing_state, outcome, harvested, pln_state, deposited_lom) " +
-            "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, email, deposit_uuid,
+            "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, deposit_uuid, deposit_details,
              datetime.now(), on_behalf_of, checksum_value, url, size, processing_state, outcome, None, 'in_progress', None))
         con.commit()
         return True # Do we need this?

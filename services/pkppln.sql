@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 22, 2014 at 11:18 AM
+-- Generation Time: Apr 23, 2014 at 11:52 AM
 -- Server version: 5.5.35-0ubuntu0.13.10.2-log
 -- PHP Version: 5.5.3-1ubuntu2.3
 
@@ -29,8 +29,8 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `deposits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `action` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
-  `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
+  `deposit_details` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `journal_uuid` varchar(38) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
