@@ -24,7 +24,7 @@ config.read('../config_dev.cfg')
 # Define variables.
 sword_server_base_url = config.get('URLs', 'sword_server_base_url')
 namespaces = {'entry': 'http://www.w3.org/2005/Atom',
-    'lom': 'http://lockssomatic.info/SWORD2',
+    'pkp': 'http://pkp.sfu.ca/SWORD',
     'dcterms': 'http://purl.org/dc/terms/'}
 
 @get('/api/sword/2.0/sd-iri')
@@ -45,14 +45,14 @@ def create_deposit(on_behalf_of):
     tree = et.parse(request.body)
     root = tree.getroot()
     title = root.find('entry:title', namespaces=namespaces)
-    issn = root.findall('lom:issn', namespaces=namespaces)
+    issn = root.findall('pkp:issn', namespaces=namespaces)
     email = root.find('entry:email', namespaces=namespaces)
     id = root.find('entry:id', namespaces=namespaces)
     deposit_uuid = id.text.replace('urn:uuid:', '')
-    deposit_details = root.find('lom:details', namespaces=namespaces)
+    deposit_details = root.find('pkp:details', namespaces=namespaces)
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)
-    contents = root.findall('lom:content', namespaces=namespaces)
+    contents = root.findall('pkp:content', namespaces=namespaces)
     print contents
     for content in contents:
         size = content.get('size')
@@ -124,7 +124,7 @@ def edit_deposit(on_behalf_of, deposit_uuid):
     deposit_uuid = id.text.replace('urn:uuid:', '')
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)    
-    contents = root.findall('lom:content', namespaces=namespaces)
+    contents = root.findall('pkp:content', namespaces=namespaces)
     for content in contents:
         size = content.get('size')
         checksum_type = content.get('checksumType')
