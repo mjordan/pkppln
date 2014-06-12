@@ -1,20 +1,20 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/pages/DataverseHandler.inc.php
+ * @file plugins/generic/dataverse/pages/PLNHandler.inc.php
  *
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @class DataverseHandler
+ * @class PLNHandler
  * @ingroup plugins_generic_dataverse
  *
- * @brief Handle Dataverse requests
+ * @brief Handle PLN requests
  */
 
 import('classes.handler.Handler');
 
-class DataverseHandler extends Handler {
+class PLNHandler extends Handler {
 
 	/**
 	 * Index handler: redirect to journal page.
@@ -38,7 +38,7 @@ class DataverseHandler extends Handler {
   }
 
   /**
-   * Display terms of use of Dataverse configured for journal
+   * Display terms of use of PLN configured for journal
    * @param array $args
    * @param Request $request
    */

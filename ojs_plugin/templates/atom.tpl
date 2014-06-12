@@ -4,7 +4,7 @@
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * Generate an APA-formatted article citation to include in Dataverse study metadata
+ * Generate an APA-formatted article citation to include in PLN study metadata
  *
  *}
 {assign var=authors value=$article->getAuthors()}

@@ -9,7 +9,7 @@
  * @class SettingsForm
  * @ingroup plugins_generic_dataverse
  *
- * @brief Form for journal managers to modify Dataverse plugin settings
+ * @brief Form for journal managers to modify PLN plugin settings
  */
 
 import('lib.pkp.classes.form.Form');
@@ -57,7 +57,7 @@ class SettingsForm extends Form {
     $this->addCheck(new FormValidatorPost($this));
     $this->addCheck(new FormValidator($this, 'dataAvailability', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataAvailabilityRequired'));
     $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.termsOfUseRequired', array(&$this, '_validateTermsOfUse')));
-    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataverseTermsOfUseError', array(&$this, '_validateDataverseTermsOfUse'))); 
+    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataverseTermsOfUseError', array(&$this, '_validatePLNTermsOfUse'))); 
     $this->addCheck(new FormValidatorPost($this));    
   }
 
@@ -148,7 +148,7 @@ class SettingsForm extends Form {
    * If TOU to be fetched from DV, verify TOU are available
    * @return bool
    */
-  function _validateDataverseTermsOfUse() {
+  function _validatePLNTermsOfUse() {
     if ($this->getData('fetchTermsOfUse') === "0") return true;
 
     // Otherwise, try to fetch terms of use

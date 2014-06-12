@@ -1,21 +1,21 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/DataverseSelectForm.inc.php
+ * @file plugins/generic/dataverse/PLNSelectForm.inc.php
  *
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @class DataverseSelectForm
+ * @class PLNSelectForm
  * @ingroup plugins_generic_dataverse
  *
  * @brief Form for journal managers to provide DVN account for depositing files
  */
 import('lib.pkp.classes.form.Form');
 
-class DataverseSelectForm extends Form {
+class PLNSelectForm extends Form {
 
-  /** @var $_plugin DataversePlugin */
+  /** @var $_plugin PLNPlugin */
   var $_plugin;
 
   /** @var $_journalId int */
@@ -23,10 +23,10 @@ class DataverseSelectForm extends Form {
 
   /**
    * Constructor
-   * @param $plugin DataversePlugin
+   * @param $plugin PLNPlugin
    * @param $journalId int
    */
-  function DataverseSelectForm(&$plugin, $journalId) {
+  function PLNSelectForm(&$plugin, $journalId) {
     $this->_plugin =& $plugin;
     $this->_journalId = $journalId;
     parent::Form($plugin->getTemplatePath() . 'dataverseSelectForm.tpl');
@@ -54,7 +54,7 @@ class DataverseSelectForm extends Form {
         }
       }
     }
-    /** @fixme add notice to check connection settings if no Dataverses found */
+    /** @fixme add notice to check connection settings if no PLNs found */
     $this->setData('dataverses', $dataverses);
     
     $dataverseUri = $this->_plugin->getSetting($this->_journalId, 'dvUri');

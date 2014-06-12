@@ -1,12 +1,12 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/DataverseAuthForm.inc.php
+ * @file plugins/generic/dataverse/PLNAuthForm.inc.php
  *
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @class DataverseAuthForm
+ * @class PLNAuthForm
  * @ingroup plugins_generic_dataverse
  *
  * @brief Form for journal managers to provide DVN account for depositing files
@@ -15,9 +15,9 @@ define('DATAVERSE_PLUGIN_PASSWORD_SLUG', '********');
 
 import('lib.pkp.classes.form.Form');
 
-class DataverseAuthForm extends Form {
+class PLNAuthForm extends Form {
 
-  /** @var $_plugin DataversePlugin */
+  /** @var $_plugin PLNPlugin */
   var $_plugin;
 
   /** @var $_journalId int */
@@ -25,10 +25,10 @@ class DataverseAuthForm extends Form {
 
   /**
    * Constructor
-   * @param $plugin DataversePlugin
+   * @param $plugin PLNPlugin
    * @param $journalId int
    */
-  function DataverseAuthForm(&$plugin, $journalId) {
+  function PLNAuthForm(&$plugin, $journalId) {
     $this->_plugin =& $plugin;
     $this->_journalId = $journalId;
 

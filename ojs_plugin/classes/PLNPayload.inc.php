@@ -1,22 +1,22 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/classes/DataverseFile.inc.php
+ * @file plugins/generic/dataverse/classes/PLNFile.inc.php
  *
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @class DataverseFile
+ * @class PLNFile
  * @ingroup plugins_generic_dataverse
  *
- * @brief Basic class describing a data file stored in Dataverse
+ * @brief Basic class describing a data file stored in PLN
  */
 
 import('classes.article.SuppFile');
 
-class DataverseFile extends DataObject {
+class PLNFile extends DataObject {
   
-  function DataverseFile() {
+  function PLNFile() {
     parent::DataObject();
   }
   
@@ -35,7 +35,7 @@ class DataverseFile extends DataObject {
   }
   
   /**
-   * Dataverse study id
+   * PLN study id
    */
   function getStudyId() {
     return $this->getData('studyId');

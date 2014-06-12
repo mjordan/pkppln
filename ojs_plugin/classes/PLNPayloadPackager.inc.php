@@ -1,19 +1,19 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/classes/DataversePackager.inc.php
+ * @file plugins/generic/dataverse/classes/PLNPackager.inc.php
  *
  * Copyright (c) 2003-2013 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @class DataversePackager
+ * @class PLNPackager
  * @ingroup plugins_generic_dataverse
  *
- * @brief Packages article metadata and suppfiles for deposit in Dataverse
+ * @brief Packages article metadata and suppfiles for deposit in PLN
  */
 require_once('lib/pkp/lib/swordappv2/packager_atom_twostep.php');
 
-class DataversePackager extends PackagerAtomTwoStep {
+class PLNPackager extends PackagerAtomTwoStep {
   
   /** @var string output path for packager files */
   var $_outPath;
@@ -36,7 +36,7 @@ class DataversePackager extends PackagerAtomTwoStep {
   /** @var string package content type */
   var $_contentType = 'application/zip';
           
-  function DataversePackager() {
+  function PLNPackager() {
     // Create temporary directory for Atom entry & deposit files
     /** @fixme cumbersome but need separate args for parent constructor */
     $this->_outPath = tempnam('/tmp', 'dataverse');

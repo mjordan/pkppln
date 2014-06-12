@@ -41,7 +41,7 @@ class LOMPayloadDAO extends DAO {
 			array(
 				$dvFile->getSuppFileId(),
 				$dvFile->getSubmissionId(),
-        // Parent study and Dataverse Uri may not exist when record is inserted          
+        // Parent study and PLN Uri may not exist when record is inserted          
         $dvFile->getStudyId() ? $dvFile->getStudyId() : 0,
         $dvFile->getContentSourceUri() ? $dvFile->getContentSourceUri() : ''
 			)
@@ -51,7 +51,7 @@ class LOMPayloadDAO extends DAO {
 	}
   
   /**
-   * Update Dataverse File
+   * Update PLN File
    * @param DatverseFile $dvFile
    * @return int LOMPayload id
    */
@@ -76,7 +76,7 @@ class LOMPayloadDAO extends DAO {
 	}  
   
 	/**
-	 * Get the ID of the last inserted Dataverse file.
+	 * Get the ID of the last inserted PLN file.
 	 * @return int
 	 */
 	function getInsertLOMPayloadId() {
@@ -93,7 +93,7 @@ class LOMPayloadDAO extends DAO {
 	}
 
 	/**
-	 * Delete a Dataverse file by ID.
+	 * Delete a PLN file by ID.
 	 * @param $dvFileId int
 	 * @param $submissionId int optional
 	 */
@@ -106,7 +106,7 @@ class LOMPayloadDAO extends DAO {
 	}
   
 	/**
-	 * Delete Dataverse files associated with a study
+	 * Delete PLN files associated with a study
 	 * @param $studyId int
 	 */
 	function deleteLOMPayloadsByStudyId($studyId) {
@@ -118,7 +118,7 @@ class LOMPayloadDAO extends DAO {
   
   
   /**
-   * Retrieve Dataverse file by supp id & optional submission 
+   * Retrieve PLN file by supp id & optional submission 
    * @param int $suppFileId
    * @param int $submissionId
    * @return LOMPayload
@@ -144,7 +144,7 @@ class LOMPayloadDAO extends DAO {
   }
   
 	/**
-	 * Retrieve Dataverse files for a submission
+	 * Retrieve PLN files for a submission
 	 * @param $submissionId int
 	 * @return array LOMPayloads
 	 */
@@ -168,7 +168,7 @@ class LOMPayloadDAO extends DAO {
 	}  
   
 	/**
-	 * Retrieve Dataverse files for a study
+	 * Retrieve PLN files for a study
 	 * @param $submissionId int
 	 * @return array LOMPayloads
 	 */
@@ -209,8 +209,8 @@ class LOMPayloadDAO extends DAO {
 	}    
   
   /**
-	 * Update the Dataverse deposit status of a supplementary file.
-   * Files with deposit status = true will be deposited/updated in Dataverse.
+	 * Update the PLN deposit status of a supplementary file.
+   * Files with deposit status = true will be deposited/updated in PLN.
 	 * @param $suppFileId int
 	 * @param $depositStatus bool
 	 */
