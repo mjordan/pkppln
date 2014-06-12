@@ -14,20 +14,11 @@
  */
 
 import('lib.pkp.classes.plugins.GenericPlugin');
-import('plugins.generic.pln.classes.PLNPackager');
 
 require('lib/pkp/lib/swordappv2/swordappclient.php');
 
 define('PLN_PLUGIN_HTTP_STATUS_OK', 200);
-define('DATAVERSE_PLUGIN_HTTP_STATUS_CREATED', 201);
-define('DATAVERSE_PLUGIN_HTTP_STATUS_NO_CONTENT', 204);
-define('DATAVERSE_PLUGIN_TOU_POLICY_SEPARATOR', '---');
-define('DATAVERSE_PLUGIN_SUBJECT_SEPARATOR', ';');
-define('DATAVERSE_PLUGIN_CITATION_FORMAT_APA', 'APA');
 
-// Study release options
-define('DATAVERSE_PLUGIN_RELEASE_ARTICLE_ACCEPTED',  0x01);
-define('DATAVERSE_PLUGIN_RELEASE_ARTICLE_PUBLISHED', 0x02);
 
 class PLNPlugin extends GenericPlugin {
 
@@ -40,18 +31,17 @@ class PLNPlugin extends GenericPlugin {
 	 */
 	function register($category, $path) {
 
-    $success = parent::register($category, $path);
+		$success = parent::register($category, $path);
 
-    if ($success && $this->getEnabled()) {
-       
-      // Handler for public (?) access to PLN-related information (i.e., terms of Use)
-      //HookRegistry::register('LoadHandler', array(&$this, 'setupPublicHandler'));
-      // Add data citation to submissions & reading tools  
-      //HookRegistry::register('TemplateManager::display', array(&$this, 'handleTemplateDisplay'));
-      // Add data citation to article landing page
-      //HookRegistry::register('Templates::Article::MoreInfo', array(&$this, 'addDataCitationArticle'));
-    }
-    return $success;
+		if ($success && $this->getEnabled()) {
+			// Handler for public (?) access to PLN-related information (i.e., terms of Use)
+			//HookRegistry::register('LoadHandler', array(&$this, 'setupPublicHandler'));
+			// Add data citation to submissions & reading tools  
+			//HookRegistry::register('TemplateManager::display', array(&$this, 'handleTemplateDisplay'));
+			// Add data citation to article landing page
+			//HookRegistry::register('Templates::Article::MoreInfo', array(&$this, 'addDataCitationArticle'));
+		}
+		return $success;
 	}
 
 	function getDisplayName() {

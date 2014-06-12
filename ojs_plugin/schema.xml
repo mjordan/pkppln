@@ -20,11 +20,14 @@
 	 *
 	 -->
 	<table name="pln_deposits">
-		<field name="id" type="I8">
+		<field name="deposit_id" type="I8">
 			<KEY/>
 			<AUTOINCREMENT/>
 		</field>
 		<field name="uuid" type="C2" size="255">
+			<NOTNULL/>
+		</field>
+		<field name="journal_id" type="I8">
 			<NOTNULL/>
 		</field>
 		<field name="content_type" type="C2" size="255">
@@ -37,9 +40,6 @@
 			<NOTNULL/>
 		</field>
 	    <field name="date_modified" type="T"/>
-		<field name="content_id" type="I8">
-			<NOTNULL/>
-		</field>
 	    <field name="bag_path" type="X"/>
 	    <field name="bag_checksum" type="C2" size="255"/>
 	    <field name="bag_size" type="I8"/>
@@ -47,7 +47,7 @@
 	    <field name="status" type="I8"/>
 		<descr>PLN Deposits</descr>
 		<index name="pln_deposits_id">
-			<col>id</col>
+			<col>deposit_id</col>
 		</index>
 	</table>
   
