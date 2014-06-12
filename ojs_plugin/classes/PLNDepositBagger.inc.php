@@ -1,13 +1,14 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/classes/PLNPackager.inc.php
+ * @file plugins/generic/pln/classes/PLNPackager.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class PLNPackager
- * @ingroup plugins_generic_dataverse
+ * @ingroup plugins_generic_pln
  *
  * @brief Packages article metadata and suppfiles for deposit in PLN
  */

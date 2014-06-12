@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plugin_settings SYSTEM "../../../lib/pkp/dtd/pluginSettings.dtd">
+
+<!--
+  * plugins/generic/pln/settings.xml
+  *
+  * Copyright (c) 2013-2014 Simon Fraser University Library
+  * Copyright (c) 2003-2014 John Willinsky
+  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
+  *
+  * Default plugin settings.
+  *
+  -->
+
+<plugin_settings>
+	<setting type="bool">
+		<name>conditions_agreement</name>
+		<value>false</value>
+	</setting>
+	<setting type="string">
+		<name>journal_uuid</name>
+		<value></value>
+	</setting>
+	<setting type="string">
+		<name>network_name</name>
+		<value>0</value>
+	</setting>
+	<setting type="string">
+		<name>network_host</name>
+		<value>0</value>
+	</setting>
+	<setting type="string">
+		<name>deposit_type</name>
+		<value>0</value>
+	</setting>
+	<setting type="string">
+		<name>pln_networks</name>
+		<value>[{"name":"PKP","host":"example.pkp.sfu.ca"},]</value>
+	</setting>
+</plugin_settings>

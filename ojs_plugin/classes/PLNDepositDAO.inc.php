@@ -1,20 +1,21 @@
 <?php
 
 /**
- * @file plugins/generic/lockssomatic/LOMPayloadDAO.inc.php
+ * @file plugins/generic/pln/PLNDepositDAO.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class LOMPayloadDAO
- * @ingroup plugins_generic_lockssomatic
+ * @class PLNDepositDAO
+ * @ingroup plugins_generic_pln
  *
- * @brief Operations for adding a Lockss-O-Matic payload
+ * @brief Operations for adding a PLN deposit
  */
 
 import('lib.pkp.classes.db.DAO');
 
-class LOMPayloadDAO extends DAO {
+class PLNDepositDAO extends DAO {
   
 	/** @var $_parentPluginName string Name of parent plugin */
 	var $_parentPluginName;
@@ -22,56 +23,56 @@ class LOMPayloadDAO extends DAO {
 	/**
 	 * Constructor
 	 */
-	function LOMPayloadDAO($parentPluginName) {
+	function PLNDepositDAO($parentPluginName) {
 		$this->_parentPluginName = $parentPluginName;
 		parent::DAO();
 	}
-  
+
 	/**
-	 * Insert a new LOM paylaod 
-	 * @param $lomPayload LOMPayload
-   * @return int inserted LOMPayload id
+	 * Insert a new PLN deposit
+	 * @param $plnDeposit PLNDeposit
+	 * @return int inserted PLNDeposit id
 	 */
-	function insertLOMPayload(&$lomPayload) {
+	function insertPLNDeposit(&$plnDeposit) {
 		$this->update(
-			'INSERT INTO lom_payloads
+			'INSERT INTO pln_deposits
 				(issue_id, , study_id, content_source_uri)
 				VALUES
 				(?, ?, ?, ?)',
 			array(
-				$dvFile->getSuppFileId(),
-				$dvFile->getSubmissionId(),
-        // Parent study and PLN Uri may not exist when record is inserted          
-        $dvFile->getStudyId() ? $dvFile->getStudyId() : 0,
-        $dvFile->getContentSourceUri() ? $dvFile->getContentSourceUri() : ''
+				$plnDeposit->getSuppFileId(),
+				$plnDeposit->getSubmissionId(),
+				// Some parent data may not exist when record is inserted, set it here
+				$dvFile->getStudyId() ? $dvFile->getStudyId() : 0,
+				$dvFile->getContentSourceUri() ? $dvFile->getContentSourceUri() : ''
 			)
 		);
-		$dvFile->setId($this->getInsertLOMPayloadId());
+		$dvFile->setId($this->getInsertPLNDepositId());
 		return $dvFile->getId();
 	}
-  
+
   /**
-   * Update PLN File
-   * @param DatverseFile $dvFile
-   * @return int LOMPayload id
+   * Update PLN deposit
+   * @param $plnDeposit PLNDeposit
+   * @return int PLNDeposit id
    */
-	function updateLOMPayload(&$dvFile) {
+	function updatePLNDeposit(&$plnDeposit) {
 		$returner = $this->update(
-            'UPDATE dataverse_files
-              SET
-              supp_id = ?,
-              study_id = ?,
-              submission_id = ?,
-              content_source_uri = ?
-              WHERE dvfile_id = ?',
-            array(
-                $dvFile->getSuppFileId(),
-                $dvFile->getStudyId(),
-                $dvFile->getSubmissionId(),
-                $dvFile->getContentSourceUri(),
-                $dvFile->getId()
-            )
-    );
+			'UPDATE dataverse_files
+				SET
+				supp_id = ?,
+				study_id = ?,
+				submission_id = ?,
+				content_source_uri = ?
+				WHERE dvfile_id = ?',
+			array(
+				$dvFile->getSuppFileId(),
+				$dvFile->getStudyId(),
+				$dvFile->getSubmissionId(),
+				$dvFile->getContentSourceUri(),
+				$dvFile->getId()
+			)
+		);
 		return $returner;
 	}  
   
@@ -79,17 +80,17 @@ class LOMPayloadDAO extends DAO {
 	 * Get the ID of the last inserted PLN file.
 	 * @return int
 	 */
-	function getInsertLOMPayloadId() {
+	function getInsertPLNDepositId() {
 		return $this->getInsertId('dataverse_files', 'dvfile_id');
 	}  
   
   
 	/**
-	 * Delete a LOMPayload
-	 * @param $dvFile LOMPayload
+	 * Delete a PLNDeposit
+	 * @param $dvFile PLNDeposit
 	 */
-	function deleteLOMPayload(&$dvFile) {
-		return $this->deleteLOMPayloadById($dvFile->getId());
+	function deletePLNDeposit(&$dvFile) {
+		return $this->deletePLNDepositById($dvFile->getId());
 	}
 
 	/**
@@ -97,7 +98,7 @@ class LOMPayloadDAO extends DAO {
 	 * @param $dvFileId int
 	 * @param $submissionId int optional
 	 */
-	function deleteLOMPayloadById($dvFileId, $submissionId = null) {
+	function deletePLNDepositById($dvFileId, $submissionId = null) {
 		if (isset($submissionId)) {
 			$returner = $this->update('DELETE FROM dataverse_files WHERE dvfile_id = ? AND submission_id = ?', array($dvFileId, $submissionId));
 			return $returner;
@@ -109,10 +110,10 @@ class LOMPayloadDAO extends DAO {
 	 * Delete PLN files associated with a study
 	 * @param $studyId int
 	 */
-	function deleteLOMPayloadsByStudyId($studyId) {
-		$dvFiles =& $this->getLOMPayloadsByStudyId($studyId);
+	function deletePLNDepositsByStudyId($studyId) {
+		$dvFiles =& $this->getPLNDepositsByStudyId($studyId);
 		foreach ($dvFiles as $dvFile) {
-			$this->deleteLOMPayload($dvFile);
+			$this->deletePLNDeposit($dvFile);
 		}
 	}
   
@@ -121,9 +122,9 @@ class LOMPayloadDAO extends DAO {
    * Retrieve PLN file by supp id & optional submission 
    * @param int $suppFileId
    * @param int $submissionId
-   * @return LOMPayload
+   * @return PLNDeposit
    */
-  function &getLOMPayloadBySuppFileId($suppFileId, $submissionId = null) {
+  function &getPLNDepositBySuppFileId($suppFileId, $submissionId = null) {
 		$params = array($suppFileId);
 		if ($submissionId) $params[] = $submissionId;
 
@@ -134,7 +135,7 @@ class LOMPayloadDAO extends DAO {
 
 		$returner = null;
 		if ($result->RecordCount() != 0) {
-			$returner =& $this->_returnLOMPayloadFromRow($result->GetRowAssoc(false));
+			$returner =& $this->_returnPLNDepositFromRow($result->GetRowAssoc(false));
 		}
 
 		$result->Close();
@@ -146,9 +147,9 @@ class LOMPayloadDAO extends DAO {
 	/**
 	 * Retrieve PLN files for a submission
 	 * @param $submissionId int
-	 * @return array LOMPayloads
+	 * @return array PLNDeposits
 	 */
-	function &getLOMPayloadsBySubmissionId($submissionId) {
+	function &getPLNDepositsBySubmissionId($submissionId) {
 		$dvFiles = array();
 
 		$result =& $this->retrieve(
@@ -157,7 +158,7 @@ class LOMPayloadDAO extends DAO {
 		);
 
 		while (!$result->EOF) {
-			$dvFiles[] =& $this->_returnLOMPayloadFromRow($result->GetRowAssoc(false));
+			$dvFiles[] =& $this->_returnPLNDepositFromRow($result->GetRowAssoc(false));
 			$result->moveNext();
 		}
 
@@ -170,9 +171,9 @@ class LOMPayloadDAO extends DAO {
 	/**
 	 * Retrieve PLN files for a study
 	 * @param $submissionId int
-	 * @return array LOMPayloads
+	 * @return array PLNDeposits
 	 */
-	function &getLOMPayloadsByStudyId($studyId) {
+	function &getPLNDepositsByStudyId($studyId) {
 		$dvFiles = array();
 
 		$result =& $this->retrieve(
@@ -181,7 +182,7 @@ class LOMPayloadDAO extends DAO {
 		);
 
 		while (!$result->EOF) {
-			$dvFiles[] =& $this->_returnLOMPayloadFromRow($result->GetRowAssoc(false));
+			$dvFiles[] =& $this->_returnPLNDepositFromRow($result->GetRowAssoc(false));
 			$result->moveNext();
 		}
 
@@ -192,14 +193,14 @@ class LOMPayloadDAO extends DAO {
 	}    
   
 	/**
-	 * Internal function to return LOMPayload object from a row.
+	 * Internal function to return PLNDeposit object from a row.
 	 * @param $row array
-	 * @return LOMPayload
+	 * @return PLNDeposit
 	 */
-	function &_returnLOMPayloadFromRow(&$row) {
+	function &_returnPLNDepositFromRow(&$row) {
 		$dataversePlugin =& PluginRegistry::getPlugin('generic', $this->_parentPluginName);
-		$dataversePlugin->import('classes.LOMPayload');
-		$dvFile = new LOMPayload();
+		$dataversePlugin->import('classes.PLNDeposit');
+		$dvFile = new PLNDeposit();
 		$dvFile->setId($row['dvfile_id']);    
 		$dvFile->setSuppFileId($row['supp_id']);        
 		$dvFile->setStudyId($row['study_id']);

@@ -2,18 +2,19 @@
 <!DOCTYPE version SYSTEM "../../../lib/pkp/dtd/pluginVersion.dtd">
 
 <!--
-  * plugins/generic/lockssomatic/version.xml
+  * plugins/generic/pln/version.xml
   *
-  * Copyright (c) 2003-2013 John Willinsky
-  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+  * Copyright (c) 2013-2014 Simon Fraser University Library
+  * Copyright (c) 2003-2014 John Willinsky
+  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
   *
   * Plugin version information.
   -->
 <version>
-	<application>lockssomatic</application>
+	<application>pln</application>
 	<type>plugins.generic</type>
 	<release>0.1.0.0</release>
-	<date>2014-03-10</date>
+	<date>2014-07-01</date>
 	<lazy-load>1</lazy-load>
-	<class>LOMPlugin</class>
+	<class>PLNPlugin</class>
 </version>

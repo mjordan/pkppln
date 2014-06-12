@@ -1,13 +1,14 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/PLNSelectForm.inc.php
+ * @file plugins/generic/pln/PLNSelectForm.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class PLNSelectForm
- * @ingroup plugins_generic_dataverse
+ * @ingroup plugins_generic_pln
  *
  * @brief Form for journal managers to provide DVN account for depositing files
  */
@@ -30,7 +31,7 @@ class PLNSelectForm extends Form {
     $this->_plugin =& $plugin;
     $this->_journalId = $journalId;
     parent::Form($plugin->getTemplatePath() . 'dataverseSelectForm.tpl');
-    $this->addCheck(new FormValidator($this, 'dataverse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataverseRequired'));    
+    $this->addCheck(new FormValidator($this, 'dataverse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.dataverseRequired'));    
     $this->addCheck(new FormValidatorPost($this));    
   }
 

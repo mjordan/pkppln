@@ -3,8 +3,9 @@
 /**
  * @file plugins/generic/pln/PLNPlugin.inc.php
  *
- * Copyright (c) 2003-2012 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class PLNPlugin
  * @ingroup plugins_generic_pln
@@ -13,11 +14,11 @@
  */
 
 import('lib.pkp.classes.plugins.GenericPlugin');
-import('plugins.generic.dataverse.classes.PLNPackager');
+import('plugins.generic.pln.classes.PLNPackager');
 
 require('lib/pkp/lib/swordappv2/swordappclient.php');
 
-define('DATAVERSE_PLUGIN_HTTP_STATUS_OK', 200);
+define('PLN_PLUGIN_HTTP_STATUS_OK', 200);
 define('DATAVERSE_PLUGIN_HTTP_STATUS_CREATED', 201);
 define('DATAVERSE_PLUGIN_HTTP_STATUS_NO_CONTENT', 204);
 define('DATAVERSE_PLUGIN_TOU_POLICY_SEPARATOR', '---');
@@ -38,73 +39,27 @@ class PLNPlugin extends GenericPlugin {
 	 * 	the plugin will not be registered.
 	 */
 	function register($category, $path) {
-    $success = parent::register($category, $path);
-    if ($success && $this->getEnabled()) {
-      // PLN Study objects
-      $this->import('classes.PLNStudyDAO');
-      $dataverseStudyDao = new PLNStudyDAO($this->getName());
-			$returner =& DAORegistry::registerDAO('PLNStudyDAO', $dataverseStudyDao);
 
-      // Files associated with PLN studies
-      $this->import('classes.PLNFileDAO');      
-      $dataverseFileDao = new PLNFileDAO($this->getName());      
-      $returner =& DAORegistry::registerDAO('PLNFileDAO', $dataverseFileDao);
-          
+    $success = parent::register($category, $path);
+
+    if ($success && $this->getEnabled()) {
+       
       // Handler for public (?) access to PLN-related information (i.e., terms of Use)
-      HookRegistry::register('LoadHandler', array(&$this, 'setupPublicHandler'));
+      //HookRegistry::register('LoadHandler', array(&$this, 'setupPublicHandler'));
       // Add data citation to submissions & reading tools  
-      HookRegistry::register('TemplateManager::display', array(&$this, 'handleTemplateDisplay'));
+      //HookRegistry::register('TemplateManager::display', array(&$this, 'handleTemplateDisplay'));
       // Add data citation to article landing page
-      HookRegistry::register('Templates::Article::MoreInfo', array(&$this, 'addDataCitationArticle'));
-      // Enable TinyMCEditor in textarea fields
-      HookRegistry::register('TinyMCEPlugin::getEnableFields', array(&$this, 'getTinyMCEEnabledFields'));
-      // Include data policy in About page
-      HookRegistry::register('Templates::About::Index::Policies', array(&$this, 'addPolicyLinks'));
-      
-      // Add data publication options to author submission suppfile form: 
-      HookRegistry::register('Templates::Author::Submit::SuppFile::AdditionalMetadata', array(&$this, 'suppFileAdditionalMetadata'));
-      HookRegistry::register('authorsubmitsuppfileform::initdata', array(&$this, 'suppFileFormInitData'));
-      HookRegistry::register('authorsubmitsuppfileform::readuservars', array(&$this, 'suppFileFormReadUserVars'));
-      HookRegistry::register('authorsubmitsuppfileform::execute', array(&$this, 'authorSubmitSuppFileFormExecute'));
-      
-      // Add PLN deposit options to suppfile form for completed submissions
-      HookRegistry::register('Templates::Submission::SuppFile::AdditionalMetadata', array(&$this, 'suppFileAdditionalMetadata'));
-      HookRegistry::register('suppfileform::initdata', array(&$this, 'suppFileFormInitData'));
-      HookRegistry::register('suppfileform::readuservars', array(&$this, 'suppFileFormReadUserVars'));
-      HookRegistry::register('suppfileform::execute', array(&$this, 'suppFileFormExecute'));
-      
-      // Notify ArticleDAO of article metadata field (external data citation) in suppfile form
-			HookRegistry::register('articledao::getAdditionalFieldNames', array(&$this, 'articleMetadataFormFieldNames'));
-      
-      // Validate suppfile forms: warn if PLN deposit selected but no file uploaded
-      HookRegistry::register('authorsubmitsuppfileform::Constructor', array(&$this, 'suppFileFormConstructor'));
-      HookRegistry::register('suppfileform::Constructor', array(&$this, 'suppFileFormConstructor'));      
-      
-      // Handle suppfile insertion: prevent duplicate insertion of a suppfile
-      HookRegistry::register('suppfiledao::_insertsuppfile', array(&$this, 'handleSuppFileInsertion'));
-      // Handle suppfile deletion: only necessary for completed submissions
-      HookRegistry::register('suppfiledao::_deletesuppfilebyid', array(&$this, 'handleSuppFileDeletion'));
-      // Add form validator to check whether submission includes data files 
-      HookRegistry::register('authorsubmitstep4form::Constructor', array(&$this, 'addAuthorSubmitFormValidator'));
-      // Create study for author submissions
-      HookRegistry::register('Author::SubmitHandler::saveSubmit', array(&$this, 'handleAuthorSubmission'));
-      // Update cataloguing information when submission metadata is edited
-      HookRegistry::register('metadataform::execute', array(&$this, 'handleMetadataUpdate'));
-      // Release or delete studies according to editor decision
-      HookRegistry::register('SectionEditorAction::unsuitableSubmission', array(&$this, 'handleUnsuitableSubmission'));
-      HookRegistry::register('SectionEditorAction::recordDecision', array(&$this, 'handleEditorDecision'));
-      // Release studies on article publication
-      HookRegistry::register('articledao::_updatearticle', array(&$this, 'handleArticleUpdate'));
+      //HookRegistry::register('Templates::Article::MoreInfo', array(&$this, 'addDataCitationArticle'));
     }
     return $success;
 	}
 
 	function getDisplayName() {
-		return __('plugins.generic.dataverse.displayName');
+		return __('plugins.generic.pln.displayName');
 	}
 
 	function getDescription() {
-		return __('plugins.generic.dataverse.description');
+		return __('plugins.generic.pln.description');
 	}
 
 	function getInstallSchemaFile() {
@@ -125,9 +80,9 @@ class PLNPlugin extends GenericPlugin {
 	function getManagementVerbs() {
 		$verbs = array();
     if ($this->getEnabled()) {
-      $verbs[] = array('connect', __('plugins.generic.dataverse.settings.connect'));
-      $verbs[] = array('select', __('plugins.generic.dataverse.settings.selectPLN')); 
-      $verbs[] = array('settings', __('plugins.generic.dataverse.settings'));
+      $verbs[] = array('connect', __('plugins.generic.pln.settings.connect'));
+      $verbs[] = array('select', __('plugins.generic.pln.settings.selectPLN')); 
+      $verbs[] = array('settings', __('plugins.generic.pln.settings'));
     }
 		return parent::getManagementVerbs($verbs);
 	}
@@ -268,8 +223,8 @@ class PLNPlugin extends GenericPlugin {
         $article =& $templateMgr->get_template_vars('article');
         $study =& $dataverseStudyDao->getStudyBySubmissionId($article->getId());
         if (!isset($study)) return false;
-        $dataverseFileDao =& DAORegistry::getDAO('PLNFileDAO');
-        $dvFiles =& $dataverseFileDao->getPLNFilesBySubmissionId($article->getId());
+        $dataverseFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+        $dvFiles =& $dataverseFileDao->getPLNDepositsBySubmissionId($article->getId());
         $dvFileIndex = array();
         foreach ($dvFiles as $dvFile) {
           $dvFileIndex[$dvFile->getSuppFileId()] = true;
@@ -309,7 +264,7 @@ class PLNPlugin extends GenericPlugin {
     $index = strpos($output, '<td class="label">'. __('submission.submitter'));
     if ($index !== false) {
       $newOutput = substr($output,0,$index);
-      $newOutput .= '<td class="label">'.  __('plugins.generic.dataverse.dataCitation') .'</td>';
+      $newOutput .= '<td class="label">'.  __('plugins.generic.pln.dataCitation') .'</td>';
       $newOutput .= '<td class="value" colspan="2">'. $dataCitation .'</td></tr><tr>';
       $newOutput .= substr($output, $index);
       $output =& $newOutput;
@@ -374,7 +329,7 @@ class PLNPlugin extends GenericPlugin {
       $output =& $args[2];
       $templateMgr =& TemplateManager::getManager();    
       $output .= '<li>&#187; <a href="'. $templateMgr->smartyUrl(array('page' => 'dataverse', 'op'=>'dataAvailabilityPolicy'), $smarty) .'">';
-      $output .= __('plugins.generic.dataverse.settings.dataAvailabilityPolicy');
+      $output .= __('plugins.generic.pln.settings.dataAvailabilityPolicy');
       $output .= '</a></li>';
     }
     return false;
@@ -419,8 +374,8 @@ class PLNPlugin extends GenericPlugin {
    */
   function suppFileFormConstructor($hookName, $args) {
     $form =& $args[0];
-    $form->addCheck(new FormValidatorCustom($this, 'publishData', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.suppFile.publishData.error', array(&$this, 'suppFileFormValidateDeposit'), array(&$form)));
-    $form->addCheck(new FormValidatorCustom($this, 'externalDataCitation', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.suppFile.externalDataCitation.error', array(&$this, 'suppFileFormValidateCitations'), array(&$form))); 
+    $form->addCheck(new FormValidatorCustom($this, 'publishData', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.suppFile.publishData.error', array(&$this, 'suppFileFormValidateDeposit'), array(&$form)));
+    $form->addCheck(new FormValidatorCustom($this, 'externalDataCitation', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.suppFile.externalDataCitation.error', array(&$this, 'suppFileFormValidateCitations'), array(&$form))); 
     return false;
   }
   
@@ -475,8 +430,8 @@ class PLNPlugin extends GenericPlugin {
 
     if (isset($form->suppFile) && $form->suppFile->getId()) {
       // Check if uploaded file has been deposited in PLN
-      $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-      $dvFile =& $dvFileDao->getPLNFileBySuppFileId($form->suppFile->getId(), $article->getId());
+      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+      $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());
       if (!is_null($dvFile)) { $publishData = 'dataverse'; }
     }
     $form->setData('publishData', $publishData);
@@ -514,8 +469,8 @@ class PLNPlugin extends GenericPlugin {
       return false;
     }
     
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-    $dvFile = $dvFileDao->getPLNFileBySuppFileId($form->suppFile->getId(), $form->articleId);      
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFile = $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $form->articleId);      
 
     switch ($form->getData('publishData')) {
       case 'none':
@@ -525,7 +480,7 @@ class PLNPlugin extends GenericPlugin {
          */
         if (isset($dvFile)) {
           /** @todo warn user file will be removed from PLN */
-          $dvFileDao->deletePLNFile($dvFile);
+          $dvFileDao->deletePLNDeposit($dvFile);
         }
         break;
 
@@ -536,11 +491,11 @@ class PLNPlugin extends GenericPlugin {
          * @see handleAuthorSubmission, handleEditorDecision
          */
         if (!isset($dvFile)) {
-          $this->import('classes.PLNFile');
-          $dvFile = new PLNFile();
+          $this->import('classes.PLNDeposit');
+          $dvFile = new PLNDeposit();
           $dvFile->setSuppFileId($form->suppFile->getId());
           $dvFile->setSubmissionId($form->articleId);
-          $dvFileDao->insertPLNFile($dvFile);            
+          $dvFileDao->insertPLNDeposit($dvFile);            
         }
         break;
     }    
@@ -564,7 +519,7 @@ class PLNPlugin extends GenericPlugin {
     // Form executed for completed submissions. Draft studies are created on 
     // submission completion. A study may or may not exist for this submission.
     $dvStudyDao =& DAORegistry::getDAO('PLNStudyDAO');
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');    
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');    
     
     switch ($form->getData('publishData')) {
       case 'none':
@@ -572,20 +527,20 @@ class PLNPlugin extends GenericPlugin {
         /** @todo warn users before removing files from studies */
         if (!$form->suppFile->getId()) return false; // New suppfile: not in PLN
 
-        $dvFile =& $dvFileDao->getPLNFileBySuppFileId($form->suppFile->getId(), $article->getId());
+        $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());
         if (!isset($dvFile)) return false; // Edited suppfile, but not in PLN
           
         if (!$this->deleteFile($dvFile)) {
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorDeletingFile', NOTIFICATION_TYPE_ERROR);
+          $this->_sendNotification('plugins.generic.pln.notification.errorDeletingFile', NOTIFICATION_TYPE_ERROR);
           return false;
         }
         /** @fixme move this to deleteFile() */
-        $dvFileDao->deletePLNFile($dvFile);
+        $dvFileDao->deletePLNDeposit($dvFile);
         
         // Deleting a file may affect study cataloguing information
         $study =& $dvStudyDao->getStudyBySubmissionId($article->getId());
         $this->updateStudy($article, $study);
-        $this->_sendNotification('plugins.generic.dataverse.notification.fileDeleted', NOTIFICATION_TYPE_SUCCESS);             
+        $this->_sendNotification('plugins.generic.pln.notification.fileDeleted', NOTIFICATION_TYPE_SUCCESS);             
         break;
 
       case 'dataverse':
@@ -630,27 +585,27 @@ class PLNPlugin extends GenericPlugin {
         if (!isset($study)) {
           $study =& $this->createStudy($article);
           if (!isset($study)) {
-            $this->_sendNotification('plugins.generic.dataverse.notification.errorCreatingStudy', NOTIFICATION_TYPE_ERROR);
+            $this->_sendNotification('plugins.generic.pln.notification.errorCreatingStudy', NOTIFICATION_TYPE_ERROR);
             return false;
           }
           /** @fixme notification bomb. study created! file deposited! one's enough */
-          $this->_sendNotification('plugins.generic.dataverse.notification.studyCreated', NOTIFICATION_TYPE_SUCCESS);
+          $this->_sendNotification('plugins.generic.pln.notification.studyCreated', NOTIFICATION_TYPE_SUCCESS);
         }
         
         // File already in PLN?
-        $dvFile =& $dvFileDao->getPLNFileBySuppFileId($form->suppFile->getId(), $article->getId());        
+        $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());        
         if (isset($dvFile)) {
           // File is already in PLN. Update study cataloging information
           // with suppfile metadata. 
           $this->updateStudy($article, $study) ? 
-            $this->_sendNotification('plugins.generic.dataverse.notification.studyUpdated', NOTIFICATION_TYPE_SUCCESS) : 
-            $this->_sendNotification('plugins.generic.dataverse.notification.errorUpdatingStudy', NOTIFICATION_TYPE_ERROR);
+            $this->_sendNotification('plugins.generic.pln.notification.studyUpdated', NOTIFICATION_TYPE_SUCCESS) : 
+            $this->_sendNotification('plugins.generic.pln.notification.errorUpdatingStudy', NOTIFICATION_TYPE_ERROR);
         }
         else {
           // Add file to study
           $this->addFileToStudy($study, $form->suppFile) ?
-            $this->_sendNotification('plugins.generic.dataverse.notification.fileAdded', NOTIFICATION_TYPE_SUCCESS) : 
-            $this->_sendNotification('plugins.generic.dataverse.notification.errorAddingFile', NOTIFICATION_TYPE_ERROR);          
+            $this->_sendNotification('plugins.generic.pln.notification.fileAdded', NOTIFICATION_TYPE_SUCCESS) : 
+            $this->_sendNotification('plugins.generic.pln.notification.errorAddingFile', NOTIFICATION_TYPE_ERROR);          
         }
         break;
     }
@@ -683,8 +638,8 @@ class PLNPlugin extends GenericPlugin {
     $submissionId = is_array($params) ? $params[1] : '';
     
     // Does a PLN file exist for this suppfile?
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-    $dvFile =& $dvFileDao->getPLNFileBySuppFileId($suppFileId, $submissionId ? $submissionId : '');
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($suppFileId, $submissionId ? $submissionId : '');
     if (!isset($dvFile)) return false;
 
     // If submission is incomplete, file will not yet be in PLN
@@ -693,11 +648,11 @@ class PLNPlugin extends GenericPlugin {
       // File is in PLN. Set flag so we can notify later.
       $dvFileDeposited = true;
       if (!$this->deleteFile($dvFile)) {
-        $this->_sendNotification('plugins.generic.dataverse.notification.errorDeletingFile', NOTIFICATION_TYPE_ERROR);
+        $this->_sendNotification('plugins.generic.pln.notification.errorDeletingFile', NOTIFICATION_TYPE_ERROR);
         return false;
       }
     }
-    $dvFileDao->deletePLNFile($dvFile);
+    $dvFileDao->deletePLNDeposit($dvFile);
     // Deleting the file may require an update to study metadata
     $dvStudyDao =& DAORegistry::getDAO('PLNStudyDAO');
     $study =& $dvStudyDao->getStudyBySubmissionId($dvFile->getSubmissionId());
@@ -707,7 +662,7 @@ class PLNPlugin extends GenericPlugin {
       $article =& $articleDao->getArticle($study->getSubmissionId(), $journal->getId(), true);
       $this->updateStudy($article, $study);
     }
-    if ($dvFileDeposited) $this->_sendNotification('plugins.generic.dataverse.notification.fileDeleted', NOTIFICATION_TYPE_SUCCESS);
+    if ($dvFileDeposited) $this->_sendNotification('plugins.generic.pln.notification.fileDeleted', NOTIFICATION_TYPE_SUCCESS);
     return false;
   }
   
@@ -718,7 +673,7 @@ class PLNPlugin extends GenericPlugin {
    */
   function addAuthorSubmitFormValidator($hookName, $args) {
     $form =& $args[0];
-    $form->addCheck(new FormValidatorCustom($form, '', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.requireDataError', array(&$this, 'validateRequiredData'), array($form)));
+    $form->addCheck(new FormValidatorCustom($form, '', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.requireDataError', array(&$this, 'validateRequiredData'), array($form)));
   }
   
   /**
@@ -729,8 +684,8 @@ class PLNPlugin extends GenericPlugin {
     $journal =& Request::getJournal();
     if (!$this->getSetting($journal->getId(), 'requireData')) return true;
     // Data files must be provided.
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-    $dvFiles =& $dvFileDao->getPLNFilesBySubmissionId($form->articleId);
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFiles =& $dvFileDao->getPLNDepositsBySubmissionId($form->articleId);
     return count($dvFiles);
   }
   
@@ -744,13 +699,13 @@ class PLNPlugin extends GenericPlugin {
     $article =& $args[1];
     if ($step == 5) {
       // Author has completed submission. Check if submission has suppfiles to deposit.
-      $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-      $dvFiles =& $dvFileDao->getPLNFilesBySubmissionId($article->getId());
+      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+      $dvFiles =& $dvFileDao->getPLNDepositsBySubmissionId($article->getId());
       if ($dvFiles) {
         // Create a study for the new submission
         $study =& $this->createStudy($article, $dvFiles);
-        isset($study) ? $this->_sendNotification('plugins.generic.dataverse.notification.studyCreated', NOTIFICATION_TYPE_SUCCESS) : 
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorCreatingStudy', NOTIFICATION_TYPE_ERROR);
+        isset($study) ? $this->_sendNotification('plugins.generic.pln.notification.studyCreated', NOTIFICATION_TYPE_SUCCESS) : 
+          $this->_sendNotification('plugins.generic.pln.notification.errorCreatingStudy', NOTIFICATION_TYPE_ERROR);
       }
     }
     return false;
@@ -769,8 +724,8 @@ class PLNPlugin extends GenericPlugin {
     
     // Update & notify
     $study =& $this->updateStudy($form->article, $study);
-    isset($study) ? $this->_sendNotification('plugins.generic.dataverse.notification.studyUpdated', NOTIFICATION_TYPE_SUCCESS) :
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorUpdatingStudy', NOTIFICATION_TYPE_ERROR);
+    isset($study) ? $this->_sendNotification('plugins.generic.pln.notification.studyUpdated', NOTIFICATION_TYPE_SUCCESS) :
+          $this->_sendNotification('plugins.generic.pln.notification.errorUpdatingStudy', NOTIFICATION_TYPE_ERROR);
     return false;
   }
   
@@ -796,14 +751,14 @@ class PLNPlugin extends GenericPlugin {
       // Editor decision on a submission with a draft study in PLN
       if ($decision['decision'] == SUBMISSION_EDITOR_DECISION_ACCEPT) {
         $this->releaseStudy($study) ? 
-          $this->_sendNotification('plugins.generic.dataverse.notification.studyReleased', NOTIFICATION_TYPE_SUCCESS) :
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorReleasingStudy', NOTIFICATION_TYPE_ERROR);
+          $this->_sendNotification('plugins.generic.pln.notification.studyReleased', NOTIFICATION_TYPE_SUCCESS) :
+          $this->_sendNotification('plugins.generic.pln.notification.errorReleasingStudy', NOTIFICATION_TYPE_ERROR);
       }
       if ($decision['decision'] == SUBMISSION_EDITOR_DECISION_DECLINE) {
         // Draft studies will be deleted; released studies will be deaccesioned
         $this->deleteStudy($study) ? 
-          $this->_sendNotification('plugins.generic.dataverse.notification.studyDeleted', NOTIFICATION_TYPE_SUCCESS) :
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorDeletingStudy', NOTIFICATION_TYPE_ERROR);
+          $this->_sendNotification('plugins.generic.pln.notification.studyDeleted', NOTIFICATION_TYPE_SUCCESS) :
+          $this->_sendNotification('plugins.generic.pln.notification.errorDeletingStudy', NOTIFICATION_TYPE_ERROR);
       }
     }
     return false;
@@ -843,8 +798,8 @@ class PLNPlugin extends GenericPlugin {
     $study =& $dataverseStudyDao->getStudyBySubmissionId($submission->getId());
     if (isset($study)) {
         $this->deleteStudy($study) ? 
-          $this->_sendNotification('plugins.generic.dataverse.notification.studyDeleted', NOTIFICATION_TYPE_SUCCESS) :
-          $this->_sendNotification('plugins.generic.dataverse.notification.errorDeletingStudy', NOTIFICATION_TYPE_ERROR);
+          $this->_sendNotification('plugins.generic.pln.notification.studyDeleted', NOTIFICATION_TYPE_SUCCESS) :
+          $this->_sendNotification('plugins.generic.pln.notification.errorDeletingStudy', NOTIFICATION_TYPE_ERROR);
     }
     return false;    
   }
@@ -1027,14 +982,14 @@ class PLNPlugin extends GenericPlugin {
     if (!isset($studyStatement)) return false;
 
     // Update each PLN file with study id & content source URI
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
     foreach ($studyStatement->sac_entries as $entry) {
       $dvUriFileName = substr($entry->sac_content_source, strrpos($entry->sac_content_source, '/')+1);
       if (array_key_exists($dvUriFileName, $dvFileIndex)) {
         $dvFile =& $dvFileIndex[$dvUriFileName];
         $dvFile->setContentSourceUri($entry->sac_content_source);
         $dvFile->setStudyId($study->getId());
-        $dvFileDao->updatePLNFile($dvFile);
+        $dvFileDao->updatePLNDeposit($dvFile);
       }
     }
 
@@ -1100,8 +1055,8 @@ class PLNPlugin extends GenericPlugin {
     $packager->addMetadata('isReferencedBy', $this->getCitation($article), $pubIdAttributes);
     // Include (some) suppfile metadata in study
     $suppFileDao =& DAORegistry::getDAO('SuppFileDAO');    
-    $dataverseFileDao =& DAORegistry::getDAO('PLNFileDAO');
-    $dvFiles =& $dataverseFileDao->getPLNFilesByStudyId($study->getId());
+    $dataverseFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFiles =& $dataverseFileDao->getPLNDepositsByStudyId($study->getId());
     foreach ($dvFiles as $dvFile) {
       $suppFile =& $suppFileDao->getSuppFile($dvFile->getSuppFileId(), $article->getId());
       if (isset($suppFile)) {
@@ -1140,7 +1095,7 @@ class PLNPlugin extends GenericPlugin {
   /**
    * Add a file to an existing study
    * @param PLNStudy $study
-   * @param PLNFile $dvFile
+   * @param PLNDeposit $dvFile
    */
   function &addFileToStudy(&$study, &$suppFile) {
     $packager = new PLNPackager();
@@ -1174,8 +1129,8 @@ class PLNPlugin extends GenericPlugin {
     if (!isset($studyStatement)) return false;
 
     // Create a new PLN file for inserted suppfile
-    $this->import('classes.PLNFile');
-    $dvFile = new PLNFile();
+    $this->import('classes.PLNDeposit');
+    $dvFile = new PLNDeposit();
     $dvFile->setSuppFileId($suppFile->getId());
     $dvFile->setStudyId($study->getId());
     $dvFile->setSubmissionId($study->getSubmissionId());
@@ -1190,8 +1145,8 @@ class PLNPlugin extends GenericPlugin {
     /** @fixme what if we can't relate the file to a statement entry? */     
     if (!$dvFile->getContentSourceUri()) return false;
     
-    $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-    $dvFileDao->insertPLNFile($dvFile);
+    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFileDao->insertPLNDeposit($dvFile);
     
     // Finally, file may have metadata that needs to be in study cataloguing information
     $articleDao =& DAORegistry::getDAO('ArticleDAO');
@@ -1231,7 +1186,7 @@ class PLNPlugin extends GenericPlugin {
           $notificationManager = new NotificationManager();
           $roleDao =& DAORegistry::getDAO('RoleDAO');
           $journalManagers =& $roleDao->getUsersByRoleId(ROLE_ID_JOURNAL_MANAGER, $journal->getId());
-          $contents = __('plugins.generic.dataverse.notification.releasePLN', array('dvnUri' => $this->getSetting($journal->getId(), 'dvnUri')));
+          $contents = __('plugins.generic.pln.notification.releasePLN', array('dvnUri' => $this->getSetting($journal->getId(), 'dvnUri')));
           while ($journalManagers && !$journalManagers->eof()) {
             $journalManager =& $journalManagers->next();
             $notificationManager->createNotification(
@@ -1270,8 +1225,8 @@ class PLNPlugin extends GenericPlugin {
                 ''); // on behalf of 
     
     if ($response->sac_status == DATAVERSE_PLUGIN_HTTP_STATUS_NO_CONTENT) {
-      $dvFileDao =& DAORegistry::getDAO('PLNFileDAO');
-      $dvFileDao->deletePLNFilesByStudyId($study->getId());
+      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+      $dvFileDao->deletePLNDepositsByStudyId($study->getId());
       $dataverseStudyDao = DAORegistry::getDAO('PLNStudyDAO');
       $dataverseStudyDao->deleteStudy($study);
       return true;

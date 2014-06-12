@@ -1,13 +1,14 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/PLNAuthForm.inc.php
+ * @file plugins/generic/pln/PLNAuthForm.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class PLNAuthForm
- * @ingroup plugins_generic_dataverse
+ * @ingroup plugins_generic_pln
  *
  * @brief Form for journal managers to provide DVN account for depositing files
  */
@@ -33,10 +34,10 @@ class PLNAuthForm extends Form {
     $this->_journalId = $journalId;
 
     parent::Form($plugin->getTemplatePath() . 'dataverseAuthForm.tpl');
-    $this->addCheck(new FormValidatorUrl($this, 'dvnUri', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dvnUriRequired'));
-    $this->addCheck(new FormValidatorCustom($this, 'dvnUri', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dvnUriNotValid', array(&$this, '_validateDvnUri')));
-    $this->addCheck(new FormValidator($this, 'username', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.usernameRequired'));
-    $this->addCheck(new FormValidator($this, 'password', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.passwordRequired'));
+    $this->addCheck(new FormValidatorUrl($this, 'dvnUri', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.dvnUriRequired'));
+    $this->addCheck(new FormValidatorCustom($this, 'dvnUri', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.dvnUriNotValid', array(&$this, '_validateDvnUri')));
+    $this->addCheck(new FormValidator($this, 'username', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.usernameRequired'));
+    $this->addCheck(new FormValidator($this, 'password', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.passwordRequired'));
     $this->addCheck(new FormValidatorPost($this));
   }
 

@@ -1,13 +1,14 @@
 <?php
 
 /**
- * @file plugins/generic/dataverse/SettingsForm.inc.php
+ * @file plugins/generic/pln/SettingsForm.inc.php
  *
- * Copyright (c) 2003-2013 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SettingsForm
- * @ingroup plugins_generic_dataverse
+ * @ingroup plugins_generic_pln
  *
  * @brief Form for journal managers to modify PLN plugin settings
  */
@@ -34,13 +35,13 @@ class SettingsForm extends Form {
     
     // Citation formats
     $this->_citationFormats = array(
-        DATAVERSE_PLUGIN_CITATION_FORMAT_APA => __('plugins.generic.dataverse.settings.citationFormat.apa'),
+        DATAVERSE_PLUGIN_CITATION_FORMAT_APA => __('plugins.generic.pln.settings.citationFormat.apa'),
       );
     
     // Study release options
     $this->_studyReleaseOptions = array(
-        DATAVERSE_PLUGIN_RELEASE_ARTICLE_ACCEPTED => __('plugins.generic.dataverse.settings.studyReleaseSubmissionAccepted'),
-        DATAVERSE_PLUGIN_RELEASE_ARTICLE_PUBLISHED => __('plugins.generic.dataverse.settings.studyReleaseArticlePublished')
+        DATAVERSE_PLUGIN_RELEASE_ARTICLE_ACCEPTED => __('plugins.generic.pln.settings.studyReleaseSubmissionAccepted'),
+        DATAVERSE_PLUGIN_RELEASE_ARTICLE_PUBLISHED => __('plugins.generic.pln.settings.studyReleaseArticlePublished')
     );    
 
     // Public id plugins
@@ -55,9 +56,9 @@ class SettingsForm extends Form {
     
     parent::Form($plugin->getTemplatePath() . 'settingsForm.tpl');
     $this->addCheck(new FormValidatorPost($this));
-    $this->addCheck(new FormValidator($this, 'dataAvailability', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataAvailabilityRequired'));
-    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.termsOfUseRequired', array(&$this, '_validateTermsOfUse')));
-    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.dataverse.settings.dataverseTermsOfUseError', array(&$this, '_validatePLNTermsOfUse'))); 
+    $this->addCheck(new FormValidator($this, 'dataAvailability', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.dataAvailabilityRequired'));
+    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.termsOfUseRequired', array(&$this, '_validateTermsOfUse')));
+    $this->addCheck(new FormValidatorCustom($this, 'termsOfUse', FORM_VALIDATOR_REQUIRED_VALUE, 'plugins.generic.pln.settings.dataverseTermsOfUseError', array(&$this, '_validatePLNTermsOfUse'))); 
     $this->addCheck(new FormValidatorPost($this));    
   }
 
