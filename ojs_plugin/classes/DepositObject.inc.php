@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @file plugins/generic/pln/classes/PLNDeposit.inc.php
+ * @file plugins/generic/pln/classes/DepositObject.inc.php
  *
  * Copyright (c) 2013-2014 Simon Fraser University Library
  * Copyright (c) 2003-2014 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class PLNDeposit
+ * @class DepositObject
  * @ingroup plugins_generic_pln
  *
  * @brief Basic class describing a deposit stored in the PLN
@@ -15,30 +15,41 @@
 import('classes.article.Article');
 import('classes.issue.Issue');
 
-define('PLN_PLUGIN_DEPOSIT_CONTENT_ISSUE', get_class(new Article()));
-define('PLN_PLUGIN_DEPOSIT_CONTENT_ARTICLE', get_class(new Issue()));
+define('PLN_PLUGIN_DEPOSIT_OBJECT_ISSUE', get_class(new Article()));
+define('PLN_PLUGIN_DEPOSIT_OBJECT_ARTICLE', get_class(new Issue()));
 
-define('PLN_PLUGIN_HTTP_STATUS_OK', 200);
+class DepositObject extends DataObject {
 
-class PLNDeposit extends DataObject {
-
-	function PLNDeposit() {
+	function DepositObject() {
 		parent::DataObject();
+	}
+
+	/**
+	* Export the deposit object using the OJS native XML format
+	* @return string OJS Native XML for an article or an issue
+	*/
+	function exportDepositObjectToFile($fileName) {
+		if ((is_writable($fileName)) && (($file = fopen($fileName,'w')) !== FALSE)) {
+			$ret = fwrite($file, 'Some XML content.');
+			if ($ret === FALSE) {
+				return $ret;
+			}
+		}
 	}
 
 	/**
 	* Get/Set content helpers
 	*/
 	function getContent() {
-		$content_type = $this->getData('content_type');
-		$content_id = $this->getData('content_id');
+		$content_type = $this->getContentType();
+		$content_id = $this->getContentId();
 		$content = null;
 
 		switch ($content_type) {
-			case PLN_PLUGIN_DEPOSIT_CONTENT_ISSUE:
+			case PLN_PLUGIN_DEPOSIT_OBJECT_ISSUE:
 				$issueDao =& DAORegistry::getDAO('IssueDAO');
 				$content = $issueDao->getIssueById($content_id,$this->getJournalId());
-			case PLN_PLUGIN_DEPOSIT_CONTENT_ARTICLE:
+			case PLN_PLUGIN_DEPOSIT_OBJECT_ARTICLE:
 				$articleDao =& DAORegistry::getDAO('ArticleDAO');
 				$content = $articleDao->getArticle($content_id,$this->getJournalId());
 			default:
@@ -48,8 +59,8 @@ class PLNDeposit extends DataObject {
 	function setContent(&$content) {
 		
 		switch (get_class($content)) {
-			case PLN_PLUGIN_DEPOSIT_CONTENT_ISSUE:
-			case PLN_PLUGIN_DEPOSIT_CONTENT_ARTICLE:
+			case PLN_PLUGIN_DEPOSIT_OBJECT_ISSUE:
+			case PLN_PLUGIN_DEPOSIT_OBJECT_ARTICLE:
 				$content_type = get_class($content);
 				$content_id = $content->getId();
 				$this->setData('content_id', $content_id);
@@ -58,16 +69,6 @@ class PLNDeposit extends DataObject {
 			default:
 		}
 		
-	}
-
-	/**
-	* Get/Set deposit uuid
-	*/
-	function getUUID() {
-		return $this->getData('uuid');
-	}
-	function setUUID($uuid) {
-		$this->setData('uuid', $uuid);
 	}
 
 	/**
@@ -99,6 +100,16 @@ class PLNDeposit extends DataObject {
 	function setJournalId($journalId) {
 		$this->setData('journal_id', $journalId);
 	}
+	
+	/**
+	* Get/Set deposit id
+	*/
+	function getDepositId() {
+		return $this->getData('deposit_id');
+	}
+	function setDepositId($depositId) {
+		$this->setData('deposit_id', $depositId);
+	}
 
 	/**
 	* Get/Set deposit creation date
@@ -118,56 +129,6 @@ class PLNDeposit extends DataObject {
 	}
 	function setDateModified($dateModified) {
 		$this->setData('date_modified', $dateModified);
-	}
-
-	/**
-	* Get/Set bag path
-	*/
-	function getBagPath() {
-		return $this->getData('bag_path');
-	}
-	function setBagPath($bagPath) {
-		$this->setData('bag_path', $bagPath);
-	}
-
-	/**
-	* Get/Set bag checksum
-	*/
-	function getBagChecksum() {
-		return $this->getData('bag_checksum');
-	}
-	function setBagChecksum($bagChecksum) {
-		$this->setData('bag_checksum', $bagChecksum);
-	}
-
-	/**
-	* Get/Set bag size
-	*/
-	function getBagSize() {
-		return $this->getData('bag_size');
-	}
-	function setBagSize($bagSize) {
-		$this->setData('bag_size', $bagSize);
-	}
-
-	/**
-	* Get/Set last status check date
-	*/
-	function getLastStatusDate() {
-		return $this->getData('date_status');
-	}
-	function setLastStatusDate($date_last_status) {
-		$this->setData('date_status', $date_last_status);
-	}
-
-	/**
-	* Get/Set deposit status
-	*/
-	function getStatus() {
-		return $this->getData('status');
-	}
-	function setStatus($status) {
-		$this->setData('status', $status);
 	}
 
 }

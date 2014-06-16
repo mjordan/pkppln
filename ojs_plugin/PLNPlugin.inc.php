@@ -213,8 +213,8 @@ class PLNPlugin extends GenericPlugin {
         $article =& $templateMgr->get_template_vars('article');
         $study =& $dataverseStudyDao->getStudyBySubmissionId($article->getId());
         if (!isset($study)) return false;
-        $dataverseFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-        $dvFiles =& $dataverseFileDao->getPLNDepositsBySubmissionId($article->getId());
+        $dataverseFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+        $dvFiles =& $dataverseFileDao->getDepositObjectsBySubmissionId($article->getId());
         $dvFileIndex = array();
         foreach ($dvFiles as $dvFile) {
           $dvFileIndex[$dvFile->getSuppFileId()] = true;
@@ -420,8 +420,8 @@ class PLNPlugin extends GenericPlugin {
 
     if (isset($form->suppFile) && $form->suppFile->getId()) {
       // Check if uploaded file has been deposited in PLN
-      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-      $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());
+      $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+      $dvFile =& $dvFileDao->getDepositObjectBySuppFileId($form->suppFile->getId(), $article->getId());
       if (!is_null($dvFile)) { $publishData = 'dataverse'; }
     }
     $form->setData('publishData', $publishData);
@@ -459,8 +459,8 @@ class PLNPlugin extends GenericPlugin {
       return false;
     }
     
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-    $dvFile = $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $form->articleId);      
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+    $dvFile = $dvFileDao->getDepositObjectBySuppFileId($form->suppFile->getId(), $form->articleId);      
 
     switch ($form->getData('publishData')) {
       case 'none':
@@ -470,7 +470,7 @@ class PLNPlugin extends GenericPlugin {
          */
         if (isset($dvFile)) {
           /** @todo warn user file will be removed from PLN */
-          $dvFileDao->deletePLNDeposit($dvFile);
+          $dvFileDao->deleteDepositObject($dvFile);
         }
         break;
 
@@ -481,11 +481,11 @@ class PLNPlugin extends GenericPlugin {
          * @see handleAuthorSubmission, handleEditorDecision
          */
         if (!isset($dvFile)) {
-          $this->import('classes.PLNDeposit');
-          $dvFile = new PLNDeposit();
+          $this->import('classes.DepositObject');
+          $dvFile = new DepositObject();
           $dvFile->setSuppFileId($form->suppFile->getId());
           $dvFile->setSubmissionId($form->articleId);
-          $dvFileDao->insertPLNDeposit($dvFile);            
+          $dvFileDao->insertDepositObject($dvFile);            
         }
         break;
     }    
@@ -509,7 +509,7 @@ class PLNPlugin extends GenericPlugin {
     // Form executed for completed submissions. Draft studies are created on 
     // submission completion. A study may or may not exist for this submission.
     $dvStudyDao =& DAORegistry::getDAO('PLNStudyDAO');
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');    
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');    
     
     switch ($form->getData('publishData')) {
       case 'none':
@@ -517,7 +517,7 @@ class PLNPlugin extends GenericPlugin {
         /** @todo warn users before removing files from studies */
         if (!$form->suppFile->getId()) return false; // New suppfile: not in PLN
 
-        $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());
+        $dvFile =& $dvFileDao->getDepositObjectBySuppFileId($form->suppFile->getId(), $article->getId());
         if (!isset($dvFile)) return false; // Edited suppfile, but not in PLN
           
         if (!$this->deleteFile($dvFile)) {
@@ -525,7 +525,7 @@ class PLNPlugin extends GenericPlugin {
           return false;
         }
         /** @fixme move this to deleteFile() */
-        $dvFileDao->deletePLNDeposit($dvFile);
+        $dvFileDao->deleteDepositObject($dvFile);
         
         // Deleting a file may affect study cataloguing information
         $study =& $dvStudyDao->getStudyBySubmissionId($article->getId());
@@ -583,7 +583,7 @@ class PLNPlugin extends GenericPlugin {
         }
         
         // File already in PLN?
-        $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($form->suppFile->getId(), $article->getId());        
+        $dvFile =& $dvFileDao->getDepositObjectBySuppFileId($form->suppFile->getId(), $article->getId());        
         if (isset($dvFile)) {
           // File is already in PLN. Update study cataloging information
           // with suppfile metadata. 
@@ -628,8 +628,8 @@ class PLNPlugin extends GenericPlugin {
     $submissionId = is_array($params) ? $params[1] : '';
     
     // Does a PLN file exist for this suppfile?
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-    $dvFile =& $dvFileDao->getPLNDepositBySuppFileId($suppFileId, $submissionId ? $submissionId : '');
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+    $dvFile =& $dvFileDao->getDepositObjectBySuppFileId($suppFileId, $submissionId ? $submissionId : '');
     if (!isset($dvFile)) return false;
 
     // If submission is incomplete, file will not yet be in PLN
@@ -642,7 +642,7 @@ class PLNPlugin extends GenericPlugin {
         return false;
       }
     }
-    $dvFileDao->deletePLNDeposit($dvFile);
+    $dvFileDao->deleteDepositObject($dvFile);
     // Deleting the file may require an update to study metadata
     $dvStudyDao =& DAORegistry::getDAO('PLNStudyDAO');
     $study =& $dvStudyDao->getStudyBySubmissionId($dvFile->getSubmissionId());
@@ -674,8 +674,8 @@ class PLNPlugin extends GenericPlugin {
     $journal =& Request::getJournal();
     if (!$this->getSetting($journal->getId(), 'requireData')) return true;
     // Data files must be provided.
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-    $dvFiles =& $dvFileDao->getPLNDepositsBySubmissionId($form->articleId);
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+    $dvFiles =& $dvFileDao->getDepositObjectsBySubmissionId($form->articleId);
     return count($dvFiles);
   }
   
@@ -689,8 +689,8 @@ class PLNPlugin extends GenericPlugin {
     $article =& $args[1];
     if ($step == 5) {
       // Author has completed submission. Check if submission has suppfiles to deposit.
-      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-      $dvFiles =& $dvFileDao->getPLNDepositsBySubmissionId($article->getId());
+      $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+      $dvFiles =& $dvFileDao->getDepositObjectsBySubmissionId($article->getId());
       if ($dvFiles) {
         // Create a study for the new submission
         $study =& $this->createStudy($article, $dvFiles);
@@ -972,14 +972,14 @@ class PLNPlugin extends GenericPlugin {
     if (!isset($studyStatement)) return false;
 
     // Update each PLN file with study id & content source URI
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
     foreach ($studyStatement->sac_entries as $entry) {
       $dvUriFileName = substr($entry->sac_content_source, strrpos($entry->sac_content_source, '/')+1);
       if (array_key_exists($dvUriFileName, $dvFileIndex)) {
         $dvFile =& $dvFileIndex[$dvUriFileName];
         $dvFile->setContentSourceUri($entry->sac_content_source);
         $dvFile->setStudyId($study->getId());
-        $dvFileDao->updatePLNDeposit($dvFile);
+        $dvFileDao->updateDepositObject($dvFile);
       }
     }
 
@@ -1045,8 +1045,8 @@ class PLNPlugin extends GenericPlugin {
     $packager->addMetadata('isReferencedBy', $this->getCitation($article), $pubIdAttributes);
     // Include (some) suppfile metadata in study
     $suppFileDao =& DAORegistry::getDAO('SuppFileDAO');    
-    $dataverseFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-    $dvFiles =& $dataverseFileDao->getPLNDepositsByStudyId($study->getId());
+    $dataverseFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+    $dvFiles =& $dataverseFileDao->getDepositObjectsByStudyId($study->getId());
     foreach ($dvFiles as $dvFile) {
       $suppFile =& $suppFileDao->getSuppFile($dvFile->getSuppFileId(), $article->getId());
       if (isset($suppFile)) {
@@ -1085,7 +1085,7 @@ class PLNPlugin extends GenericPlugin {
   /**
    * Add a file to an existing study
    * @param PLNStudy $study
-   * @param PLNDeposit $dvFile
+   * @param DepositObject $dvFile
    */
   function &addFileToStudy(&$study, &$suppFile) {
     $packager = new PLNPackager();
@@ -1119,8 +1119,8 @@ class PLNPlugin extends GenericPlugin {
     if (!isset($studyStatement)) return false;
 
     // Create a new PLN file for inserted suppfile
-    $this->import('classes.PLNDeposit');
-    $dvFile = new PLNDeposit();
+    $this->import('classes.DepositObject');
+    $dvFile = new DepositObject();
     $dvFile->setSuppFileId($suppFile->getId());
     $dvFile->setStudyId($study->getId());
     $dvFile->setSubmissionId($study->getSubmissionId());
@@ -1135,8 +1135,8 @@ class PLNPlugin extends GenericPlugin {
     /** @fixme what if we can't relate the file to a statement entry? */     
     if (!$dvFile->getContentSourceUri()) return false;
     
-    $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-    $dvFileDao->insertPLNDeposit($dvFile);
+    $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+    $dvFileDao->insertDepositObject($dvFile);
     
     // Finally, file may have metadata that needs to be in study cataloguing information
     $articleDao =& DAORegistry::getDAO('ArticleDAO');
@@ -1215,8 +1215,8 @@ class PLNPlugin extends GenericPlugin {
                 ''); // on behalf of 
     
     if ($response->sac_status == DATAVERSE_PLUGIN_HTTP_STATUS_NO_CONTENT) {
-      $dvFileDao =& DAORegistry::getDAO('PLNDepositDAO');
-      $dvFileDao->deletePLNDepositsByStudyId($study->getId());
+      $dvFileDao =& DAORegistry::getDAO('DepositObjectDAO');
+      $dvFileDao->deleteDepositObjectsByStudyId($study->getId());
       $dataverseStudyDao = DAORegistry::getDAO('PLNStudyDAO');
       $dataverseStudyDao->deleteStudy($study);
       return true;

@@ -13,6 +13,37 @@
  -->
 
 <schema version="0.1">
+	<!--
+	 *
+	 * TABLE pln_deposit_objects
+	 *
+	 -->
+	<table name="pln_deposit_objects">
+		<field name="deposit_object_id" type="I8">
+			<KEY/>
+			<AUTOINCREMENT/>
+		</field>
+		<field name="journal_id" type="I8">
+			<NOTNULL/>
+		</field>
+		<field name="content_id" type="I8">
+			<NOTNULL/>
+		</field>
+		<field name="content_type" type="C2" size="255">
+			<NOTNULL/>
+		</field>
+		<field name="deposit_id" type="I8">
+			<NOTNULL/>
+		</field>
+		<field name="date_created" type="T">
+			<NOTNULL/>
+		</field>
+		<field name="date_modified" type="T"/>
+		<descr>PLN Deposit Objects</descr>
+		<index name="pln_deposit_object_id">
+			<col>deposit_object_id</col>
+		</index>
+	</table>
 
 	<!--
 	 *
@@ -24,29 +55,16 @@
 			<KEY/>
 			<AUTOINCREMENT/>
 		</field>
-		<field name="uuid" type="C2" size="255">
+		<field name="uuid" type="C2" size="255"/>
+		<field name="package_path" type="X"/>
+		<field name="status" type="I8"/>
+		<field name="date_status" type="T"/>
+		<field name="date_created" type="T">
 			<NOTNULL/>
 		</field>
-		<field name="journal_id" type="I8">
-			<NOTNULL/>
-		</field>
-		<field name="content_type" type="C2" size="255">
-			<NOTNULL/>
-		</field>
-		<field name="content_id" type="I8">
-			<NOTNULL/>
-		</field>
-	    <field name="date_created" type="T">
-			<NOTNULL/>
-		</field>
-	    <field name="date_modified" type="T"/>
-	    <field name="bag_path" type="X"/>
-	    <field name="bag_checksum" type="C2" size="255"/>
-	    <field name="bag_size" type="I8"/>
-	    <field name="date_status" type="T"/>
-	    <field name="status" type="I8"/>
+		<field name="date_modified" type="T"/>
 		<descr>PLN Deposits</descr>
-		<index name="pln_deposits_id">
+		<index name="pln_deposit_id">
 			<col>deposit_id</col>
 		</index>
 	</table>
