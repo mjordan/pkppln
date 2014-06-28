@@ -12,8 +12,6 @@
  *
  * @brief Basic class describing a deposit stored in the PLN
  */
-import('classes.article.Article');
-import('classes.issue.Issue');
 
 define('PLN_PLUGIN_DEPOSIT_OBJECT_ISSUE', get_class(new Article()));
 define('PLN_PLUGIN_DEPOSIT_OBJECT_ARTICLE', get_class(new Issue()));
@@ -36,7 +34,7 @@ class DepositObject extends DataObject {
 			}
 		}
 	}
-
+	
 	/**
 	* Get/Set content helpers
 	*/

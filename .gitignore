@@ -1,2 +1,3 @@
 config_dev.cfg
 *.pyc
+.DS_Store

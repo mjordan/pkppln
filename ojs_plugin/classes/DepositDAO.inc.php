@@ -45,6 +45,99 @@ class DepositDAO extends DAO {
 	}
 
 	/**
+	 * Retrieve all newly-created deposits (ones with no package path)
+	 * @return array Deposit
+	 */
+	function &getNew() {
+		$result =& $this->retrieve(
+			'SELECT * FROM pln_deposits WHERE package_path = null'
+		);
+
+		$returner = array();
+		while (!$result->EOF) {
+			$returner[] =& $this->_returnDepositFromRow($result->GetRowAssoc(false));
+			$result->MoveNext();
+		}
+		$result->Close();
+		return $returner;
+	}
+	
+	/**
+	 * Retrieve all deposits that need packaging
+	 * @return array Deposit
+	 */
+	function &getNeedPackaging() {
+		$result =& $this->retrieve(
+			'
+			SELECT DISTINCT d.* FROM pln_deposits d LEFT JOIN pln_deposit_objects o ON
+				(d.deposit_id = o.deposit_id)
+			WHERE
+				(d.date_modified != null and
+				o.date_modified != null and
+				o.date_modified > d.date_modified) or
+				(d.status = ?)', (int) PLN_PLUGIN_DEPOSIT_STATUS_NONE
+		);
+
+		$returner = array();
+		while (!$result->EOF) {
+			$returner[] =& $this->_returnDepositFromRow($result->GetRowAssoc(false));
+			$result->MoveNext();
+		}
+		$result->Close();
+		
+		return $returner;
+		
+	}
+	
+	/**
+	 * Retrieve all deposits that need transferring
+	 * @return array Deposit
+	 */
+	function &getNeedTransferring() {
+		$result =& $this->retrieve(
+			'SELECT * FROM pln_deposits WHERE status = ?', (int) PLN_PLUGIN_DEPOSIT_STATUS_PACKAGED
+		);
+
+		$returner = array();
+		while (!$result->EOF) {
+			$returner[] =& $this->_returnDepositFromRow($result->GetRowAssoc(false));
+			$result->MoveNext();
+		}
+		$result->Close();
+		
+		return $returner;
+		
+	}
+	
+		/**
+	 * Retrieve all deposits that need a status update
+	 * @return array Deposit
+	 */
+	function &getNeedStatus() {
+		$result =& $this->retrieve(
+			'
+			SELECT * FROM pln_deposits WHERE
+			status = ? or
+			status = ? or
+			status = ? or
+			',
+			(int) PLN_PLUGIN_DEPOSIT_STATUS_TRANSFERRED,
+			(int) PLN_PLUGIN_DEPOSIT_STATUS_RECEIVED,
+			(int) PLN_PLUGIN_DEPOSIT_STATUS_SYNCING
+		);
+
+		$returner = array();
+		while (!$result->EOF) {
+			$returner[] =& $this->_returnDepositFromRow($result->GetRowAssoc(false));
+			$result->MoveNext();
+		}
+		$result->Close();
+		
+		return $returner;
+		
+	}
+	
+	/**
 	 * Insert deposit object
 	 * @param $deposit Deposit
 	 * @return int inserted Deposit id
@@ -53,7 +146,8 @@ class DepositDAO extends DAO {
 		$ret = $this->update(
 			sprintf('
 				INSERT INTO pln_deposits
-					(uuid,
+					(journal_id,
+					uuid,
 					package_path,
 					status,
 					date_status,
@@ -62,10 +156,11 @@ class DepositDAO extends DAO {
 				VALUES
 					(?, ?, %s, %s, %s)',
 				$this->datetimeToDB($deposit->getLastStatusDate()),
-				$this->datetimeToDB($deposit->getDateCreated()),
+				$this->datetimeToDB(new DateTime()),
 				$this->datetimeToDB($deposit->getDateModified())
 			),
 			array(
+				(int) $deposit->getJournalId(),
 				(int) $deposit->getUUID(),
 				(int) $deposit->getPackage(),
 				(int) $deposit->getStatus()
@@ -75,15 +170,16 @@ class DepositDAO extends DAO {
 		return $deposit->getId();
 	}
 
-  /**
-   * Update deposit object
-   * @param $depositObject DepositObject
-   * @return int updated DepositObject id
-   */
+	/**
+	 * Update deposit object
+	 * @param $depositObject DepositObject
+	 * @return int updated DepositObject id
+	 */
 	function updateDeposit(&$depositObject) {
 		$ret = $this->update(
 			sprintf('
 				UPDATE pln_deposits SET
+					journal_id = ?,
 					uuid = ?,
 					package_path = ?,
 					status = ?,
@@ -93,9 +189,10 @@ class DepositDAO extends DAO {
 				WHERE deposit_id = ?',
 				$this->datetimeToDB($deposit->getLastStatusDate()),
 				$this->datetimeToDB($deposit->getDateCreated()),
-				$this->datetimeToDB($deposit->getDateModified())
+				$this->datetimeToDB(new DateTime())
 			),
 			array(
+				(int) $deposit->getJournalId(),
 				(int) $deposit->getUUID(),
 				(int) $deposit->getPackagePath(),
 				(int) $deposit->getStatus(),
@@ -131,6 +228,7 @@ class DepositDAO extends DAO {
 	function &_returnDepositFromRow(&$row) {
 		$deposit = $this->newDataObject();
 		$deposit->setId($row['deposit_id']);
+		$deposit->setJournalId($row['journal_id']);
 		$deposit->setUUID($row['uuid']);
 		$deposit->setPackagePath($row['package_path']);
 		$deposit->setStatus($row['status']);
@@ -143,5 +241,5 @@ class DepositDAO extends DAO {
 		return $deposit;
 	}
 }
-}
+
 ?>

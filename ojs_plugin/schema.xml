@@ -55,9 +55,14 @@
 			<KEY/>
 			<AUTOINCREMENT/>
 		</field>
+		<field name="journal_id" type="I8">
+			<NOTNULL/>
+		</field>
 		<field name="uuid" type="C2" size="255"/>
 		<field name="package_path" type="X"/>
-		<field name="status" type="I8"/>
+		<field name="status" type="I8">
+			<default>0</default>
+		</field>
 		<field name="date_status" type="T"/>
 		<field name="date_created" type="T">
 			<NOTNULL/>

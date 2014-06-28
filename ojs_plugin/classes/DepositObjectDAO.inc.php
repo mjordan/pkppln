@@ -65,13 +65,31 @@ class DepositObjectDAO extends DAO {
 		$result->Close();
 		return $returner;
 	}
+	
+	/**
+	 * Retrieve all deposit objects that don't yet have a deposit id.
+	 * @return array DepositObject ordered by sequence
+	 */
+	function &getNew() {
+		$result =& $this->retrieve(
+			'SELECT * FROM pln_deposit_objects WHERE deposit_id = null'
+		);
+
+		$returner = array();
+		while (!$result->EOF) {
+			$returner[] =& $this->_returnDepositObjectFromRow($result->GetRowAssoc(false));
+			$result->MoveNext();
+		}
+		$result->Close();
+		return $returner;
+	}
 
 	/**
 	 * Insert deposit object
 	 * @param $depositObject DepositObject
 	 * @return int inserted DepositObject id
 	 */
-	function insertDeposit(&$depositObject) {
+	function insertDepositObject(&$depositObject) {
 		$ret = $this->update(
 			sprintf('
 				INSERT INTO pln_deposit_objects
@@ -83,7 +101,7 @@ class DepositObjectDAO extends DAO {
 					date_modified)
 				VALUES
 					(?, ?, ?, %s, %s)',
-				$this->datetimeToDB($depositObject->getDateCreated()),
+				$this->datetimeToDB(new DateTime()),
 				$this->datetimeToDB($depositObject->getDateModified())
 			),
 			array(
@@ -97,12 +115,12 @@ class DepositObjectDAO extends DAO {
 		return $depositObject->getId();
 	}
 
-  /**
-   * Update deposit object
-   * @param $depositObject DepositObject
-   * @return int updated DepositObject id
-   */
-	function updateDeposit(&$depositObject) {
+	/**
+	 * Update deposit object
+	 * @param $depositObject DepositObject
+	 * @return int updated DepositObject id
+	 */
+	function updateDepositObject(&$depositObject) {
 		$ret = $this->update(
 			sprintf('
 				UPDATE pln_deposit_objects SET
@@ -114,7 +132,7 @@ class DepositObjectDAO extends DAO {
 					date_modified = %s,
 				WHERE deposit_object_id = ?',
 				$this->datetimeToDB($depositObject->getDateCreated()),
-				$this->datetimeToDB($depositObject->getDateModified())
+				$this->datetimeToDB(new DateTime())
 			),
 			array(
 				(int) $depositObject->getJournalId(),

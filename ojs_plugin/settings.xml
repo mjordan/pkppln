@@ -14,27 +14,52 @@
 
 <plugin_settings>
 	<setting type="bool">
+		<name>enabled</name>
+		<value>true</value>
+	</setting>
+	<!-- if they've agreed to the conditions -->
+	<setting type="bool">
 		<name>conditions_agreement</name>
 		<value>false</value>
 	</setting>
+	<!-- unique journal uuid -->
 	<setting type="string">
 		<name>journal_uuid</name>
 		<value></value>
 	</setting>
+	<!-- checksum type (see constants in Deposit) -->
 	<setting type="string">
-		<name>network_name</name>
-		<value>0</value>
+		<name>checksum_type</name>
+		<value>SHA-1</value>
 	</setting>
-	<setting type="string">
-		<name>network_host</name>
-		<value>0</value>
-	</setting>
+	<!-- article or issue-based depositing (see constants in DepositObject) -->
 	<setting type="string">
 		<name>deposit_type</name>
 		<value>0</value>
 	</setting>
+	<!-- in the case of articles, the article threshold per deposit -->
+	<setting type="string">
+		<name>object_threshold</name>
+		<value>20</value>
+	</setting>
+	<!-- available pln networks -->
 	<setting type="string">
 		<name>pln_networks</name>
 		<value>[{"name":"PKP","host":"example.pkp.sfu.ca"},]</value>
+	</setting>
+	<!-- chosen staging server -->
+	<setting type="string">
+		<name>pln_network</name>
+		<value>PKP</value>
+	</setting>
+	<!-- SWORD sd-iri -->
+	<setting type="string">
+		<name>pln_sd_iri</name>
+		<value></value>
+	</setting>
+	<!-- SWORD col-iri -->
+	<setting type="string">
+		<name>pln_col_iri</name>
+		<value></value>
 	</setting>
 </plugin_settings>
