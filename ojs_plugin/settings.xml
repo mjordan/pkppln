@@ -35,10 +35,10 @@
 	<!-- article or issue-based depositing (see constants in DepositObject) -->
 	<setting type="string">
 		<name>deposit_type</name>
-		<value>0</value>
+		<value></value>
 	</setting>
 	<!-- in the case of articles, the article threshold per deposit -->
-	<setting type="string">
+	<setting type="int">
 		<name>object_threshold</name>
 		<value>20</value>
 	</setting>

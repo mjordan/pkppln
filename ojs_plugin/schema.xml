@@ -12,7 +12,7 @@
  *
  -->
 
-<schema version="0.1">
+<schema version="1.0">
 	<!--
 	 *
 	 * TABLE pln_deposit_objects
@@ -61,7 +61,7 @@
 		<field name="uuid" type="C2" size="255"/>
 		<field name="package_path" type="X"/>
 		<field name="status" type="I8">
-			<default>0</default>
+			<default value="0"/>
 		</field>
 		<field name="date_status" type="T"/>
 		<field name="date_created" type="T">

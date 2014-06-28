@@ -28,24 +28,33 @@ class PLNPlugin extends GenericPlugin {
 	}
 
 	/**
-	 * @see PKPPlugin::register()
-	 * @return boolean true iff success
-	 */
+	* @see LazyLoadPlugin::register()
+	*/
 	function register($category, $path) {
-		$success = parent::register($category, $path);
-		$this->addLocaleData();
 
-		// sitewide function:
-		$this->registerDAOs();
+		if (parent::register($category, $path)) {
 		
-		// Delete all plug-in data for a journal when the journal is deleted
-		HookRegistry::register('JournalDAO::deleteJournalById', array($this, 'deleteJournalById'));
+			$this->import('classes.DepositDAO');
+			$this->import('classes.DepositObjectDAO');
+			
+			$depositDao = new DepositDAO($this->getName());
+			DAORegistry::registerDAO('DepositDAO', $depositDao);
+			
+			$depositObjectDao = new DepositObjectDAO($this->getName());
+			DAORegistry::registerDAO('DepositObjectDAO', $depositObjectDao);
 
-		if ($success && $this->getEnabled()) {
+			// Delete all plug-in data for a journal when the journal is deleted
+			HookRegistry::register('JournalDAO::deleteJournalById', array($this, 'deleteJournalById'));
+		
+			if ($this->getEnabled()) {
+				
+			}
+			
+			return true;
 
 		}
 		
-		return $success;
+		return false;
 	}
 
 	function getDisplayName() {
@@ -71,20 +80,6 @@ class PLNPlugin extends GenericPlugin {
 	function getContextSpecificPluginSettingsFile() {
 		return $this->getPluginPath() . '/settings.xml';
 	}
-
-	/**
-	 * Instantiate and register the DAOs.
-	 */
-	function registerDAOs() {
-		$this->import('classes.DepositDAO');
-		$this->import('classes.DepositObjectDAO');
-		
-		$depositDao = new DepositDAO($this->getName());
-		DAORegistry::registerDAO('DepositDAO', $depositDao);
-		
-		$depositObjectDao = new DepositObjectDAO($this->getName());
-		DAORegistry::registerDAO('DepositObjectDAO', $depositObjectDao);
-	}
 	
 	/**
 	 * Delete all plug-in data for a journal when the journal is deleted
@@ -102,30 +97,48 @@ class PLNPlugin extends GenericPlugin {
 	}
 
 	/**
-	 * Display verbs for the management interface.
-	 */
-	function getManagementVerbs() {
-
-	}
-
-	/**
-	* Execute a management verb on this plugin
-	* @param $verb string
-	* @param $args array
-	* @param $message string Result status message
-	* @param $messageParams array Parameters for the message key
-	* @return boolean
+	* @see PKPPlugin::manage()
 	*/
 	function manage($verb, $args, &$message, &$messageParams) {
+		$returner = parent::manage($verb, $args, $message, $messageParams);
+		if (!$returner) return false;
+		$this->import('PLNPluginSettingsForm');
 
+		switch($verb) {
+			case 'settings':
+				$templateMgr =& TemplateManager::getManager();
+				$templateMgr->register_function('plugin_url', array(&$this, 'smartyPluginUrl'));
+				$settingsForm = new PLNPluginSettingsForm($this);
+				$settingsForm->initData();
+				$settingsForm->display();
+				break;
+			case 'save':
+				$settingsForm = new PLNPluginSettingsForm($this);
+				$settingsForm->readInputData();
+				if ($settingsForm->validate()) {
+					$settingsForm->execute();
+					$message = NOTIFICATION_TYPE_SUCCESS;
+					$messageParams = array('contents' => __('plugins.generic.pln.settings.saved'));
+					return false;
+				} else {
+					$settingsForm->display();
+				}
+				break;
+			default:
+				return $returner;
+		}
+		return true;
 	}
-  
+	
 	/**
-	 * Hook callback: add data citation to submissions, published articles, and
-	 * reading tools.
-	 */
-	function handleTemplateDisplay($hookName, $args) {
-
+	* @see GenericPlugin::getManagementVerbs()
+	*/
+	function getManagementVerbs() {
+		$verbs = parent::getManagementVerbs();
+		if ($this->getEnabled()) {
+			$verbs[] = array('settings', __('manager.plugins.settings'));
+		}
+		return $verbs;
 	}
   
 	/**

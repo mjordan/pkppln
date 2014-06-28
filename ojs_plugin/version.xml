@@ -13,8 +13,9 @@
 <version>
 	<application>pln</application>
 	<type>plugins.generic</type>
-	<release>0.1.0.0</release>
-	<date>2014-07-01</date>
+	<release>1.0.0.4</release>
+	<date>2014-06-01</date>
 	<lazy-load>1</lazy-load>
+	<sitewide>0</sitewide>
 	<class>PLNPlugin</class>
 </version>

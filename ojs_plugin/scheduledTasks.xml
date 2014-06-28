@@ -20,8 +20,8 @@
 <!DOCTYPE scheduled_tasks SYSTEM "../../../lib/pkp/dtd/scheduledTasks.dtd">
 
 <scheduled_tasks>
-	<task class="plugins.generic.pln.classes.tasks.PLNPluginDepositor">
-		<descr>Deposit content with the PLN.</descr>
+	<task class="plugins.generic.pln.classes.tasks.PLNDepositor">
+		<descr>Deposit content with the PLN</descr>
 		<frequency hour="24"/>
 	</task>
 </scheduled_tasks>
