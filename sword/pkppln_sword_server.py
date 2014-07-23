@@ -6,7 +6,9 @@ Copyright (c) 2014 John Willinsky
 Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
+import sys
 import MySQLdb
+import MySQLdb.cursors
 import xml.etree.ElementTree as et
 from datetime import datetime
 import ConfigParser
@@ -32,9 +34,28 @@ def service_document():
     """
     Routing for retrieving the Service Document.
     """
-    obh = request.get_header('On-Behalf-Of')
-    return template('service_document', on_behalf_of=obh,
-        sword_server_base_url=sword_server_base_url)
+
+    obh = request.headers.get('On-Behalf-Of')
+    language = request.headers.get('Accept-Language', 'en-US')
+
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+        cur = con.cursor()
+        cur.execute("SELECT * FROM terms_of_use WHERE language = %s", language)
+    except MySQLdb.Error, e:
+        # print "Error %d: %s" % (e.args[0],e.args[1])
+        logging.exception(e)
+        sys.exit(1)
+    
+    if cur.rowcount:
+        terms_of_use = []
+        for row in cur:
+            terms_of_use.append(row)
+        return template('service_document', on_behalf_of=obh, terms=terms_of_use,
+            sword_server_base_url=sword_server_base_url)
+    else:
+        return HTTPResponse(status=404)
 
 @post('/api/sword/2.0/col-iri/<on_behalf_of>')
 def create_deposit(on_behalf_of):
@@ -89,9 +110,9 @@ def sword_statement(on_behalf_of, deposit_uuid):
         'disagreement': 'The PKP LOCKSS network is not in agreement on content checksums.',
         'agreement': 'The PKP LOCKSS network agrees internally on content checksums.'
     }
-    con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
-    with con:
         cur = con.cursor()
         cur.execute("SELECT deposit_url FROM deposits WHERE deposit_uuid = %s", deposit_uuid)
     except MySQLdb.Error, e:

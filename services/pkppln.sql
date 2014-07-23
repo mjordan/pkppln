@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 23, 2014 at 11:52 AM
--- Server version: 5.5.35-0ubuntu0.13.10.2-log
--- PHP Version: 5.5.3-1ubuntu2.3
+-- Generation Time: Jul 22, 2014 at 02:43 PM
+-- Server version: 5.5.37-0ubuntu0.13.10.1-log
+-- PHP Version: 5.5.3-1ubuntu2.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -76,6 +76,21 @@ CREATE TABLE IF NOT EXISTS `microservices` (
   `error` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=187 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `terms_of_use`
+--
+
+CREATE TABLE IF NOT EXISTS `terms_of_use` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `key` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+  `text` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
