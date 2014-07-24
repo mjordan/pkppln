@@ -14,7 +14,8 @@ from datetime import datetime
 import ConfigParser
 from bottle import run, request, template, get, post, put, HTTPResponse
 
-sys.path.append("/opt/pkppln")
+# sys.path.append("/opt/pkppln")
+sys.path.append("/home/mark/Documents/apache_thinkpad/pkppln")
 
 import staging_server_common
 
@@ -23,7 +24,8 @@ import logging
 logging.basicConfig(filename='log.txt', level=logging.INFO, format=logging.BASIC_FORMAT)
 
 config = ConfigParser.ConfigParser()
-config.read('/opt/pkppln/config_dev.cfg')
+# config.read('/opt/pkppln/config_dev.cfg')
+config.read('../config_dev.cfg')
 
 # Define variables.
 sword_server_base_url = config.get('URLs', 'sword_server_base_url')
@@ -46,7 +48,6 @@ def service_document():
         cur = con.cursor()
         cur.execute("SELECT * FROM terms_of_use WHERE language = %s", language)
     except MySQLdb.Error, e:
-        # print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
         sys.exit(1)
     
@@ -68,7 +69,7 @@ def create_deposit(on_behalf_of):
     tree = et.parse(request.body)
     root = tree.getroot()
     title = root.find('entry:title', namespaces=namespaces)
-    issn = root.findall('pkp:issn', namespaces=namespaces)
+    issn = root.find('pkp:issn', namespaces=namespaces)
     email = root.find('entry:email', namespaces=namespaces)
     id = root.find('entry:id', namespaces=namespaces)
     deposit_uuid = id.text.replace('urn:uuid:', '')
@@ -76,7 +77,6 @@ def create_deposit(on_behalf_of):
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)
     contents = root.findall('pkp:content', namespaces=namespaces)
-    print contents
     for content in contents:
         size = content.get('size')
         checksum_type = content.get('checksumType')
@@ -84,9 +84,9 @@ def create_deposit(on_behalf_of):
         deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, deposit_details, on_behalf_of,
             checksum_value, content.text, size, 'depositedByJournal', 'success')
     if deposits_insert_success:
+        journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, email.text, deposit_uuid)
         return template('deposit_receipt', on_behalf_of=on_behalf_of, deposit_uuid=deposit_uuid,
             journal_title=title.text, sword_server_base_url=sword_server_base_url)
-        journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title, issn, email.text, deposit_uuid)
     else:
         # What error code do we use if the deposit failed? Also, if the database insert failed,
         # how do we record this in the database?
@@ -100,6 +100,7 @@ def sword_statement(on_behalf_of, deposit_uuid):
     SWORD state terms applicable to a deposit to the PKP PLN (taken from the
         LOCKSS-O-Matic SWORD API state terms but with modified descriptions):
         failed: The deposit to the PKP PLN staging server (or LOCKSS-O-Matic) has failed.
+        in_progress: The deposit to the staging server has succeeded but the deposit has not yet been registered with the PLN.
         disagreement: The PKP LOCKSS network is not in agreement on content checksums.
         agreement: The PKP LOCKSS network agrees internally on content checksums.
             
@@ -118,7 +119,6 @@ def sword_statement(on_behalf_of, deposit_uuid):
         cur = con.cursor()
         cur.execute("SELECT deposit_url FROM deposits WHERE deposit_uuid = %s", deposit_uuid)
     except MySQLdb.Error, e:
-        # print "Error %d: %s" % (e.args[0],e.args[1])
         logging.exception(e)
         sys.exit(1)
     
@@ -152,7 +152,7 @@ def edit_deposit(on_behalf_of, deposit_uuid):
         size = content.get('size')
         checksum_type = content.get('checksumType')
         checksum_value = content.get('checksumValue')
-        insert_success = insert_deposit('edit', email.text, deposit_uuid, on_behalf_of, checksum_value, content.text, size, 'depositedByJournal', 'success')      
+        insert_success = staging_server_common.insert_deposit('edit', email.text, deposit_uuid, on_behalf_of, checksum_value, content.text, size, 'depositedByJournal', 'success')      
     if insert_success:
         return HTTPResponse(status=201)
     else:
