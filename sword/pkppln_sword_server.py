@@ -14,6 +14,8 @@ from datetime import datetime
 import ConfigParser
 from bottle import run, request, template, get, post, put, HTTPResponse
 
+sys.path.append("/opt/pkppln")
+
 import staging_server_common
 
 # For debugging during development.
@@ -21,7 +23,7 @@ import logging
 logging.basicConfig(filename='log.txt', level=logging.INFO, format=logging.BASIC_FORMAT)
 
 config = ConfigParser.ConfigParser()
-config.read('../config_dev.cfg')
+config.read('/opt/pkppln/config_dev.cfg')
 
 # Define variables.
 sword_server_base_url = config.get('URLs', 'sword_server_base_url')
@@ -159,4 +161,4 @@ def edit_deposit(on_behalf_of, deposit_uuid):
         return HTTPResponse(status=201)
 
 # Run Bottle's built-in development web server.
-run(host='localhost', port=9999)
+run(host=config.get('URLs', 'sword_server_host'), port=config.get('URLs', 'sword_server_port'))
