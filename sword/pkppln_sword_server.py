@@ -81,7 +81,7 @@ def create_deposit(on_behalf_of):
         size = content.get('size')
         checksum_type = content.get('checksumType')
         checksum_value = content.get('checksumValue')
-        deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, deposit_details, on_behalf_of,
+        deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, deposit_details.text, on_behalf_of,
             checksum_value, content.text, size, 'depositedByJournal', 'success')
     if deposits_insert_success:
         journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, email.text, deposit_uuid)
