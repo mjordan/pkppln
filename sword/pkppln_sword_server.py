@@ -73,7 +73,10 @@ def create_deposit(on_behalf_of):
     email = root.find('entry:email', namespaces=namespaces)
     id = root.find('entry:id', namespaces=namespaces)
     deposit_uuid = id.text.replace('urn:uuid:', '')
-    deposit_details = root.find('pkp:details', namespaces=namespaces)
+    deposit_volume = root.find('pkp:volume', namespaces=namespaces)
+    deposit_issue = root.find('pkp:issue', namespaces=namespaces)
+    deposit_pubdate = root.find('pkp:pubdate', namespaces=namespaces)
+
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)
     contents = root.findall('pkp:content', namespaces=namespaces)
@@ -81,8 +84,8 @@ def create_deposit(on_behalf_of):
         size = content.get('size')
         checksum_type = content.get('checksumType')
         checksum_value = content.get('checksumValue')
-        deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, deposit_details.text, on_behalf_of,
-            checksum_value, content.text, size, 'depositedByJournal', 'success')
+        deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, deposit_volume.text, deposit_issue.text,
+            deposit_pubdate.text, on_behalf_of, checksum_value, content.text, size, 'depositedByJournal', 'success')
     if deposits_insert_success:
         journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, email.text, deposit_uuid)
         return template('deposit_receipt', on_behalf_of=on_behalf_of, deposit_uuid=deposit_uuid,

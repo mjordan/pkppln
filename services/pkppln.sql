@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 22, 2014 at 02:43 PM
+-- Generation Time: Aug 05, 2014 at 03:46 PM
 -- Server version: 5.5.37-0ubuntu0.13.10.1-log
 -- PHP Version: 5.5.3-1ubuntu2.6
 
@@ -30,9 +30,11 @@ CREATE TABLE IF NOT EXISTS `deposits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `action` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_details` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `deposit_volume` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `deposit_issue` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `deposit_pubdate` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `journal_uuid` varchar(38) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `journal_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `size` int(11) NOT NULL,
@@ -41,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `deposits` (
   `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `deposited_lom` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=58 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=69 ;
 
 -- --------------------------------------------------------
 
@@ -58,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `journals` (
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -90,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `terms_of_use` (
   `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `text` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=3 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
