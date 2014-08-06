@@ -85,7 +85,7 @@ def create_deposit(on_behalf_of):
         issue = content.get('issue')
         pubdate = content.get('pubdate')
  
-        deposits_insert_success = staging_server_common.insert_deposit('edit', deposit_uuid, volume, issue,
+        deposits_insert_success = staging_server_common.insert_deposit('add', deposit_uuid, volume, issue,
             pubdate, on_behalf_of, checksum_value, content.text, size, 'depositedByJournal', 'success')
     if deposits_insert_success:
         journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, email.text, deposit_uuid)
