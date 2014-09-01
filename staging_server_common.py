@@ -16,7 +16,7 @@ import MySQLdb
 import MySQLdb.cursors
 
 config = ConfigParser.ConfigParser()
-config.read('/opt/pkppln/config_dev.cfg')
+config.read('/home/cmacdonald/pkppln/config.cfg')
 # config.read('/home/mark/Documents/apache_thinkpad/pkppln/config_dev.cfg')
 
 logger = logging.getLogger()
@@ -53,13 +53,13 @@ def get_deposits(processing_state):
             deposits.append(row)
         return deposits
 
-def insert_deposit(action, deposit_uuid, volume, issue, pubdate, on_behalf_of, checksum_value, url, size, processing_state, outcome):
+def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue, deposit_pubdate, on_behalf_of, checksum_value, url, size, processing_state, outcome):
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
         cur.execute("INSERT INTO deposits " +
-            "(action, deposit_uuid, volume, issue, pubdate, date_deposited, journal_uuid, \
+            "(action, deposit_uuid, deposit_volume, deposit_issue, deposit_pubdate, date_deposited, journal_uuid, \
                 sha1_value, deposit_url, size, processing_state, outcome, pln_state) " +
             "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (action, deposit_uuid, deposit_volume, deposit_issue,
                 deposit_pubdate, datetime.now(), on_behalf_of, checksum_value, url, size, processing_state, outcome, 'in_progress'))
