@@ -6,6 +6,7 @@
     <sword:version>2.0</sword:version>
     <sword:maxUploadSize>1000</sword:maxUploadSize>
     <pkp:uploadChecksumType>SHA-1</pkp:uploadChecksumType>
+    <pkp:pln_accepting>{{accepting}}</pkp:pln_accepting>
     <pkp:terms_of_use>
         % for term in terms:
         <pkp:{{term[2]}} updated="{{term[1]}}">{{term[4]}}</pkp:{{term[2]}}>

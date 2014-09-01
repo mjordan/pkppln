@@ -50,12 +50,14 @@ def service_document():
     except MySQLdb.Error, e:
         logging.exception(e)
         sys.exit(1)
+
+    accepting = config.get('Deposits', 'pln_accept_deposits')
     
     if cur.rowcount:
         terms_of_use = []
         for row in cur:
             terms_of_use.append(row)
-        return template('service_document', on_behalf_of=obh, terms=terms_of_use,
+        return template('service_document', accepting=accepting, on_behalf_of=obh, terms=terms_of_use,
             sword_server_base_url=sword_server_base_url)
     else:
         return HTTPResponse(status=404)
