@@ -16,8 +16,7 @@ import MySQLdb
 import MySQLdb.cursors
 
 config = ConfigParser.ConfigParser()
-config.read('/home/cmacdonald/pkppln/config.cfg')
-# config.read('/home/mark/Documents/apache_thinkpad/pkppln/config_dev.cfg')
+config.read('/opt/pkppln/config_dev.cfg')
 
 logger = logging.getLogger()
 # Create error file handler and set level to error.
@@ -75,8 +74,8 @@ def insert_journal(journal_uuid, title, issn, email, deposit_uuid):
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
         cur.execute("INSERT INTO journals " +
-            "(journal_uuid, title, issn, contact_email, deposit_uuid, date_deposited) " +
-            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, deposit_uuid, datetime.now()))
+            "(journal_uuid, title, issn, contact_email, accept_deposits, deposit_uuid, date_deposited) " +
+            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, config.get('Deposits', 'journal_accept_deposits_default'), deposit_uuid, datetime.now()))
         con.commit()
         if cur.rowcount == 1:
             return True

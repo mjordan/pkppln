@@ -1,6 +1,6 @@
 -- MySQL dump 10.14  Distrib 5.5.37-MariaDB, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: pkppln
+-- Host: localhost    Database: pkppln
 -- ------------------------------------------------------
 -- Server version	5.5.37-MariaDB
 
@@ -55,6 +55,7 @@ CREATE TABLE `journals` (
   `title` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `issn` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `accept_deposits` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
@@ -94,7 +95,7 @@ CREATE TABLE `terms_of_use` (
   `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `text` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -106,4 +107,4 @@ CREATE TABLE `terms_of_use` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-08-08  7:12:59
+-- Dump completed on 2014-09-01 20:11:05
