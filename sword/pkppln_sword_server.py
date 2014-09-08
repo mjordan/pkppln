@@ -51,24 +51,8 @@ def service_document():
         logging.exception(e)
         sys.exit(1)
 
-    # Get the SWORD-server level value of accepting_deposits.
-    accepting = config.get('Deposits', 'pln_accept_deposits')
-    # Then override it at the journal level. If there are no rows in the journals table for this
-    # journal (i.e., the journal has not yet made a deposit request), use the server-level value
-    # of 'Yes'. Note: Service document requests do not add rows to the journals table; entries are
-    # added only on deposit creation requests, in which case, the journal-level value defined in
-    # the config variable journal_accept_deposits_default is used.
-    if accepting == 'Yes':
-        try:
-            accept_deposits_cur = con.cursor()
-            # The journals table contains multiple rows for each journal, so we get the most recent one.
-            accept_deposits_cur.execute("SELECT accept_deposits FROM journals WHERE journal_uuid = %s ORDER BY date_deposited DESC LIMIT 1", obh)
-            accept_deposits_row = accept_deposits_cur.fetchone()
-            if accept_deposits_cur.rowcount:
-                accepting = accept_deposits_row[-1]
-        except MySQLdb.Error, e:
-            logging.exception(e)
-            sys.exit(1)
+    # Get the 'accepting deposits' value.
+    accepting = staging_server_common.check_access(obh) 
     
     if terms_of_use_cur.rowcount:
         terms_of_use = []

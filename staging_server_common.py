@@ -34,6 +34,24 @@ smtp_handler = logging.handlers.SMTPHandler(
 smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
+def check_access(uuid):
+    # whitelist.txt and blacklist.txt must contain only UUIDs, no comments, etc.
+
+    # Get the SWORD-server level value of accepting_deposits.
+    accepting = config.get('Deposits', 'pln_accept_deposits')
+    if accepting == 'No':
+        return 'No'
+
+    whitelist = [line.strip() for line in open("whitelist.txt")]
+    blacklist = [line.strip() for line in open("blacklist.txt")]
+
+    # 'Yes' or 'No' gets inserted into the <pkp:pln_accepting> element in the
+    # service document; the create and update deposit calls also check.
+    if (uuid in whitelist or whitelist[0] == 'all') and uuid not in blacklist:
+        return 'Yes'
+    else:
+        return 'No'
+
 def get_deposits(processing_state):
     # Get the deposits that have the indicated processing state value
     # and return them to the microservice for processing.
@@ -74,8 +92,8 @@ def insert_journal(journal_uuid, title, issn, email, deposit_uuid):
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
         cur.execute("INSERT INTO journals " +
-            "(journal_uuid, title, issn, contact_email, accept_deposits, deposit_uuid, date_deposited) " +
-            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, config.get('Deposits', 'journal_accept_deposits_default'), deposit_uuid, datetime.now()))
+            "(journal_uuid, title, issn, contact_email, deposit_uuid, date_deposited) " +
+            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, deposit_uuid, datetime.now()))
         con.commit()
         if cur.rowcount == 1:
             return True
