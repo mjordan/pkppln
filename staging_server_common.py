@@ -42,8 +42,8 @@ def check_access(uuid):
     if accepting == 'No':
         return 'No'
 
-    whitelist = [line.strip() for line in open("whitelist.txt")]
-    blacklist = [line.strip() for line in open("blacklist.txt")]
+    whitelist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_whitelist'))]
+    blacklist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_blacklist'))]
 
     # 'Yes' or 'No' gets inserted into the <pkp:pln_accepting> element in the
     # service document; the create and update deposit calls also check.
