@@ -46,9 +46,10 @@ def service_document():
     Routing for retrieving the Service Document.
     """
     obh = request.headers.get('On-Behalf-Of')
+    journal_url = request.headers.get('Journal-URL')
     language = request.headers.get('Accept-Language', 'en-US')
 
-    request_message = [request.get('REMOTE_ADDR'), obh]
+    request_message = [request.get('REMOTE_ADDR'), obh, journal_url]
     request_logger.info("\t".join(request_message))
 
     try:
