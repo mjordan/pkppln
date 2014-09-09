@@ -35,7 +35,7 @@ smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
 def check_access(uuid):
-    # whitelist.txt and blacklist.txt must contain only UUIDs, no comments, etc.
+    # whitelist.txt and blacklist.txt must contain only UUIDs.
 
     # Get the SWORD-server level value of accepting_deposits.
     accepting = config.get('Deposits', 'pln_accept_deposits')

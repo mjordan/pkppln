@@ -12,10 +12,10 @@ import MySQLdb.cursors
 import xml.etree.ElementTree as et
 from datetime import datetime
 import ConfigParser
+import logging
 from bottle import run, request, template, get, post, put, HTTPResponse
 
 sys.path.append("/opt/pkppln")
-# sys.path.append("/home/mark/Documents/apache_thinkpad/pkppln")
 
 import staging_server_common
 
@@ -23,9 +23,16 @@ config = ConfigParser.ConfigParser()
 config.read('/opt/pkppln/config_dev.cfg')
 
 # For debugging during development.
-import logging
-# logging.basicConfig(filename='log.txt', level=logging.INFO, format=logging.BASIC_FORMAT)
 logging.basicConfig(filename=config.get('Paths', 'error_log'), level=logging.INFO, format=logging.BASIC_FORMAT)
+
+# Configure request logger.
+request_logger = logging.getLogger('pkppln_requests')
+request_logger.setLevel(logging.INFO)
+request_logger_fh = logging.FileHandler(config.get('Paths', 'request_log'))
+request_logger_fh.setLevel(logging.INFO)
+request_logger_formatter = logging.Formatter('%(asctime)s' + "\t" +  '%(message)s')
+request_logger_fh.setFormatter(request_logger_formatter)
+request_logger.addHandler(request_logger_fh)
 
 # Define variables.
 sword_server_base_url = config.get('URLs', 'sword_server_base_url')
@@ -38,9 +45,11 @@ def service_document():
     """
     Routing for retrieving the Service Document.
     """
-
     obh = request.headers.get('On-Behalf-Of')
     language = request.headers.get('Accept-Language', 'en-US')
+
+    request_message = [request.get('REMOTE_ADDR'), obh]
+    request_logger.info("\t".join(request_message))
 
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
