@@ -86,14 +86,14 @@ def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue, deposit_
         logging.exception(e)
         sys.exit(1)
 
-def insert_journal(journal_uuid, title, issn, email, deposit_uuid):
+def insert_journal(journal_uuid, title, issn, journal_url, email, deposit_uuid):
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
         cur.execute("INSERT INTO journals " +
-            "(journal_uuid, title, issn, contact_email, deposit_uuid, date_deposited) " +
-            "VALUES(%s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, email, deposit_uuid, datetime.now()))
+            "(journal_uuid, title, issn, journal_url, contact_email, deposit_uuid, date_deposited) " +
+            "VALUES(%s, %s, %s, %s, %s, %s, %s)", (journal_uuid, title, issn, journal_url, email, deposit_uuid, datetime.now()))
         con.commit()
         if cur.rowcount == 1:
             return True

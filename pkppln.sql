@@ -54,6 +54,7 @@ CREATE TABLE `journals` (
   `journal_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `title` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `issn` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `journal_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',

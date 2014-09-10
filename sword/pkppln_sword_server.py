@@ -83,6 +83,7 @@ def create_deposit(on_behalf_of):
     root = tree.getroot()
     title = root.find('entry:title', namespaces=namespaces)
     issn = root.find('pkp:issn', namespaces=namespaces)
+    journal_url = root.find('pkp:journal_url', namespaces=namespaces)
     email = root.find('entry:email', namespaces=namespaces)
     id = root.find('entry:id', namespaces=namespaces)
     deposit_uuid = id.text.replace('urn:uuid:', '')
@@ -101,7 +102,7 @@ def create_deposit(on_behalf_of):
         deposits_insert_success = staging_server_common.insert_deposit('add', deposit_uuid, volume, issue,
             pubdate, on_behalf_of, checksum_value, content.text, size, 'depositedByJournal', 'success')
     if deposits_insert_success:
-        journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, email.text, deposit_uuid)
+        journals_insert_success = staging_server_common.insert_journal(on_behalf_of, title.text, issn.text, journal_url.text, email.text, deposit_uuid)
         return template('deposit_receipt', on_behalf_of=on_behalf_of, deposit_uuid=deposit_uuid,
             journal_title=title.text, sword_server_base_url=sword_server_base_url)
     else:
