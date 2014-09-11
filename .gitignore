@@ -1,3 +1,5 @@
 config_dev.cfg
+whitelist.txt
+blacklist.txt
 *.pyc
 .DS_Store
