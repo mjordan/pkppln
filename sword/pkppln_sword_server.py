@@ -56,7 +56,8 @@ def service_document():
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         terms_of_use_cur = con.cursor()
-        terms_of_use_cur.execute("SELECT * FROM terms_of_use WHERE language = %s", language)
+        # terms_of_use_cur.execute("SELECT * FROM terms_of_use WHERE language = %s", language)
+        terms_of_use_cur.execute("SELECT * FROM terms_of_use WHERE language = %s and last_updated = (SELECT max(last_updated) FROM terms_of_use)", language)
     except MySQLdb.Error, e:
         logging.exception(e)
         sys.exit(1)
