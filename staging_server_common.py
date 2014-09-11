@@ -35,15 +35,25 @@ smtp_handler.setLevel(logging.ERROR)
 logger.addHandler(smtp_handler)
 
 def check_access(uuid):
-    # whitelist.txt and blacklist.txt must contain only UUIDs.
+    # whitelist.txt and blacklist.txt contain journal UUIDs to allow or block,
+    # respectively, one UUID per line. If the files don't exist, we define
+    # sensible default values for the lists.
 
-    # Get the SWORD-server level value of accepting_deposits.
+    # Get the SWORD-server level value of accepting_deposits. If this is set to 'No',
+    # don't bother checking the white or black lists.
     accepting = config.get('Deposits', 'pln_accept_deposits')
     if accepting == 'No':
         return 'No'
 
-    whitelist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_whitelist'))]
-    blacklist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_blacklist'))]
+    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_whitelist')):
+        whitelist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_whitelist'))]
+    else:
+        whitelist = ['all']
+
+    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_blacklist')):
+        blacklist = [line.strip() for line in open(config.get('Deposits', 'pln_accept_deposits_blacklist'))]
+    else:
+        blacklist = []
 
     # 'Yes' or 'No' gets inserted into the <pkp:pln_accepting> element in the
     # service document; the create and update deposit calls also check.
