@@ -10,6 +10,11 @@ Distributed under the GNU GPL v3. For full terms see the file COPYING.
 import os
 import subprocess
 import re
+import MySQLdb
+import MySQLdb.cursors
+import xml.etree.ElementTree as et
+from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import SubElement
 import ConfigParser
 from datetime import datetime
 
@@ -25,6 +30,29 @@ microservice_state = 'contentVerified'
 # The name of the directory under the processing root directory. One of
 # 'havested', 'bagValidated', or 'reserialized'.
 input_directory = 'bagValidated'
+
+def get_journal_info(deposit_uuid):
+    """
+    Query information about the journal that produced this deposit and wrap it
+    in XML to include in the Bag.
+    """
+    con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+        config.get('Database', 'db_password'), config.get('Database', 'db_name'),
+        cursorclass=MySQLdb.cursors.DictCursor)
+    cur = con.cursor()
+    cur.execute("SELECT journal_uuid, title, issn, journal_url, contact_email, date_deposited FROM journals WHERE deposit_uuid = %s", deposit_uuid)
+
+    if cur.rowcount:
+        et.register_namespace('pkp', 'http://pkp.sfu.ca/SWORD')
+        journal = Element('{http://pkp.sfu.ca/SWORD}journal')
+        for row in cur:
+            for key, value in row.items():
+                # To avoid dumbass 'TypeError: cannot serialize datetime' errors.
+                if key == 'date_deposited':
+                    value = value.strftime('%Y-%m-%d')
+                foo = SubElement(journal, 'pkp:' + key)
+                foo.text = value
+        return et.tostring(journal)
 
 def validate_export(deposit):
     started_on = datetime.now()
@@ -59,6 +87,16 @@ def validate_export(deposit):
         except subprocess.CalledProcessError, e:
             error = e.output
             outcome = 'failure'
+    except Exception as e:
+        error = error + ' / ' + e.message 
+        outcome = 'failure'
+
+    try:
+        journal_info_xml = get_journal_info(deposit_uuid)
+        path_to_journal_info_file = os.path.join(path_to_unserialized_deposit, 'journal_info.xml')
+        journal_info_file = open(path_to_journal_info_file, 'w')
+        journal_info_file.write(journal_info_xml)
+        journal_info_file.close()
     except Exception as e:
         error = error + ' / ' + e.message 
         outcome = 'failure'
