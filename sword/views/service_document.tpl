@@ -14,7 +14,7 @@
     % end
     <pkp:terms_of_use>
         % for term in terms:
-        <pkp:{{term[2]}} updated="{{term[1]}}">{{term[4]}}</pkp:{{term[2]}}>
+        <pkp:{{term[3]}} updated="{{term[2]}}">{{term[5]}}</pkp:{{term[3]}}>
         % end
     </pkp:terms_of_use>
     <workspace>
