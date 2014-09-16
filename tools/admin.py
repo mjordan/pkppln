@@ -1,3 +1,10 @@
+"""
+Simple CRUD tool for PKP PLN terms of use.
+
+Copyright (c) 2014 Simon Fraser University Library
+Copyright (c) 2014 John Willinsky
+Distributed under the GNU GPL v3. For full terms see the file COPYING.
+"""
 import sys
 import MySQLdb
 import MySQLdb.cursors
@@ -9,6 +16,7 @@ config.read('/home/mark/Documents/apache_thinkpad/pkppln/config_dev.cfg')
 
 @route('/list_terms')
 def list_terms_of_use():
+    # @todo: add filters for locale, current version, local key
     language = 'en-US'
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
@@ -27,8 +35,20 @@ def list_terms_of_use():
     else:
         return template('messages', section='no_terms', message='Sorry, there are no terms of use.')
 
+@route('/add_term/:id')
+def edit_term_of_use(id):
+    pass
+
 @route('/edit_term/:id')
 def edit_term_of_use(id):
+    """
+    We need to keep all versions of each term of use. The current_version field indicates whether
+    a term is to appear in the SWORD Service Document (i.e., if its value is 'Yes'). In order to
+    keep all vesions, we don't perform an UPDATE SQL query, we always perfom INSERTs, using the
+    using the key and language values from the source term row and addding new id, current_version,
+    last_updates, and text values. The current_version value for the source terms row will also need
+    to be set to 'No'.
+    """
     pass
 
 @route('/delete_term/:id')
