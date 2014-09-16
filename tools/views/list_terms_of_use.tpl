@@ -28,14 +28,31 @@
     %for col in row:
     <td>{{col}}</td>
     %end
+    %if row[0] != 'ID':
+    <td><a href="/edit_term/{{row[0]}}">Edit</a> / <a class="confirm-delete" href="/delete_term/{{row[0]}}">Delete</a></td>
+    %end
     </tr>
     %end
     </table>
     </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Simple confirm delete function. -->
+    <script>
+    $( document ).ready(function() {
+        $('.confirm-delete').click(function(c) {
+	    c.preventDefault();
+	    thisHref = $(this).attr('href');
+	    if(confirm('Are you sure you want to delete this item?')) {
+		window.location = thisHref;
+	    }
+        });
+    });
+    </script>
+
   </body>
 </html>

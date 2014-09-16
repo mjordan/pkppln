@@ -18,7 +18,21 @@ def list_terms_of_use():
     except MySQLdb.Error, e:
         sys.exit(1)
 
-    return template('list_terms_of_use', rows=result)
+    if len(result):
+        rows = list(result)
+        headings = ('ID', 'Last updated', 'Key', 'Locale', 'Text')
+        rows.insert(0, headings)
+        return template('list_terms_of_use', rows=rows)
+    else:
+        return template('no_terms')
+
+@route('/edit_term:id')
+def edit_term_of_use(id):
+    pass
+
+@route('/delete_term:id')
+def delete_term_of_use(id):
+    pass
 
 # Routes for static files - CSS, Javascript, etc.
 @route('/css/<filename:path>')
