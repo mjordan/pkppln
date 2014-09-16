@@ -14,14 +14,14 @@ def list_terms_of_use():
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
-        cur.execute("SELECT * FROM terms_of_use WHERE language = %s and last_updated = (SELECT max(last_updated) FROM terms_of_use)", language)
+        cur.execute("SELECT * FROM terms_of_use WHERE language = %s AND current_version = 'Yes'", language)
         result = cur.fetchall()
     except MySQLdb.Error, e:
         sys.exit(1)
 
     if len(result):
         rows = list(result)
-        headings = ('ID', 'Last updated', 'Key', 'Locale', 'Text')
+        headings = ('ID', 'Current version', 'Last updated', 'Key', 'Locale', 'Text', 'Actions')
         rows.insert(0, headings)
         return template('list_terms_of_use', rows=rows)
     else:

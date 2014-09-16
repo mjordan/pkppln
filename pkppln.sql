@@ -90,6 +90,7 @@ DROP TABLE IF EXISTS `terms_of_use`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `terms_of_use` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `current_version` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `key` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
