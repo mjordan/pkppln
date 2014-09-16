@@ -1,6 +1,7 @@
+import sys
 import MySQLdb
 import MySQLdb.cursors
-from bottle import route, run, template, debug, static_file
+from bottle import route, run, template, debug, static_file, redirect
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
@@ -12,9 +13,9 @@ def list_terms_of_use():
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
-        terms_of_use_cur = con.cursor()
-        terms_of_use_cur.execute("SELECT * FROM terms_of_use WHERE language = %s and last_updated = (SELECT max(last_updated) FROM terms_of_use)", language)
-        result = terms_of_use_cur.fetchall()
+        cur = con.cursor()
+        cur.execute("SELECT * FROM terms_of_use WHERE language = %s and last_updated = (SELECT max(last_updated) FROM terms_of_use)", language)
+        result = cur.fetchall()
     except MySQLdb.Error, e:
         sys.exit(1)
 
@@ -24,15 +25,28 @@ def list_terms_of_use():
         rows.insert(0, headings)
         return template('list_terms_of_use', rows=rows)
     else:
-        return template('no_terms')
+        return template('messages', section='no_terms', message='Sorry, there are no terms of use.')
 
-@route('/edit_term:id')
+@route('/edit_term/:id')
 def edit_term_of_use(id):
     pass
 
-@route('/delete_term:id')
+@route('/delete_term/:id')
 def delete_term_of_use(id):
-    pass
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+        cur = con.cursor()
+        cur.execute("DELETE FROM terms_of_use WHERE id = %s", id)
+        rows_affected=cur.rowcount
+        con.commit()
+    except MySQLdb.Error, e:
+        sys.exit(1)
+
+    if rows_affected == 1:
+        return template('messages', section='term_deleted', message='Term deleted.')
+    else:
+        return template('messages', section='term_not_deleted', message='Sorry, there was a problem deleting the term of use.')
 
 # Routes for static files - CSS, Javascript, etc.
 @route('/css/<filename:path>')
