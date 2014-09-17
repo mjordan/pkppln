@@ -5,18 +5,35 @@ Copyright (c) 2014 Simon Fraser University Library
 Copyright (c) 2014 John Willinsky
 Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
+
+# @todo: Add filters to routes as per http://bottlepy.org/docs/dev/routing.html.
+
 import sys
+import re
 import MySQLdb
 import MySQLdb.cursors
-from bottle import route, run, template, debug, static_file, redirect
+from bottle import route, run, template, debug, static_file, redirect, request
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
 config.read('/home/mark/Documents/apache_thinkpad/pkppln/config_dev.cfg')
 
+def get_term_details(id):
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'),
+            cursorclass=MySQLdb.cursors.DictCursor)
+        cur = con.cursor()
+        cur.execute("SELECT * FROM terms_of_use WHERE id = %s", id)
+        term = cur.fetchone()
+    except MySQLdb.Error, e:
+        sys.exit(1)
+
+    return term
+
 @route('/list_terms')
 def list_terms_of_use():
-    # @todo: add filters for locale, current version, local key
+    # @todo: Allow limiting to locale and key, possibly via links in the list.
     language = 'en-US'
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
@@ -29,15 +46,22 @@ def list_terms_of_use():
 
     if len(result):
         rows = list(result)
-        headings = ('ID', 'Current version', 'Last updated', 'Key', 'Locale', 'Text', 'Actions')
-        rows.insert(0, headings)
         return template('list_terms_of_use', rows=rows)
     else:
         return template('messages', section='no_terms', message='Sorry, there are no terms of use.')
 
 @route('/add_term/:id')
-def edit_term_of_use(id):
-    pass
+def add_term_of_use(id=''):
+    # If it's a brand-new term of use.
+    if id == 'new':
+        form_title = 'Add term of use'
+        term_values = {'language': '', 'key': '', 'text': ''}
+    # If it's a clone of an existing one.
+    else:
+        form_title = 'Clone term of use'
+        term_values = get_term_details(id)
+    disabled = ''
+    return template('crud_form', term_values=term_values, form_title=form_title, disabled=disabled)
 
 @route('/edit_term/:id')
 def edit_term_of_use(id):
@@ -49,7 +73,10 @@ def edit_term_of_use(id):
     last_updates, and text values. The current_version value for the source terms row will also need
     to be set to 'No'.
     """
-    pass
+    form_title = 'Edit term of use'
+    term_values = get_term_details(id)
+    disabled = 'disabled'
+    return template('crud_form', term_values=term_values, form_title=form_title, disabled=disabled)
 
 @route('/delete_term/:id')
 def delete_term_of_use(id):
