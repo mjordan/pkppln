@@ -23,24 +23,29 @@
     <h1>PKP PLN Terms of Use</h1>
     <h2>{{form_title}}</h2>
 
-    <form action="/login" method="post">
+    <form action="/insert_new_term" method="post">
+        % if defined('id'):
+        <div class="form-group">
+             <input type="hidden" name="id" value="{{id}}" />
+        </div>
+        % end
         <div class="form-group">
              <label for="language">Language</label>
-             <input name="language" type="text" class="form-control" id="language" value="{{term_values['language']}}" {{disabled}}/>
+             <input name="language" type="text" class="form-control" id="language" value="{{language}}" {{disabled}}/>
              % if len(disabled):
              <span class="help-block">You can't edit the language of the term.</span>
              % end
         </div>
         <div class="form-group">
              <label for="key">Locale string key</label>
-             <input name="key" type="text" size="20" class="form-control" id="key" value="{{term_values['key']}}" {{disabled}} />
+             <input name="key" type="text" size="20" class="form-control" id="key" value="{{key}}" {{disabled}} />
              % if len(disabled):
              <span class="help-block">You can't edit the locale string key of the term.</span>
              % end
         </div>
         <div class="form-group">
              <label for="text">Term text</label>
-             <textarea name="text" rows="5" class="form-control" id="key">{{term_values['text']}}</textarea>
+             <textarea name="text" rows="5" class="form-control" id="key">{{text}}</textarea>
              <span class="help-block">Enter the text of the term here.</span>
         </div>
         <div class="form-group">

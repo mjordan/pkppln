@@ -12,6 +12,7 @@ import sys
 import re
 import MySQLdb
 import MySQLdb.cursors
+from datetime import datetime
 from bottle import route, run, template, debug, static_file, redirect, request
 import ConfigParser
 
@@ -55,13 +56,13 @@ def add_term_of_use(id=''):
     # If it's a brand-new term of use.
     if id == 'new':
         form_title = 'Add term of use'
-        term_values = {'language': '', 'key': '', 'text': ''}
+        term_values = {'id': None, 'language': '', 'key': '', 'text': ''}
     # If it's a clone of an existing one.
     else:
         form_title = 'Clone term of use'
         term_values = get_term_details(id)
     disabled = ''
-    return template('crud_form', term_values=term_values, form_title=form_title, disabled=disabled)
+    return template('crud_form', form_title=form_title, disabled=disabled, **term_values)
 
 @route('/edit_term/:id')
 def edit_term_of_use(id):
@@ -75,8 +76,10 @@ def edit_term_of_use(id):
     """
     form_title = 'Edit term of use'
     term_values = get_term_details(id)
-    disabled = 'disabled'
-    return template('crud_form', term_values=term_values, form_title=form_title, disabled=disabled)
+    # @todo: disabled form elements (textfields anyway) have a value of None. Wha?
+    # disabled = 'disabled'
+    disabled = ''
+    return template('crud_form', form_title=form_title, disabled=disabled, **term_values)
 
 @route('/delete_term/:id')
 def delete_term_of_use(id):
@@ -91,9 +94,47 @@ def delete_term_of_use(id):
         sys.exit(1)
 
     if rows_affected == 1:
-        return template('messages', section='term_deleted', message='Term deleted.')
+        return template('messages', section='term_deleted', message='The term has been deleted.')
     else:
         return template('messages', section='term_not_deleted', message='Sorry, there was a problem deleting the term of use.')
+
+@route('/insert_new_term', method='POST')
+def insert_new_term_of_use():
+    """
+    We don't update rows in this application, we only add new ones.
+    If request.headers.get('Referer') contains 'add_term/\d+', it's a clone;
+    if it contains 'add_term/new', it's a new term; if it contains 'edit_term',
+    it's a 'edit' (a new term and we need to set the current_version of the source 
+    term to 'No').
+    """
+    language = request.forms.get('language').strip()
+    key = request.forms.get('key').strip()
+    text = request.forms.get('text').strip()
+    # id will be the string 'None' if it's a new term, and a string number if it's an existing term.
+    id = request.forms.get('id')
+    current_version = 'Yes'
+
+    # if re.findall(r"^[0-9]+$", id):
+        # print "OK, you have numbers"
+
+    try:
+        con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+            config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+        cur = con.cursor()
+        # MySQL allows 'key' as a column name, but MySQLdb pukes on it. Wrapping it in backticks makes it taste better.
+        cur.execute("INSERT INTO terms_of_use (current_version, last_updated, `key`, language, text) " +
+            "VALUES(%s, %s, %s, %s, %s)", (current_version, datetime.now(), key, language, text))
+        con.commit()
+        # 'None' the str, not None the value.
+        if id == 'None':
+            return template('messages', section='term_added', message='The term of use has been added.')
+        else:
+            return template('messages', section='term_updated', message='The term of use has been updated.')
+    except MySQLdb.Error, e:
+        print e
+        sys.exit(1)
+
+
 
 # Routes for static files - CSS, Javascript, etc.
 @route('/css/<filename:path>')
