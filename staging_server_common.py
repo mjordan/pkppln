@@ -16,7 +16,7 @@ import MySQLdb
 import MySQLdb.cursors
 
 config = ConfigParser.ConfigParser()
-config.read('/opt/pkppln/config_dev.cfg')
+config.read('/opt/pkppln/config.cfg')
 
 logger = logging.getLogger()
 # Create error file handler and set level to error.

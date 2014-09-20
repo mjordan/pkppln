@@ -1,4 +1,4 @@
-config_dev.cfg
+config.cfg
 whitelist.txt
 blacklist.txt
 tools/views/css/*

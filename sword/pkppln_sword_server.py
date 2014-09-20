@@ -20,7 +20,7 @@ sys.path.append("/opt/pkppln")
 import staging_server_common
 
 config = ConfigParser.ConfigParser()
-config.read('/opt/pkppln/config_dev.cfg')
+config.read('/opt/pkppln/config.cfg')
 
 # For debugging during development.
 logging.basicConfig(filename=config.get('Paths', 'error_log'), level=logging.INFO, format=logging.BASIC_FORMAT)
