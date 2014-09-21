@@ -67,7 +67,12 @@ def service_document():
     if terms_of_use_cur.rowcount:
         terms_of_use = []
         for row in terms_of_use_cur:
-            terms_of_use.append(row)
+            # Convert the term's text to unicode, stripping out any characters that are not
+            # legal UTF8 (like smart quotes).
+            term_row = list(row)
+            # Use the 'replace' error handling parameter so replaced characters are obvious.
+            term_row[5] = unicode(row[5], 'utf-8', 'replace')
+            terms_of_use.append(term_row)
         return template('service_document', accepting=accepting, on_behalf_of=obh, terms=terms_of_use,
             sword_server_base_url=sword_server_base_url)
     else:
