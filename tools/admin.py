@@ -27,6 +27,10 @@ def get_term_details(id):
         cur = con.cursor()
         cur.execute("SELECT * FROM terms_of_use WHERE id = %s", id)
         term = cur.fetchone()
+        # Replace all non-UTF8 characters with U+FFFD, which will be visible in the text as a question mark.
+        # We don't do this in insert/update since we can't be sure the incoming text is encoded in UTF8 (but
+        # we can assume it is coming out of MySQL encoded in UTF8).
+        term['text'] = unicode(term['text'], 'utf-8', 'replace')
     except MySQLdb.Error, e:
         sys.exit(1)
 
@@ -34,13 +38,11 @@ def get_term_details(id):
 
 @route('/list_terms')
 def list_terms_of_use():
-    # @todo: Allow limiting to locale and key, possibly via links in the list.
-    language = 'en-US'
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
             config.get('Database', 'db_password'), config.get('Database', 'db_name'))
         cur = con.cursor()
-        cur.execute("SELECT * FROM terms_of_use WHERE language = %s AND current_version = 'Yes'", language)
+        cur.execute("SELECT * FROM terms_of_use")
         result = cur.fetchall()
     except MySQLdb.Error, e:
         sys.exit(1)
@@ -114,8 +116,18 @@ def insert_new_term_of_use():
     id = request.forms.get('id')
     current_version = 'Yes'
 
-    # if re.findall(r"^[0-9]+$", id):
-        # print "OK, you have numbers"
+    # If we are 'editing' a term, we need to set the current_version value of the original term
+    # to 'No'.
+    if re.findall(r"^[0-9]+$", id):
+        try:
+            con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
+                config.get('Database', 'db_password'), config.get('Database', 'db_name'))
+            cur = con.cursor()
+            cur.execute("UPDATE terms_of_use SET current_version = 'No' WHERE id = %s", id)
+            con.commit()
+        except MySQLdb.Error, e:
+            print e
+            sys.exit(1)
 
     try:
         con = MySQLdb.connect(config.get('Database', 'db_host'), config.get('Database', 'db_user'),
