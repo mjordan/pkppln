@@ -13,7 +13,7 @@ import re
 import MySQLdb
 import MySQLdb.cursors
 from datetime import datetime
-from bottle import route, run, template, debug, static_file, redirect, request
+from bottle import route, run, template, debug, static_file, request
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
@@ -28,12 +28,9 @@ def get_term_details(id):
         cur.execute("SELECT * FROM terms_of_use WHERE id = %s", id)
         term = cur.fetchone()
         # Replace all non-UTF8 characters with U+FFFD, which will be visible in the text as a question mark.
-        # We don't do this in insert/update since we can't be sure the incoming text is encoded in UTF8 (but
-        # we can assume it is coming out of MySQL encoded in UTF8).
         term['text'] = unicode(term['text'], 'utf-8', 'replace')
     except MySQLdb.Error, e:
         sys.exit(1)
-
     return term
 
 @route('/list_terms')
@@ -63,8 +60,7 @@ def add_term_of_use(id=''):
     else:
         form_title = 'Clone term of use'
         term_values = get_term_details(id)
-    disabled = ''
-    return template('crud_form', form_title=form_title, disabled=disabled, **term_values)
+    return template('crud_form', form_title=form_title, **term_values)
 
 @route('/edit_term/:id')
 def edit_term_of_use(id):
@@ -78,10 +74,7 @@ def edit_term_of_use(id):
     """
     form_title = 'Edit term of use'
     term_values = get_term_details(id)
-    # @todo: disabled form elements (textfields anyway) have a value of None. Wha?
-    # disabled = 'disabled'
-    disabled = ''
-    return template('crud_form', form_title=form_title, disabled=disabled, **term_values)
+    return template('crud_form', form_title=form_title, **term_values)
 
 @route('/delete_term/:id')
 def delete_term_of_use(id):
@@ -112,6 +105,8 @@ def insert_new_term_of_use():
     language = request.forms.get('language').strip()
     key = request.forms.get('key').strip()
     text = request.forms.get('text').strip()
+    text = unicode(text, 'utf8', 'replace')
+    text = text.encode('utf8', 'replace')
     # id will be the string 'None' if it's a new term, and a string number if it's an existing term.
     id = request.forms.get('id')
     current_version = 'Yes'
@@ -145,8 +140,6 @@ def insert_new_term_of_use():
     except MySQLdb.Error, e:
         print e
         sys.exit(1)
-
-
 
 # Routes for static files - CSS, Javascript, etc.
 @route('/css/<filename:path>')

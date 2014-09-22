@@ -31,16 +31,12 @@
         % end
         <div class="form-group">
              <label for="language">Language</label>
-             <input name="language" type="text" class="form-control" id="language" value="{{language}}" {{disabled}}/>
-             % if len(disabled):
-             <span class="help-block">You can't edit the language of the term.</span>
+             <input name="language" type="text" class="form-control" id="language" value="{{language}}" />
              % end
         </div>
         <div class="form-group">
              <label for="key">Locale string key</label>
-             <input name="key" type="text" size="20" class="form-control" id="key" value="{{key}}" {{disabled}} />
-             % if len(disabled):
-             <span class="help-block">You can't edit the locale string key of the term.</span>
+             <input name="key" type="text" size="20" class="form-control" id="key" value="{{key}}" />
              % end
         </div>
         <div class="form-group">
