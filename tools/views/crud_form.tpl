@@ -31,13 +31,13 @@
         % end
         <div class="form-group">
              <label for="language">Language</label>
-             <input name="language" type="text" class="form-control" id="language" value="{{language}}" />
-             % end
+             <input name="language" type="text" maxlength="20" class="form-control" id="language" value="{{language}}" />
+             <span class="help-block">This value must be one of the <a target="_blank" href="http://pkp.sfu.ca/wiki/index.php/Translating_OxS#OJS_Languages">locale codes used by OJS</a>.</span>
         </div>
         <div class="form-group">
              <label for="key">Locale string key</label>
-             <input name="key" type="text" size="20" class="form-control" id="key" value="{{key}}" />
-             % end
+             <input name="key" type="text" maxlength="256" class="form-control" id="key" value="{{key}}" />
+             <span class="help-block">Enter the locale key here. It must start with 'plugins.generic.pln.terms_of_use.'</span>
         </div>
         <div class="form-group">
              <label for="text">Term text</label>
