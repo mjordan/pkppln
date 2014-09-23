@@ -144,7 +144,7 @@ def insert_new_term_of_use():
 # Routes for static files - CSS, Javascript, etc.
 @route('/css/<filename:path>')
 def server_static(filename):
-    return static_file(filename, root='/home/mark/Documents/apache_thinkpad/pkppln/tools/views/css')
+    return static_file(filename, root='/var/www/html/css')
 
 @route('/js/<filename:path>')
 def server_static(filename):
@@ -154,5 +154,3 @@ def server_static(filename):
 def server_static(filename):
     return static_file(filename, root='/home/mark/Documents/apache_thinkpad/pkppln/tools/views/fonts')
 
-# debug(True)
-# run(host='localhost', port=8080)

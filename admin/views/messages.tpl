@@ -42,7 +42,7 @@
     <div>{{message}}</div>
     % end
 
-    <p class="text-left"><a href="/list_terms">Return to list</a></p>
+    <p class="text-left"><a href="/admin/terms/list_terms">Return to list</a></p>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

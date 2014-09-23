@@ -41,6 +41,7 @@ namespaces = {'entry': 'http://www.w3.org/2005/Atom',
     'dcterms': 'http://purl.org/dc/terms/'}
 
 @get('/api/sword/2.0/sd-iri')
+# @get('/sd-iri')
 def service_document():
     """
     Routing for retrieving the Service Document.
