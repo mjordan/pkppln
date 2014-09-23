@@ -17,7 +17,7 @@ from bottle import route, run, template, debug, static_file, request
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
-config.read('/home/mark/Documents/apache_thinkpad/pkppln/config_dev.cfg')
+config.read('/opt/pkppln/config.cfg')
 
 def get_term_details(id):
     try:
@@ -154,5 +154,5 @@ def server_static(filename):
 def server_static(filename):
     return static_file(filename, root='/home/mark/Documents/apache_thinkpad/pkppln/tools/views/fonts')
 
-debug(True)
-run(host='localhost', port=8080)
+# debug(True)
+# run(host='localhost', port=8080)
