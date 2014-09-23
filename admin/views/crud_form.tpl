@@ -23,7 +23,7 @@
     <h1>PKP PLN Terms of Use</h1>
     <h2>{{form_title}}</h2>
 
-    <form action="/admin/terms/insert_new_term" method="post">
+    <form action="/admin/terms/insert_new_term" method="post" role="form">
         % if defined('id'):
         <div class="form-group">
              <input type="hidden" name="id" value="{{id}}" />

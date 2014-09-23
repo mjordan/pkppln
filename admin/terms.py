@@ -142,15 +142,15 @@ def insert_new_term_of_use():
         sys.exit(1)
 
 # Routes for static files - CSS, Javascript, etc.
-@route('/css/<filename:path>')
-def server_static(filename):
+# @route('/css/<filename:path>')
+def static_css(filename):
     return static_file(filename, root='/var/www/html/css')
 
-@route('/js/<filename:path>')
-def server_static(filename):
-    return static_file(filename, root='/home/mark/Documents/apache_thinkpad/pkppln/tools/views/js')
+# @route('/js/<filename:path>')
+def static_js(filename):
+    return static_file(filename, root='/var/www/html/js')
 
-@route('/fonts/<filename:path>')
-def server_static(filename):
-    return static_file(filename, root='/home/mark/Documents/apache_thinkpad/pkppln/tools/views/fonts')
+# @route('/fonts/<filename:path>')
+def static_fonts(filename):
+    return static_file(filename, root='/var/www/html/fonts')
 

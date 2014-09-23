@@ -22,8 +22,11 @@
     <h1>PKP PLN Terms of Use</h1>
     <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
 
-    <table class="table condensed">
-    <tr><th>ID</th><th>Current version</th><th>Last updated</th><th>Key</th><th>Locale</th><th>Text</th><th>Actions</th></tr>
+    <table class="table table-striped">
+    <thead>
+    <tr><td>ID</td><td>Current version</td><td>Last updated</td><td>Key</td><td>Locale</td><td>Text</td><td>Actions</td></tr>
+    </thead>
+    <tbody>
     %for row in rows:
     <tr>
     %for col in row:
@@ -34,6 +37,7 @@
     %end
     </tr>
     %end
+    </tbody>
     </table>
     <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
     </div>
