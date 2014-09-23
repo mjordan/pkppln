@@ -40,8 +40,8 @@ namespaces = {'entry': 'http://www.w3.org/2005/Atom',
     'pkp': 'http://pkp.sfu.ca/SWORD',
     'dcterms': 'http://purl.org/dc/terms/'}
 
-@get('/api/sword/2.0/sd-iri')
-# @get('/sd-iri')
+# @get('/api/sword/2.0/sd-iri')
+@get('/sd-iri')
 def service_document():
     """
     Routing for retrieving the Service Document.
@@ -79,7 +79,8 @@ def service_document():
     else:
         return HTTPResponse(status=404)
 
-@post('/api/sword/2.0/col-iri/<on_behalf_of>')
+# @post('/api/sword/2.0/col-iri/<on_behalf_of>')
+@post('/col-iri/<on_behalf_of>')
 def create_deposit(on_behalf_of):
     """
     Routing for creating a Deposit. On-Behalf-Of is
@@ -116,7 +117,8 @@ def create_deposit(on_behalf_of):
         # how do we record this in the database?
         return HTTPResponse(status=201)
 
-@get('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/state')
+# @get('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/state')
+@get('/cont-iri/<on_behalf_of>/<deposit_uuid>/state')
 def sword_statement(on_behalf_of, deposit_uuid):
     """
     Routing for retrieving a SWORD Statement.
@@ -156,7 +158,8 @@ def sword_statement(on_behalf_of, deposit_uuid):
     else:
         return HTTPResponse(status=404)
 
-@put('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/edit')
+# @put('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/edit')
+@put('/cont-iri/<on_behalf_of>/<deposit_uuid>/edit')
 def edit_deposit(on_behalf_of, deposit_uuid):
     """
     Routing for updating metadata about a Deposit.
