@@ -20,7 +20,7 @@
   <body>
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
-    <p class="text-right"><a href="/add_term/new">Add new term</a></p>
+    <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
 
     <table class="table condensed">
     <tr><th>ID</th><th>Current version</th><th>Last updated</th><th>Key</th><th>Locale</th><th>Text</th><th>Actions</th></tr>
@@ -30,12 +30,12 @@
     <td>{{col}}</td>
     %end
     %if row[0] != 'ID':
-    <td><a href="/edit_term/{{row[0]}}">Edit</a> / <a href="/add_term/{{row[0]}}">Clone</a> / <a class="confirm-delete" href="/delete_term/{{row[0]}}">Delete</a></td>
+    <td><a href="/admin/terms/edit_term/{{row[0]}}">Edit</a> / <a href="/admin/terms/add_term/{{row[0]}}">Clone</a> / <a class="confirm-delete" href="/admin/terms/delete_term/{{row[0]}}">Delete</a></td>
     %end
     </tr>
     %end
     </table>
-    <p class="text-right"><a href="/add_term/new">Add new term</a></p>
+    <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
     </div>
 
     <!-- jQuery -->

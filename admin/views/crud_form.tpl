@@ -23,7 +23,7 @@
     <h1>PKP PLN Terms of Use</h1>
     <h2>{{form_title}}</h2>
 
-    <form action="/insert_new_term" method="post">
+    <form action="/admin/terms/insert_new_term" method="post">
         % if defined('id'):
         <div class="form-group">
              <input type="hidden" name="id" value="{{id}}" />
@@ -48,7 +48,7 @@
             <button type="submit" class="btn btn-primary">Save</button>
         </div>
     </form>
-    <p class="text-left"><a href="/list_terms">Cancel / return to list</a></p>
+    <p class="text-left"><a href="/admin/terms/list_terms">Cancel / return to list</a></p>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
