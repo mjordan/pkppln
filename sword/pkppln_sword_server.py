@@ -46,9 +46,14 @@ def service_document():
     """
     Routing for retrieving the Service Document.
     """
-    obh = request.headers.get('On-Behalf-Of')
-    journal_url = request.headers.get('Journal-URL')
+    obh = request.headers.get('On-Behalf-Of', 'Missing from request')
+    journal_url = request.headers.get('Journal-URL', 'Missing from request')
     language = request.headers.get('Accept-Language', 'en-US')
+
+    if obh == 'Missing from request':
+        return HTTPResponse(status=400)
+    if journal_url == 'Missing from request':
+        return HTTPResponse(status=400)
 
     request_message = [request.get('REMOTE_ADDR'), obh, journal_url]
     request_logger.info("\t".join(request_message))
@@ -86,6 +91,9 @@ def create_deposit(on_behalf_of):
     Routing for creating a Deposit. On-Behalf-Of is
     the journal UUID.
     """
+    if len(on_behalf_of) == 0:
+        return HTTPResponse(status=400)
+     
     tree = et.parse(request.body)
     root = tree.getroot()
     title = root.find('entry:title', namespaces=namespaces)
@@ -133,6 +141,12 @@ def sword_statement(on_behalf_of, deposit_uuid):
         @todo: Develop logic to determine the above states, i.e., pass through LOCKSS-O-Matic's
         state terms.
     """
+
+    if len(on_behalf_of) == 0:
+        return HTTPResponse(status=400)
+    if len(deposit_uuid) == 0:
+        return HTTPResponse(status=400)
+
     states = {
         'failed': 'The deposit to the PKP PLN staging server (or LOCKSS-O-Matic) has failed.',
         'in_progress': 'The deposit to the staging server has succeeded but the deposit has not yet been registered with the PLN.',
@@ -167,6 +181,12 @@ def edit_deposit(on_behalf_of, deposit_uuid):
     OJS issues a deposit edit request to the CONT-IRI/Edit-IRI using a subset of
     the Atom document that originally created the deposit.
     """
+
+    if len(on_behalf_of) == 0:
+        return HTTPResponse(status=400)
+    if len(deposit_uuid) == 0:
+        return HTTPResponse(status=400)
+
     tree = et.parse(request.body)
     root = tree.getroot()
     email = root.find('entry:email', namespaces=namespaces)
