@@ -1,0 +1,11 @@
+language: python
+
+python:
+  - "2.7"
+
+install:
+  - pip install mysql-python
+  - pip install bottle
+
+script:
+  - python -m unittest discover test
