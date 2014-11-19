@@ -12,8 +12,7 @@ import sys
 import bottle
 os.chdir(os.path.dirname(__file__))
 
-# Path to directory terms.py is in.
 sys.path.append("/opt/pkppln/feeds")
-import feeds
+import feed_server
 
 application = bottle.default_app()

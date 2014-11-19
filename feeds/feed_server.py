@@ -54,5 +54,6 @@ def static_js(filename):
 def static_fonts(filename):
     return static_file(filename, root='/var/www/html/fonts')
 
-bottle.debug(True)
-run(application, host='localhost', port=8080, reloader=True)
+if __name__ == '__main__':
+    bottle.debug(True)
+    run(application, host='localhost', port=8080, reloader=True)
