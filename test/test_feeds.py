@@ -82,7 +82,7 @@ class TestFeeds(unittest.TestCase):
         except HTTPError as e:
             self.assertEqual(404, e.code)
             return
-        except e:
+        except BaseException as e:
             self.fail('Expected HTTP error. Received ' + str(e))
             return
         self.fail('No error received.')
@@ -94,7 +94,7 @@ class TestFeeds(unittest.TestCase):
         except HTTPError as e:
             self.assertEqual(404, e.code)
             return
-        except e:
+        except BaseException as e:
             self.fail('Expected HTTP error. Received ' + str(e))
             return
         self.fail('No error received.')
