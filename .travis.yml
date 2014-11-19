@@ -9,9 +9,10 @@ before_script:
   - cp config_sample.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
+  - python feeds/feed_server.py
 
 script:
-  - python feeds/feed_server.py > srv.log 2>&1 &
   - python -m unittest discover test
-  - killall python
-  - cat srv.log
+
+after_script:
+  - pkill -9 -f "feeds/feed_server.py"
