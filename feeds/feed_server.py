@@ -2,18 +2,28 @@
 """
 
 import os
+import sys
+from os.path import abspath, isfile, dirname
 import bottle
-from bottle import route, run, template
+from bottle import route, run, template, HTTPResponse
 import ConfigParser
 import MySQLdb.cursors
 
+bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 application = bottle.default_app()
 
-config = ConfigParser.ConfigParser()
-config.read('/opt/pkppln/config.cfg')
+
+def get_config():
+    config_path = dirname(dirname(abspath(__file__))) + '/config.cfg'
+    config = ConfigParser.ConfigParser()
+    success = config.read(config_path)
+    if config_path not in success:
+        raise Exception('Cannot load config file ' + config_path)
+    return config
 
 
 def get_connection():
+    config = get_config()
     con = MySQLdb.connect(
         host=config.get('Database', 'db_host'),
         user=config.get('Database', 'db_user'),
@@ -29,10 +39,12 @@ def get_connection():
 @route('/terms/<feed>')
 def terms_feed(feed='atom'):
     template_file = 'terms_' + feed
+    template_path = dirname(__file__) + '/views/' + template_file + '.tpl'
+    if not isfile(template_path):
+        return HTTPResponse(status=404)
     cursor = get_connection()
     cursor.execute('SELECT * FROM terms_of_use ORDER BY last_updated DESC LIMIT 10')
     terms = list(cursor.fetchall())
-    bottle.TEMPLATE_PATH.insert(0, os.path.dirname(__file__) + '/views')
     return template(template_file, terms=terms)
 
 

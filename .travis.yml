@@ -9,4 +9,9 @@ install:
 
 
 script:
+  - cp config_sample.cfg config.cfg
+  - python feeds/feed_server.py > srv.log 2>&1 &
   - python -m unittest discover test
+  - killall python
+  - cat srv.log
+  
