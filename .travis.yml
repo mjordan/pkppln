@@ -8,7 +8,6 @@ before_script:
   - pip install bottle
   - cp config_sample.cfg config.cfg
   - mysql -e 'create database mypln;'
-  - mysql -e "grant all on mypln.* to 'myplnuser'@'localhost' identified by 'secretpassword'"
   - mysql mypln < pkppln.sql
 
 script:
