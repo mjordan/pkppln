@@ -6,7 +6,7 @@ python:
 before_script:
   - pip install mysql-python
   - pip install bottle
-  - cp config_sample.cfg config.cfg
+  - cp config_travis.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
   - python feeds/feed_server.py &
