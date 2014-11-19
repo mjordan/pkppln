@@ -3,15 +3,16 @@ language: python
 python:
   - "2.7"
 
-install:
+before_script:
   - pip install mysql-python
   - pip install bottle
-
+  - cp config_sample.cfg config.cfg
+  - mysql -e 'create database mypln;'
+  - mysql -e "grant all on mypln.* to 'myplnuser'@'localhost' identified by 'secretpassword'"
+  - mysql mypln < pkppln.sql
 
 script:
-  - cp config_sample.cfg config.cfg
   - python feeds/feed_server.py > srv.log 2>&1 &
   - python -m unittest discover test
   - killall python
   - cat srv.log
-  
