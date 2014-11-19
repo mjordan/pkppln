@@ -4,7 +4,6 @@
 import bottle
 from bottle import route, static_file, run, template
 import ConfigParser
-import MySQLdb
 import MySQLdb.cursors
 
 application = bottle.default_app()
