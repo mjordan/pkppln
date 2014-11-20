@@ -33,71 +33,10 @@ class TestFeeds(unittest.TestCase):
         root = json.loads(content)
         self.assertGreater(len(root), 0)
 
-    def test_bottle_terms_rss(self):
-        url = 'http://127.0.0.1:8080/terms/rss'
-        try:
-            response = urllib2.urlopen(url)
-        except HTTPError as e:
-            self.fail('HTTP ' + str(e.code) + ' for ' + url)
-        except URLError as e:
-            self.fail('Cannot connect ' + url + ' ' + str(e.reason))
-        content = response.read()
-        self.assertTrue('PKP PLN Terms' in content)
-        root = ET.fromstring(content)
-        self.assertEquals('rss', root.tag)
-        self.assertGreater(len(root.findall('.//item')), 0)
-
-    def test_bottle_terms_atom(self):
-        url = 'http://127.0.0.1:8080/terms/atom'
-        try:
-            response = urllib2.urlopen(url)
-        except HTTPError as e:
-            self.fail('HTTP ' + str(e.code) + ' for ' + url)
-        except URLError as e:
-            self.fail('Cannot connect ' + url + ' ' + str(e.reason))
-        content = response.read()
-        self.assertTrue('PKP PLN Terms' in content)
-        root = ET.fromstring(content)
-        # must use full namespace here.
-        self.assertEquals('{http://www.w3.org/2005/Atom}feed', root.tag)
-        self.assertGreater(len(root.findall('.//{http://www.w3.org/2005/Atom}entry')), 0)
-
-    def test_bottle_terms_json(self):
-        url = 'http://127.0.0.1:8080/terms/json'
-        try:
-            response = urllib2.urlopen(url)
-        except HTTPError as e:
-            self.fail('HTTP ' + str(e.code) + ' for ' + url)
-        except URLError as e:
-            self.fail('Cannot connect ' + url + ' ' + str(e.reason))
-        content = response.read()
-        self.assertGreater(len(content), 0)
-        root = json.loads(content)
-        self.assertGreater(len(root), 0)
-
-    def test_bottle_format_not_found(self):
-        url = 'http://127.0.0.1:8080/terms/fooooooooooooooo'
-        try:
-            urllib2.urlopen(url)
-        except HTTPError as e:
-            self.assertEqual(404, e.code)
-            return
-        except BaseException as e:
-            self.fail('Expected HTTP error. Received ' + str(e))
-            return
-        self.fail('No error received.')
-
-    def test_bottle_error(self):
-        url = 'http://127.0.0.1:8080/notapufferfish'
-        try:
-            urllib2.urlopen(url)
-        except HTTPError as e:
-            self.assertEqual(404, e.code)
-            return
-        except BaseException as e:
-            self.fail('Expected HTTP error. Received ' + str(e))
-            return
-        self.fail('No error received.')
+    def test_terms_error(self):
+        response = terms_feed('fooooooo')
+        self.assertEquals('404 Not Found', response.status)
+        self.assertEquals('', str(response))
 
 
 if __name__ == '__main__':  # pragma: no cover
