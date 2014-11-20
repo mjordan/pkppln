@@ -9,10 +9,12 @@ before_script:
   - cp config_travis.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
-  - python feeds/feed_server.py &
+  - python feeds/feed_server.py > feedsrv.log 2>&1 &
 
 script:
   - python -m unittest discover test
 
 after_script:
   - pkill -9 -f "feed_server.py"
+  - cat feedsrv.log
+  
