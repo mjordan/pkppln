@@ -34,7 +34,7 @@ class TestFeeds(unittest.TestCase):
         self.assertGreater(len(root), 0)
 
     def test_bottle_terms_rss(self):
-        url = 'http://localhost:8080/terms/rss'
+        url = 'http://127.0.0.1:8080/terms/rss'
         try:
             response = urllib2.urlopen(url)
         except HTTPError as e:
@@ -48,7 +48,7 @@ class TestFeeds(unittest.TestCase):
         self.assertGreater(len(root.findall('.//item')), 0)
 
     def test_bottle_terms_atom(self):
-        url = 'http://localhost:8080/terms/atom'
+        url = 'http://127.0.0.1:8080/terms/atom'
         try:
             response = urllib2.urlopen(url)
         except HTTPError as e:
@@ -63,7 +63,7 @@ class TestFeeds(unittest.TestCase):
         self.assertGreater(len(root.findall('.//{http://www.w3.org/2005/Atom}entry')), 0)
 
     def test_bottle_terms_json(self):
-        url = 'http://localhost:8080/terms/json'
+        url = 'http://127.0.0.1:8080/terms/json'
         try:
             response = urllib2.urlopen(url)
         except HTTPError as e:
@@ -76,7 +76,7 @@ class TestFeeds(unittest.TestCase):
         self.assertGreater(len(root), 0)
 
     def test_bottle_format_not_found(self):
-        url = 'http://localhost:8080/terms/fooooooooooooooo'
+        url = 'http://127.0.0.1:8080/terms/fooooooooooooooo'
         try:
             urllib2.urlopen(url)
         except HTTPError as e:
@@ -88,7 +88,7 @@ class TestFeeds(unittest.TestCase):
         self.fail('No error received.')
 
     def test_bottle_error(self):
-        url = 'http://localhost:8080/notapufferfish'
+        url = 'http://127.0.0.1:8080/notapufferfish'
         try:
             urllib2.urlopen(url)
         except HTTPError as e:

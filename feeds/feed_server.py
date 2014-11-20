@@ -50,4 +50,4 @@ def terms_feed(feed='atom'):
 
 if __name__ == '__main__':
     bottle.debug(True)
-    run(application, host='0.0.0.0', port=8080, reloader=True)
+    run(application, host='127.0.0.1', port=8080, reloader=True)

@@ -11,7 +11,7 @@ before_script:
   - cp config_travis.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
-  - python feeds/feed_server.py > feedsrv.log 2>&1 &
+  - python feeds/feed_server.py | tee feedsrv.log &
 
 script:
   - python -m unittest discover test
