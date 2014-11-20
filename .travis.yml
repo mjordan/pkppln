@@ -6,8 +6,7 @@ python:
   - "2.7"
 
 before_script:
-  - pip install mysql-python
-  - pip install bottle
+  - pip -q install -r requirements.txt
   - cp config_travis.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
