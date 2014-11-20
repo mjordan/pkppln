@@ -1,5 +1,7 @@
 language: python
 
+services:
+
 python:
   - "2.7"
 
@@ -17,4 +19,3 @@ script:
 after_script:
   - pkill -9 -f "feed_server.py"
   - cat feedsrv.log
-  
