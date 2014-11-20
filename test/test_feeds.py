@@ -20,7 +20,7 @@ class TestFeeds(unittest.TestCase):
 
     def test_get_connection(self):
         connection = get_connection()
-        self.assertTrue(isinstance(connection, MySQLdb.cursors.DictCursor))
+        self.assertIsInstance(connection, MySQLdb.cursors.DictCursor)
 
     def test_terms_rss(self):
         content = str(terms_feed('rss'))
@@ -35,7 +35,10 @@ class TestFeeds(unittest.TestCase):
         root = ET.fromstring(content)
         # must use full namespace here.
         self.assertEquals('{http://www.w3.org/2005/Atom}feed', root.tag)
-        self.assertGreater(len(root.findall('.//{http://www.w3.org/2005/Atom}entry')), 0)
+        self.assertGreater(
+            len(root.findall('.//{http://www.w3.org/2005/Atom}entry')),
+            0
+        )
 
     def test_terms_json(self):
         content = str(terms_feed('json'))
