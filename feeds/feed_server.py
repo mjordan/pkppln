@@ -1,8 +1,7 @@
 """
+Generate atom, rss, and json feeds of new service terms.
 """
 
-import os
-import sys
 from os.path import abspath, isfile, dirname
 import bottle
 from bottle import route, run, template, response, HTTPResponse
@@ -14,6 +13,9 @@ application = bottle.default_app()
 
 
 def get_config():
+    """
+    Get a configuration object for the application.
+    """
     config_path = dirname(dirname(abspath(__file__))) + '/config.cfg'
     config = ConfigParser.ConfigParser()
     success = config.read(config_path)
@@ -23,6 +25,9 @@ def get_config():
 
 
 def get_connection():
+    """
+    Connect to the database and return a cursor.
+    """
     config = get_config()
     con = MySQLdb.connect(
         host=config.get('Database', 'db_host'),
@@ -35,22 +40,31 @@ def get_connection():
 
 
 def mimetype(fmt):
+    """
+    Return the correct Mime type for a feed.
+    """
     return {
         'atom': 'text/xml',
         'rss': 'text/xml',
         'json': 'application/json'
     }.get(fmt, 'text/plain')
 
+
 # options for feed: atom, rss, json
 @route('/terms')
 @route('/terms/<feed>')
 def terms_feed(feed='atom'):
+    """
+    Generate a feed of the newest terms.
+    """
     template_file = 'terms_' + feed
     template_path = dirname(__file__) + '/views/' + template_file + '.tpl'
     if not isfile(template_path):
         return HTTPResponse(status=404)
     cursor = get_connection()
-    cursor.execute('SELECT * FROM terms_of_use ORDER BY last_updated DESC LIMIT 10')
+    cursor.execute(
+        'SELECT * FROM terms_of_use ORDER BY last_updated DESC LIMIT 10'
+    )
     terms = list(cursor.fetchall())
     response.content_type = mimetype(feed)
     return template(template_file, terms=terms)
