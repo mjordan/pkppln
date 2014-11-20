@@ -5,10 +5,22 @@ import sys
 import xml.etree.ElementTree as ET
 import json
 sys.path.append("/opt/pkppln")
-from feeds.feed_server import terms_feed
+from feeds.feed_server import terms_feed, get_config, get_connection
+import MySQLdb.cursors
 
 
 class TestFeeds(unittest.TestCase):
+
+    def test_get_config(self):
+        config = get_config()
+        try:
+            config.get('Database', 'db_host')
+        except:
+            self.fail('Cannot find Database.db_host config.')
+
+    def test_get_connection(self):
+        connection = get_connection()
+        self.assertTrue(isinstance(connection, MySQLdb.cursors.DictCursor))
 
     def test_terms_rss(self):
         content = str(terms_feed('rss'))
