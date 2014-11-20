@@ -15,7 +15,5 @@ before_script:
 
 script:
   - python -m unittest discover test
-
-after_script:
-  - pkill -9 -f "feed_server.py"
   - cat feedsrv.log
+  
