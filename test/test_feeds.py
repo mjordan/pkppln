@@ -4,8 +4,6 @@ import unittest
 import sys
 import xml.etree.ElementTree as ET
 import json
-import urllib2
-from urllib2 import URLError, HTTPError
 sys.path.append("/opt/pkppln")
 from feeds.feed_server import terms_feed
 

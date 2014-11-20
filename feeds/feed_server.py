@@ -5,7 +5,7 @@ import os
 import sys
 from os.path import abspath, isfile, dirname
 import bottle
-from bottle import route, run, template, HTTPResponse
+from bottle import route, run, template, response, HTTPResponse
 import ConfigParser
 import MySQLdb.cursors
 
@@ -34,6 +34,13 @@ def get_connection():
     return con.cursor()
 
 
+def mimetype(fmt):
+    return {
+        'atom': 'text/xml',
+        'rss': 'text/xml',
+        'json': 'application/json'
+    }.get(fmt, 'text/plain')
+
 # options for feed: atom, rss, json
 @route('/terms')
 @route('/terms/<feed>')
@@ -45,6 +52,7 @@ def terms_feed(feed='atom'):
     cursor = get_connection()
     cursor.execute('SELECT * FROM terms_of_use ORDER BY last_updated DESC LIMIT 10')
     terms = list(cursor.fetchall())
+    response.content_type = mimetype(feed)
     return template(template_file, terms=terms)
 
 
