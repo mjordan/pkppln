@@ -6,3 +6,5 @@ tools/views/fonts/*
 tools/views/js/*
 *.pyc
 .DS_Store
+.project
+.pydevproject

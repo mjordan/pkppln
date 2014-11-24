@@ -1,0 +1,15 @@
+language: python
+
+services:
+
+python:
+  - "2.7"
+
+before_script:
+  - pip -q install -r requirements.txt
+  - cp config_travis.cfg config.cfg
+  - mysql -e 'create database mypln;'
+  - mysql mypln < pkppln.sql
+
+script:
+  - python -m unittest discover test
