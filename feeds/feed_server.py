@@ -34,7 +34,8 @@ def get_connection():
         user=config.get('Database', 'db_user'),
         passwd=config.get('Database', 'db_password'),
         db=config.get('Database', 'db_name'),
-        cursorclass=MySQLdb.cursors.DictCursor
+        cursorclass=MySQLdb.cursors.DictCursor,
+        use_unicode=True,
     )
     return con.cursor()
 
@@ -44,9 +45,9 @@ def mimetype(fmt):
     Return the correct Mime type for a feed.
     """
     return {
-        'atom': 'text/xml',
-        'rss': 'text/xml',
-        'json': 'application/json'
+        'atom': 'text/xml; charset=utf-8',
+        'rss': 'text/xml; charset=utf-8',
+        'json': 'application/json; charset=utf-8'
     }.get(fmt, 'text/plain')
 
 
@@ -67,7 +68,7 @@ def terms_feed(feed='atom'):
     )
     terms = list(cursor.fetchall())
     response.content_type = mimetype(feed)
-    return template(template_file, terms=terms)
+    return template(template_file, encoding='utf8', terms=terms)
 
 
 if __name__ == '__main__':
