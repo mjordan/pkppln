@@ -10,9 +10,9 @@
   <item>
     <title>Term updated</title>
     <link href="http://pkppln/path/to/term" />
-    <pubDate>{{term['last_updated']}}</pubDate>
+    <pubDate>{{ !term['last_updated'] }}</pubDate>
     <description>
-      {{term['text']}}
+      {{ !term['text'] }}
     </description>
   </item>
   % end

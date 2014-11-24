@@ -37,6 +37,7 @@ def get_connection():
         db=config.get('Database', 'db_name'),
         cursorclass=MySQLdb.cursors.DictCursor,
         use_unicode=True,
+        charset="utf8"
     )
     return con.cursor()
 
