@@ -7,6 +7,7 @@ import bottle
 from bottle import route, run, template, response, HTTPResponse
 import ConfigParser
 import MySQLdb.cursors
+import json
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 application = bottle.default_app()
@@ -68,7 +69,7 @@ def terms_feed(feed='atom'):
     )
     terms = list(cursor.fetchall())
     response.content_type = mimetype(feed)
-    return template(template_file, encoding='utf8', terms=terms)
+    return template(template_file, encoding='utf8', terms=terms, json=json)
 
 
 if __name__ == '__main__':

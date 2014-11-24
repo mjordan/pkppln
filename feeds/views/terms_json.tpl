@@ -2,7 +2,7 @@
   % for i, term in enumerate(terms):
   {
     "pubDate": "{{ term['last_updated'] }}",
-    "description": "{{ !term['text'] }}"
+    "description": {{ !json.dumps(term['text']) }}
   } \\
   <% if (i != len(terms)-1): %>
     ,
