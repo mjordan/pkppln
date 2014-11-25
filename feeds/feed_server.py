@@ -2,6 +2,7 @@
 Generate atom, rss, and json feeds of new service terms.
 """
 
+import sys
 from os.path import abspath, isfile, dirname
 import bottle
 from bottle import route, run, template, response, HTTPResponse
@@ -11,13 +12,14 @@ import json
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 application = bottle.default_app()
+config_file_name = 'config.cfg'
 
 
 def get_config():
     """
     Get a configuration object for the application.
     """
-    config_path = dirname(dirname(abspath(__file__))) + '/config.cfg'
+    config_path = dirname(dirname(abspath(__file__))) + '/' + config_file_name
     config = ConfigParser.ConfigParser()
     success = config.read(config_path)
     if config_path not in success:
@@ -82,5 +84,7 @@ def terms_feed(feed='atom'):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        config_file_name = sys.argv[1]
     bottle.debug(True)
     run(application, host='127.0.0.1', port=8080, reloader=True)
