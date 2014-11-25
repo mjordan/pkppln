@@ -25,7 +25,7 @@
     <dl>
       <dt>Terms</dt>
       <dd>The most recent terms and conditions for deposit to the PKP PLN.</dd>
-      <dd><a href="/feeds/terms/rss">RSS</a> | <a href="/feeds/terms/rss">ATOM</a> | <a href="/feeds/terms/rss">JSON</a>
+      <dd><a href="/feeds/terms/rss">RSS</a> | <a href="/feeds/terms/atom">ATOM</a> | <a href="/feeds/terms/json">JSON</a>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
