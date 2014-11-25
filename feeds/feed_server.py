@@ -53,6 +53,14 @@ def mimetype(fmt):
     }.get(fmt, 'text/plain')
 
 
+@route('/')
+def feeds_index():
+    """
+    Show a list of available feeds.
+    """
+    return template('feeds_index')
+
+
 # options for feed: atom, rss, json
 @route('/terms')
 @route('/terms/<feed>')
