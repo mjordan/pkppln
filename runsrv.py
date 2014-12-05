@@ -50,4 +50,4 @@ try:
     service_object.run(args)
 except Exception as error:
     print traceback.format_exc()
-    sys.exit('Service run failed: ' + error.message)
+    sys.exit('Service run failed: ' + str(error.message))
