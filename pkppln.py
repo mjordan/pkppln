@@ -16,13 +16,16 @@ config_file_name = 'config.cfg'
 namespaces = {
     'entry': 'http://www.w3.org/2005/Atom',
     'pkp': 'http://pkp.sfu.ca/SWORD',
-    'dcterms': 'http://purl.org/dc/terms/'
+    'dcterms': 'http://purl.org/dc/terms/',
+    'sword': 'http://purl.org/net/sword/',
+    'app': 'http://www.w3.org/2007/app',
+    'lom': 'http://lockssomatic.info/SWORD2',
 }
 
 
 def __config():
     """
-    Get a configuration object for the application.
+    Parse the config file and return the result.
     """
     config_path = dirname(abspath(__file__)) + '/' + config_file_name
     config = ConfigParser.ConfigParser()
@@ -35,6 +38,9 @@ _config = None
 
 
 def get_config():
+    """
+    Get a configuration object for the application.
+    """
     global _config
     if _config is None:
         _config = __config()
@@ -99,7 +105,16 @@ def update_deposit(deposit_uuid, state, result):
     mysql.commit()
 
 
-def get_journal_info(uuid):
+def get_journal(uuid):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+
+    cursor.execute("SELECT * FROM journals WHERE deposit_uuid = %s", [uuid])
+    if cursor.rowcount:
+        return cursor.fetchall()[0]
+    return None
+
+def get_journal_xml(uuid):
     """
     Query information about the journal that produced this deposit and wrap it
     in XML to include in the Bag.
@@ -138,6 +153,19 @@ def file_sha1(filepath):
         calculated_sha1.update(buf)
     input_file.close()
     return calculated_sha1.hexdigest()
+
+
+def file_md5(filepath):
+    input_file = open(filepath, 'rb')
+    calculated_md5 = hashlib.md5()
+    while True:
+        # Read the filename in 10 mb chunks so we don't run out of memory.
+        buf = input_file.read(10 * 1024 * 1024)
+        if not buf:
+            break
+        calculated_md5.update(buf)
+    input_file.close()
+    return calculated_md5.hexdigest()
 
 
 def input_path(in_dir, dirs='', filename=''):
