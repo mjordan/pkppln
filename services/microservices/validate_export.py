@@ -23,6 +23,7 @@ class ValidateExport(PlnService):
         expanded_path = pkppln.microservice_directory('bagValidated', uuid)
         bag_path = os.path.join(expanded_path, 'bag')
         bag = bagit.Bag(bag_path)
+        # this should probably be bag.entries.items()
         for payload_file in bag.payload_files():
             if payload_file.startswith('data/terms'):
                 continue
@@ -39,23 +40,23 @@ class ValidateExport(PlnService):
             if not re.match(r'http://pkp.sfu.ca/.*/dtds', systemId):
                 return 'failed', 'Suspicious DOCTYPE: ' + systemId
             self.output(2, 'system id: ' + systemId)
-            result = None
-            try:
-                dtd = etree.DTD(systemId)
-                result = dtd.validate(document)
-            except Exception as error:
-                return 'failed', error.message
-
-            if result is False:
-                for log in dtd.error_log:
-                    message += "----\n"
-                    message += ':'.join((payload_file, str(log.line),
-                                         str(log.column), log.type_name,
-                                         log.message))
-                    message += '\n'
-                result = 'failure'
-            else:
-                self.output(2, 'validation passed')
+#             result = None
+#             try:
+#                 dtd = etree.DTD(systemId)
+#                 result = dtd.validate(document)
+#             except Exception as error:
+#                 return 'failed', error.message
+# 
+#             if result is False:
+#                 for log in dtd.error_log:
+#                     message += "----\n"
+#                     message += ':'.join((payload_file, str(log.line),
+#                                          str(log.column), log.type_name,
+#                                          log.message))
+#                     message += '\n'
+#                 result = 'failure'
+#             else:
+#                 self.output(2, 'validation passed')
 
             journal_xml = pkppln.get_journal_info(uuid)
             journal_path = os.path.join(bag_path, 'data', 'journal_info.xml')

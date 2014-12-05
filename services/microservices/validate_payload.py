@@ -19,7 +19,7 @@ class ValidatePayload(PlnService):
         filename = pkppln.deposit_filename(deposit['deposit_url'])
         filepath = pkppln.input_path('harvested', [uuid], filename)
         self.output(1, 'validating ' + filename)
-
+        self.output(2, 'looking for\n' + filepath)
         bs = os.path.getsize(filepath)
         # OJS reports file sizes in Kb (1024 bytes). When the payload is
         # rebagged for LOCKSSOMatic, filesizes will be reported in kB (1000

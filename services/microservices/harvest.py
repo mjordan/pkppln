@@ -29,6 +29,7 @@ class Harvest(PlnService):
             f = open(harvest_bag, 'wb')
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:
+                    self.output(2, 'chunk')
                     f.write(chunk)
                     f.flush()
             self.output(2, 'Saved to ' + harvest_bag)

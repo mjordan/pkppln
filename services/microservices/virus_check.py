@@ -40,9 +40,9 @@ class VirusCheck(PlnService):
         error = ''
 
         uuid = deposit['deposit_uuid']
-        expanded_path = pkppln.microservice_directory(
-            self.state_before(), uuid)
-        report_path = os.path.join(expanded_path, 'virus_scan.txt')
+        expanded_path = pkppln.microservice_directory('bagValidated', uuid)
+        bag_path = os.path.join(expanded_path, 'bag')
+        report_path = os.path.join(bag_path, 'data', 'virus_scan.txt')
         report_file = open(report_path, 'w')
         report_file.write('# Virus scan started ' + str(datetime.now())
                           + ' by ' + self.clmd.version() + '\n')
@@ -52,10 +52,13 @@ class VirusCheck(PlnService):
         for payload_file in bag.payload_files():
             if payload_file.startswith('data/terms'):
                 continue
+            if not payload_file.endswith('.xml'):
+                continue
             payload_xml = os.path.join(bag_path, payload_file)
             if not os.path.isfile(payload_xml):
                 return 'failed', 'Cannot find export XML in ' + payload_xml
 
+            self.output(2, 'Parsing ' + payload_xml)
             document = ElementTree.parse(payload_xml)
             embeded = document.findall('.//embed')
             self.output(1, payload_file + ' has ' + str(len(embeded)) + ' docs.')

@@ -58,8 +58,10 @@ class PlnService(object):
             deposit_ended = datetime.now()
             self.output(1, result)
             self.output(0, error)
+
             if args.dry_run:
                 continue
+
             if result == 'success':
                 pkppln.update_deposit(deposit['deposit_uuid'],
                                       self.state_after(),
