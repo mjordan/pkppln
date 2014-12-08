@@ -186,7 +186,7 @@ def create_deposit(journal_uuid):
                     )
 
 
-@put('/cont-iri/<journal_uuid>/<deposit_uuid>/edit')
+@put('/api/sword/2.0/cont-iri/<journal_uuid>/<deposit_uuid_param>/edit')
 def edit_deposit(journal_uuid, deposit_uuid_param):
     """
     Routing for creating a Deposit. On-Behalf-Of is
@@ -224,8 +224,7 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
         if insert_content('edit', deposit_uuid, journal_uuid, content) is False:
             mysql.rollback()
             return HTTPResponse(status=501)
-    # hold off on the mysql commit - ensure that the journal gets inserted
-    # as well.
+        
     if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email, deposit_uuid) is False:
         mysql.rollback()
         return HTTPResponse(status=501)
@@ -234,7 +233,7 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
 
     response.status = 201
     response.set_header('Location', '/'.join((
-        '', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
+        '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
     ))
     return template('deposit_receipt', journal_uuid=journal_uuid,
                     deposit_uuid=deposit_uuid, journal_title=title,
