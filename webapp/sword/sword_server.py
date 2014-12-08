@@ -55,8 +55,6 @@ def service_document():
     accepting = pkppln.check_access(obh)
     terms = cursor.fetchall()
 
-    pkppln.log_message('found ' + str(len(terms)))
-
     if len(terms) > 0:
         return template(
             'service_document',
@@ -176,9 +174,10 @@ def create_deposit(journal_uuid):
 
     mysql.commit()
 
+    # @todo how do i set the location?
     response.status = 201
     response.set_header('Location', '/'.join((
-        '', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
+        '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
     ))
     return template('deposit_receipt', journal_uuid=journal_uuid,
                     deposit_uuid=deposit_uuid, journal_title=title,
