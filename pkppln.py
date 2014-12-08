@@ -67,11 +67,75 @@ def __connect():
 _mysql = None
 
 
+def __request_logger():
+    config = get_config()
+    logging.basicConfig(
+        filename=config.get('Paths', 'error_log'),
+        level=logging.INFO,
+        format=logging.BASIC_FORMAT
+    )
+
+    logger = logging.getLogger('pkppln_requests')
+    logger.setLevel(logging.INFO)
+    log_filehandle = logging.FileHandler(config.get('Paths', 'request_log'))
+    log_filehandle.setLevel(logging.INFO)
+    log_formatter = logging.Formatter('%(asctime)s\t%(message)s')
+    log_filehandle.setFormatter(log_formatter)
+    logger.addHandler(log_filehandle)
+    return logger
+
+_logger = None
+
+
+def get_logger():
+    global _logger
+    if _logger is None:
+        _logger = __request_logger()
+    return _logger
+
+
+def log_message(message, level=logging.INFO):
+    logger = get_logger()
+    logger.log(level, message)
+
+
 def get_connection():
     global _mysql
     if _mysql is None:
         _mysql = __connect()
     return _mysql
+
+
+def check_access(uuid):
+    config = get_config()
+    # whitelist.txt and blacklist.txt contain journal UUIDs to allow or block,
+    # respectively, one UUID per line. If the files don't exist, we define
+    # sensible default values for the lists.
+
+    # Get the SWORD-server level value of accepting_deposits. If this is set to
+    # 'No', don't bother checking the white or black lists.
+    accepting = config.get('Deposits', 'pln_accept_deposits')
+    if accepting == 'No':
+        return 'No'
+
+    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_whitelist')):
+        whitelist = [line.strip() for line in open(
+            config.get('Deposits', 'pln_accept_deposits_whitelist'))]
+    else:
+        whitelist = ['all']
+
+    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_blacklist')):
+        blacklist = [line.strip() for line in open(
+            config.get('Deposits', 'pln_accept_deposits_blacklist'))]
+    else:
+        blacklist = []
+
+    # 'Yes' or 'No' gets inserted into the <pkp:pln_accepting> element in the
+    # service document; the create and update deposit calls also check.
+    if (uuid in whitelist or whitelist[0] == 'all') and uuid not in blacklist:
+        return 'Yes'
+    else:
+        return 'No'
 
 
 def get_deposits(state):
@@ -105,6 +169,59 @@ def update_deposit(deposit_uuid, state, result):
     mysql.commit()
 
 
+def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
+                   deposit_pubdate, on_behalf_of, checksum_value, url, size,
+                   processing_state, outcome):
+    """
+    Insert a deposit record to the database. Does not do a rollback() on
+    failure or a commit() on success - that is the repsonsibility of the
+    caller.
+    """
+    try:
+        cursor = get_connection().cursor()
+        cursor.execute("""
+        INSERT INTO deposits (action, deposit_uuid, deposit_volume,
+        deposit_issue, deposit_pubdate, date_deposited, journal_uuid,
+        sha1_value, deposit_url, size, processing_state, outcome, pln_state)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                       (action, deposit_uuid, deposit_volume, deposit_issue,
+                        deposit_pubdate, datetime.now(), on_behalf_of,
+                        checksum_value, url, size, processing_state, outcome,
+                        'in_progress'))
+    except MySQLdb.Error as exception:
+        logging.exception(exception)
+        return False
+    if cursor.rowcount == 1:
+        return True
+    else:
+        return False
+    return True
+
+
+def insert_journal(journal_uuid, title, issn, journal_url, email, 
+                   deposit_uuid):
+    """
+    Insert a journal record to the database. Does not do a rollback() on
+    failure or a commit() on success - that is the repsonsibility of the
+    caller.
+    """
+    cursor = get_connection().cursor()
+    try:
+        cursor.execute("""
+        INSERT INTO journals (journal_uuid, title, issn, journal_url,
+        contact_email, deposit_uuid, date_deposited)
+        VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+                    (journal_uuid, title, issn, journal_url, email,
+                     deposit_uuid, datetime.now()))
+    except MySQLdb.Error as e:
+        logging.exception(e)
+        return False
+    if cursor.rowcount == 1:
+        return True
+    else:
+        return False
+
+
 def get_journal(uuid):
     mysql = get_connection()
     cursor = mysql.cursor()
@@ -113,6 +230,7 @@ def get_journal(uuid):
     if cursor.rowcount:
         return cursor.fetchall()[0]
     return None
+
 
 def get_journal_xml(uuid):
     """
