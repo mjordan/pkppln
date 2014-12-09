@@ -27,13 +27,13 @@
     <table class="table table-striped">
     <thead>
     <tr>
-      <td>ID</td>
-      <td>Current version</td>
-      <td>Last updated</td>
-      <td>Key</td>
-      <td>Locale</td>
-      <td>Text</td>
-      <td>Actions</td>
+      <th>ID</th>
+      <th>Current version</th>
+      <th>Last updated</th>
+      <th>Key</th>
+      <th>Locale</th>
+      <th>Text</th>
+      <th>Actions</th>
     </tr>
     </thead>
     <tbody>
