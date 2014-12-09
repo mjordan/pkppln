@@ -7,6 +7,8 @@ import zipfile
 
 class ValidateBag(PlnService):
 
+    """Validate a bag in a deposit"""
+
     def state_before(self):
         return 'payloadVerified'
 

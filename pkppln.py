@@ -11,7 +11,14 @@ from os.path import abspath, dirname
 import xml.etree.ElementTree as element_tree
 from xml.etree.ElementTree import Element, SubElement
 
+"""
+Common functions for the PKP PLN staging server.
+"""
 
+"""
+Set pkppln.config_file_name to something else before calling get_config()
+for testing.
+"""
 config_file_name = 'config.cfg'
 namespaces = {
     'entry': 'http://www.w3.org/2005/Atom',
@@ -25,7 +32,7 @@ namespaces = {
 
 def __config():
     """
-    Parse the config file and return the result.
+    Parse the config file and return the result. Internal use only.
     """
     config_path = dirname(abspath(__file__)) + '/' + config_file_name
     config = ConfigParser.ConfigParser()
@@ -50,7 +57,7 @@ def get_config():
 def __connect():
     """
     Connect to the database and return a database connection. You must
-    get the cursor manually. Autocommit is not enabled.
+    get the cursor manually. Autocommit is not enabled. Internal use only.
     """
     config = get_config()
     con = MySQLdb.connect(
@@ -68,6 +75,10 @@ _mysql = None
 
 
 def get_connection():
+    """
+    Connect to the database and return a database connection. You must
+    get the cursor manually. Autocommit is not enabled.
+    """
     global _mysql
     if _mysql is None:
         _mysql = __connect()
@@ -75,6 +86,7 @@ def get_connection():
 
 
 def __request_logger():
+    """Get a logging object. Internal use only."""
     config = get_config()
     logging.basicConfig(
         filename=config.get('Paths', 'error_log'),
@@ -95,6 +107,7 @@ _logger = None
 
 
 def get_logger():
+    """Get a logging object."""
     global _logger
     if _logger is None:
         _logger = __request_logger()
@@ -102,11 +115,22 @@ def get_logger():
 
 
 def log_message(message, level=logging.INFO):
+    """Log a message, with optional logging level."""
     logger = get_logger()
     logger.log(level, message)
 
 
 def check_access(uuid):
+    """Check access to the PLN for a journal UUID.
+ * If the config file is not accepting, then never accept.
+ * If there is no whitelist file, then all uuids are whitelisted.
+ * If there is a whitelist file, then the uuid must be listed in the file.
+ * If there is no blacklist file, then no uuids are blacklisted.
+ * If there is a blacklist file, then the uuid must not be listed there.
+
+ The whitelist and blacklist files are not required to exist. Lines in
+ those files which start with a semicolon or are blank are ignored.
+"""
     config = get_config()
     # whitelist.txt and blacklist.txt contain journal UUIDs to allow or block,
     # respectively, one UUID per line. If the files don't exist, we define
@@ -143,8 +167,10 @@ def check_access(uuid):
 
 
 def get_deposits(state):
-    # Get the deposits that have the indicated processing state value
-    # and return them to the microservice for processing.
+    """
+    Get the deposits that have the indicated processing state value
+    and return them to the microservice for processing.
+    """
     mysql = get_connection()
     cursor = mysql.cursor()
     try:
@@ -208,6 +234,7 @@ def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
 
 
 def get_journal(uuid):
+    """Get a journal from the database and return it."""
     mysql = get_connection()
     cursor = mysql.cursor()
 
@@ -262,10 +289,13 @@ def get_journal_xml(uuid):
 
 
 def deposit_filename(url):
+    """Determine the filename of a deposit from the URL from which it was
+    harvested."""
     return url.split('/')[-1]
 
 
 def file_sha1(filepath):
+    """Calculate a sha1 checksum for a file."""
     input_file = open(filepath, 'rb')
     calculated_sha1 = hashlib.sha1()
     while True:
@@ -279,6 +309,7 @@ def file_sha1(filepath):
 
 
 def file_md5(filepath):
+    """Calculate an md5 checksum for a file."""
     input_file = open(filepath, 'rb')
     calculated_md5 = hashlib.md5()
     while True:
@@ -292,6 +323,11 @@ def file_md5(filepath):
 
 
 def input_path(in_dir, dirs='', filename=''):
+    """Calculate an input directory based on the config file and
+    any additional information.
+
+    pkppln.input_path('processing_root', ['a', 'b'], 'foo.txt')
+    """
     config = get_config()
     processing_root = config.get('Paths', 'processing_root')
     tmp_path = os.sep.join(dirs)
@@ -300,6 +336,7 @@ def input_path(in_dir, dirs='', filename=''):
 
 
 def microservice_directory(state, uuid):
+    """Find or create the directory for the microservice to work."""
     config = get_config()
     try:
         processing_root = config.get('Paths', 'processing_root')

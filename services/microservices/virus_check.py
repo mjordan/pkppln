@@ -11,6 +11,10 @@ from tempfile import NamedTemporaryFile
 
 class VirusCheck(PlnService):
 
+    """Run a virus check on the contents of a deposit bag. Extracts all the
+    mime-encoded content to a temporary directory and scans each one with
+    clamd."""
+
     clmd = clamd.ClamdUnixSocket()
 
     filecount = 0
@@ -61,7 +65,8 @@ class VirusCheck(PlnService):
             self.output(2, 'Parsing ' + payload_xml)
             document = ElementTree.parse(payload_xml)
             embeded = document.findall('.//embed')
-            self.output(1, payload_file + ' has ' + str(len(embeded)) + ' docs.')
+            self.output(
+                1, payload_file + ' has ' + str(len(embeded)) + ' docs.')
             for embed in embeded:
                 self.scan(embed)
 

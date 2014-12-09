@@ -7,6 +7,8 @@ import tarfile
 
 class ReserializeBag(PlnService):
 
+    """Reserialize/repackage a bag into a .tar.gz file."""
+
     def state_before(self):
         return 'contentValidated'
 
@@ -34,11 +36,15 @@ class ReserializeBag(PlnService):
             message += error.message
 
         tar_filename = '.'.join([deposit['journal_uuid'], uuid, 'tar.gz'])
-        tar_filepath = os.path.join(
+        tar_path = os.path.join(
             config.get('Paths', 'processing_root'),
             self.state_after(),
-            tar_filename
         )
+
+        if not os.path.exists(tar_path):
+            os.makedirs(tar_path)
+
+        tar_filepath = os.path.join(tar_path, tar_filename)
 
         self.output(1, 'Saving tar.gz to ' + tar_filepath)
 

@@ -6,6 +6,8 @@ import math
 
 class ValidatePayload(PlnService):
 
+    """Validate a harvested deposit by checking file size and checksum"""
+
     def state_before(self):
         return 'harvested'
 

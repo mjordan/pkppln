@@ -1,8 +1,31 @@
 #!/usr/bin/env python
 
+"""
+Run a staging server microservice. This script will figure out where
+the microservice code is, load it, fetch the appropriate deposits from the
+database, and run the service against each deposit in turn.
+
+usage: runsrv.py [-h] [-v | -q] [-n | -f] service
+
+Run a staging service
+
+positional arguments:
+  service        Name of the service to run
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose  Increase output verbosity
+  -q, --quiet    Silence most output
+  -n, --dry-run  Do not update the deposit states
+  -f, --force    Force updates to the deposit states.
+
+Service is one of harvest, validate_payload, validat_bag, virus_check,
+validate_export, reserialize_bag, stage_bag, deposit_to_pln
+
+"""
+
 import string
 import sys
-import pkppln
 import traceback
 
 import argparse

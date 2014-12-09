@@ -3,11 +3,13 @@ import pkppln
 import os
 import re
 import bagit
-import requests
 from lxml import etree
 
 
 class ValidateExport(PlnService):
+
+    """Validate the XML exported from OJS. Also inserts some journal metaadata
+    into the bag."""
 
     def state_before(self):
         return 'virusChecked'
@@ -46,7 +48,7 @@ class ValidateExport(PlnService):
                 result = dtd.validate(document)
             except Exception as error:
                 return 'failed', error.message
- 
+
             if result is False:
                 for log in dtd.error_log:
                     message += "----\n"

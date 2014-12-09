@@ -6,6 +6,9 @@ from sword.client import SwordClient
 
 class DepositToPln(PlnService):
 
+    """Deposit a reserialized bag into LOCKSSOMatic for eventual deposit
+    into the PLN."""
+
     def state_before(self):
         return 'staged'
 

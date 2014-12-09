@@ -5,6 +5,7 @@ import os
 
 
 class Harvest(PlnService):
+
     """Harvest a deposit from an OJS instance."""
 
     def state_before(self):
