@@ -118,15 +118,19 @@ def check_access(uuid):
     if accepting == 'No':
         return 'No'
 
-    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_whitelist')):
-        whitelist = [line.strip() for line in open(
-            config.get('Deposits', 'pln_accept_deposits_whitelist'))]
+    whitelist_path = config.get('Deposits', 'pln_accept_deposits_whitelist')
+    if os.path.exists(whitelist_path):
+        whitelist = [w.strip() for w in tuple(open(whitelist_path))
+                     if not w.startswith(';') and w != '\n'
+                     ]
     else:
         whitelist = ['all']
 
-    if os.path.exists(config.get('Deposits', 'pln_accept_deposits_blacklist')):
-        blacklist = [line.strip() for line in open(
-            config.get('Deposits', 'pln_accept_deposits_blacklist'))]
+    blacklist_path = config.get('Deposits', 'pln_accept_deposits_blacklist')
+    if os.path.exists(blacklist_path):
+        blacklist = [w.strip() for w in tuple(open(blacklist_path))
+                     if not w.startswith(';') and w != '\n'
+                     ]
     else:
         blacklist = []
 
@@ -154,6 +158,10 @@ def get_deposits(state):
 
 
 def update_deposit(deposit_uuid, state, result):
+    """
+    Update a deposit in the database. Does not do a commit or rollback. The
+    caller must decide to commit or rollback the transaction.
+    """
     mysql = get_connection()
     cursor = mysql.cursor()
     try:
@@ -162,11 +170,13 @@ def update_deposit(deposit_uuid, state, result):
         processing_state = %s, outcome = %s WHERE deposit_uuid = %s""",
                        [state, result, deposit_uuid])
         # @todo: check to make sure cursor.rowcount == 1 and not 0.
-    except MySQLdb.Error, e:
-        mysql.rollback()
-        logging.exception(e)
-        sys.exit(1)
-    mysql.commit()
+    except MySQLdb.Error as exception:
+        logging.exception(exception)
+        return False
+    if cursor.rowcount == 1:
+        return True
+    else:
+        return False
 
 
 def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
@@ -195,7 +205,16 @@ def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
         return True
     else:
         return False
-    return True
+
+
+def get_journal(uuid):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+
+    cursor.execute("SELECT * FROM journals WHERE deposit_uuid = %s", [uuid])
+    if cursor.rowcount:
+        return cursor.fetchone()
+    return None
 
 
 def insert_journal(journal_uuid, title, issn, journal_url, email,
@@ -222,38 +241,24 @@ def insert_journal(journal_uuid, title, issn, journal_url, email,
         return False
 
 
-def get_journal(uuid):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-
-    cursor.execute("SELECT * FROM journals WHERE deposit_uuid = %s", [uuid])
-    if cursor.rowcount:
-        return cursor.fetchall()[0]
-    return None
-
-
 def get_journal_xml(uuid):
     """
-    Query information about the journal that produced this deposit and wrap it
+    Query information about the root that produced this deposit and wrap it
     in XML to include in the Bag.
     """
-    mysql = get_connection()
-    cursor = mysql.cursor()
 
-    cursor.execute("SELECT * FROM journals WHERE deposit_uuid = %s", [uuid])
-
-    if cursor.rowcount:
+    journal = get_journal(uuid)
+    if journal is not None:
         element_tree.register_namespace('pkp', 'http://pkp.sfu.ca/SWORD')
-        journal = Element('{http://pkp.sfu.ca/SWORD}journal')
-        for row in cursor.fetchall():
-            for key in row:
-                foo = SubElement(journal, 'pkp:' + key)
-                if key == 'date_deposited':
-                    value = row[key].strftime('%Y-%m-%d')
-                else:
-                    value = row[key]
-                foo.text = str(value)
-        return element_tree.tostring(journal)
+        root = Element('{http://pkp.sfu.ca/SWORD}root')
+        for key in journal:
+            element = SubElement(root, 'pkp:' + key)
+            if key == 'date_deposited':
+                value = journal[key].strftime('%Y-%m-%d')
+            else:
+                value = journal[key]
+            element.text = str(value)
+        return element_tree.tostring(root)
 
 
 def deposit_filename(url):
