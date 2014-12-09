@@ -24,6 +24,9 @@ class SwordClient(object):
             'X-On-Behalf-Of': self.provider_uuid
         }
         response = requests.get(self.sd_iri, headers=headers)
+        if response.status_code != 200:
+            raise Exception(str(response.status_code) + ' ' + response.reason)
+        
         # check response code here.
         root = ET.fromstring(response.content)
         collection = root.find(
