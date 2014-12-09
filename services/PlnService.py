@@ -23,7 +23,7 @@ class PlnService(object):
 
     @abstractmethod
     def state_before(self):
-        """The name of state before this one."""
+        """The name of the state before this one."""
         return
 
     @abstractmethod
