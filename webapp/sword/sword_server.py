@@ -154,7 +154,7 @@ def create_deposit(journal_uuid):
     deposit_uuid = urn_id.replace('urn:uuid:', '')
 
     pkppln.log_message('\t'.join([request.get('REMOTE_ADDR'), 'create',
-                           journal_uuid, deposit_uuid]))
+                                  journal_uuid, deposit_uuid]))
 
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)
@@ -212,7 +212,7 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
         return HTTPResponse(status=400)
 
     pkppln.log_message('\t'.join([request.get('REMOTE_ADDR'), 'edit',
-                           journal_uuid, deposit_uuid]))
+                                  journal_uuid, deposit_uuid]))
 
     # We generate our own timestamp for inserting into the database.
     # updated = root.find('entry:updated', namespaces=namespaces)
@@ -224,7 +224,7 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
         if insert_content('edit', deposit_uuid, journal_uuid, content) is False:
             mysql.rollback()
             return HTTPResponse(status=501)
-        
+
     if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email, deposit_uuid) is False:
         mysql.rollback()
         return HTTPResponse(status=501)
