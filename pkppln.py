@@ -67,6 +67,13 @@ def __connect():
 _mysql = None
 
 
+def get_connection():
+    global _mysql
+    if _mysql is None:
+        _mysql = __connect()
+    return _mysql
+
+
 def __request_logger():
     config = get_config()
     logging.basicConfig(
@@ -97,13 +104,6 @@ def get_logger():
 def log_message(message, level=logging.INFO):
     logger = get_logger()
     logger.log(level, message)
-
-
-def get_connection():
-    global _mysql
-    if _mysql is None:
-        _mysql = __connect()
-    return _mysql
 
 
 def check_access(uuid):
@@ -198,7 +198,7 @@ def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
     return True
 
 
-def insert_journal(journal_uuid, title, issn, journal_url, email, 
+def insert_journal(journal_uuid, title, issn, journal_url, email,
                    deposit_uuid):
     """
     Insert a journal record to the database. Does not do a rollback() on
@@ -211,8 +211,8 @@ def insert_journal(journal_uuid, title, issn, journal_url, email,
         INSERT INTO journals (journal_uuid, title, issn, journal_url,
         contact_email, deposit_uuid, date_deposited)
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
-                    (journal_uuid, title, issn, journal_url, email,
-                     deposit_uuid, datetime.now()))
+                       (journal_uuid, title, issn, journal_url, email,
+                        deposit_uuid, datetime.now()))
     except MySQLdb.Error as e:
         logging.exception(e)
         return False
