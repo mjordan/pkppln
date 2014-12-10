@@ -40,8 +40,16 @@ class DepositToPln(PlnService):
             filename
         ])
 
-        print client.create_deposit(url, filepath, deposit, journal)
+        try:
+            receipt, content = client.create_deposit(
+                url, filepath, deposit, journal)
+        except Exception as exception:
+            return 'failed', exception.message
 
-        # staged url
+        mysql = pkppln.get_connection()
+        if pkppln.record_deposit(deposit, receipt) is False:
+            mysql.rollback()
+            return 'failed', 'database update failed '
 
-        return 'failed', 'failed'
+        mysql.commit()
+        return 'success', ''

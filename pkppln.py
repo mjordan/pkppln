@@ -193,7 +193,8 @@ def update_deposit(deposit_uuid, state, result):
     try:
         cursor.execute("""
         UPDATE deposits SET
-        processing_state = %s, outcome = %s WHERE deposit_uuid = %s""",
+        processing_state = %s, outcome = %s
+        WHERE deposit_uuid = %s""",
                        [state, result, deposit_uuid])
         # @todo: check to make sure cursor.rowcount == 1 and not 0.
     except MySQLdb.Error as exception:
@@ -203,6 +204,23 @@ def update_deposit(deposit_uuid, state, result):
         return True
     else:
         return False
+
+
+def record_deposit(deposit, receipt):
+    """Successfully sent deposit to lockssomatic. Record the receipt."""
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute("""
+        UPDATE deposits SET
+        deposit_receipt = %s
+        WHERE deposit_uuid = %s""",
+                       [receipt, deposit['deposit_uuid']])
+        # @todo: check to make sure cursor.rowcount == 1 and not 0.
+    except MySQLdb.Error as exception:
+        logging.exception(exception)
+        return False
+    return True
 
 
 def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,

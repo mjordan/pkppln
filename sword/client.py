@@ -26,7 +26,7 @@ class SwordClient(object):
         response = requests.get(self.sd_iri, headers=headers)
         if response.status_code != 200:
             raise Exception(str(response.status_code) + ' ' + response.reason)
-        
+
         # check response code here.
         root = ET.fromstring(response.content)
         collection = root.find(
@@ -57,8 +57,12 @@ class SwordClient(object):
 
     def create_deposit(self, url, filepath, deposit, journal):
         """
-        Send a deposit to the sword server. The deposit is staged at url for the
-        server to download, and on the local file system at filepath.
+        Send a deposit to the sword server. The deposit is staged at url for 
+        the server to download, and on the local file system at filepath.
+
+        Throws an exception if the deposit failed.
+
+        Returns the location header and response content as a tuple.
         """
 
         if self.col_iri is None:
@@ -88,20 +92,52 @@ class SwordClient(object):
         summary.text = 'Deposit to LOCKSSOMatic from the PKP staging server.'
 
         content = ET.SubElement(entry, 'lom:content', {
-            'size': str(filesize),
+            'size': str(filesize / 1000),
             'checksumType': self.checksum_type,
             'checksumValue': checksum_value,
         })
         content.text = url
 
-        return ET.dump(entry)
-        # create a deposit document.
+        response = requests.post(self.col_iri,
+                                 data=ET.tostring(entry, 'utf8'),
+                                 headers={
+                                     'Content-type': 'text/xml; charset=UTF-8'
+                                 })
+        if response.status_code != 201:
+            raise Exception(str(response.status_code) +
+                            ' ' + response.reason + '\n' + response.content)
+
+        print response.headers['location']
+        return response.headers['location'], response.content
+
         # post the document
         # return the response
-        pass
 
     def modify_deposit(self, url, deposit):
         pass
 
     def statement(self, deposit):
-        pass
+
+        if self.col_iri is None:
+            self.service_document()
+
+        receipt = requests.get(deposit['deposit_receipt'])
+        if receipt.status_code != 200:
+            raise Exception(str(receipt.status_code) +
+                            ' ' + receipt.reason + '\n' +
+                            'Cannot find deposit receipt.')
+        root = ET.fromstring(receipt.content)
+        link = root.find(
+            './/entry:link[@rel="http://purl.org/net/sword/terms/statement"]',
+            pkppln.namespaces
+        )
+        if link is None:
+            raise Exception('Cannot find statment link in deposit receipt.')
+
+        statement = requests.get(link.attrib['href'])
+        if statement.status_code != 200:
+            raise Exception(str(statement.status_code) +
+                            ' ' + statement.reason + '\n' +
+                            'Cannot find statement.')
+
+        return statement.content
