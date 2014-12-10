@@ -7,6 +7,7 @@ import MySQLdb
 
 
 class PlnService(object):
+
     """
     Superclass for all PLN services. A service must provide state_before,
     state_after, and execute() methods, as defined below. This superclass
@@ -45,17 +46,11 @@ class PlnService(object):
     def log_microservice(self, uuid, start_time, end_time, result, error):
         """Log the service action ot the database."""
         mysql = pkppln.get_connection()
-        cursor = mysql.cursor()
-        try:
-            cursor.execute("""
-            INSERT INTO microservices (microservice, deposit_uuid, started_on,
-            finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
-                           [self.name(), uuid, start_time, end_time,
-                            result, error])
-        except MySQLdb.Error as mysql_error:
+        if pkppln.log_microservice(
+                self.name(), uuid, start_time, end_time, result, error):
+            mysql.commit()
+        else:
             mysql.rollback()
-            logging.exception(mysql_error)
-        mysql.commit()
 
     def run(self, args):
         """

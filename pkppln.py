@@ -245,10 +245,23 @@ def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
     except MySQLdb.Error as exception:
         logging.exception(exception)
         return False
-    if cursor.rowcount == 1:
-        return True
-    else:
+    return True
+
+
+def log_microservice(service, uuid, start_time, end_time, result, error):
+    """Log the service action ot the database."""
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute("""
+        INSERT INTO microservices (microservice, deposit_uuid, started_on,
+        finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
+                       [service, uuid, start_time, end_time,
+                        result, error])
+    except MySQLdb.Error as mysql_error:
+        logging.exception(mysql_error)
         return False
+    return True
 
 
 def get_journal(uuid):
