@@ -117,10 +117,6 @@ class SwordClient(object):
         pass
 
     def statement(self, deposit):
-
-        if self.col_iri is None:
-            self.service_document()
-
         receipt = requests.get(deposit['deposit_receipt'])
         if receipt.status_code != 200:
             raise Exception(str(receipt.status_code) +

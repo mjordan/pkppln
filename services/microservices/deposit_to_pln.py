@@ -42,7 +42,8 @@ class DepositToPln(PlnService):
 
         try:
             receipt, content = client.create_deposit(
-                url, filepath, deposit, journal)
+                url, filepath, deposit, journal
+            )
         except Exception as exception:
             return 'failed', exception.message
 
