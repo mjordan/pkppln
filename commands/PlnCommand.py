@@ -4,6 +4,9 @@ import argparse
 
 
 class PlnCommand(object):
+
+    """Abstract base class for pln staging commands."""
+
     __metaclass__ = abc.ABCMeta
 
     args = None

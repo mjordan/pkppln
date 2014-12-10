@@ -14,7 +14,8 @@ class JournalInfo(PlnCommand):
         mysql = pkppln.get_connection()
         cursor = mysql.cursor()
         cursor.execute(
-            'select distinct journal_uuid, title, issn, journal_url, contact_email from journals where journal_uuid=%s',
+            """select distinct journal_uuid, title, issn, journal_url,
+            contact_email from journals where journal_uuid=%s""",
             [uuid]
         )
         return cursor.fetchall()
