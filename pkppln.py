@@ -166,6 +166,17 @@ def check_access(uuid):
         return 'No'
 
 
+def get_deposit(uuid):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', [uuid])
+    except MySQLdb.Error, e:
+        logging.exception(e)
+        sys.exit(1)
+    return cursor.fetchone()
+
+
 def get_deposits(state):
     """
     Get the deposits that have the indicated processing state value
