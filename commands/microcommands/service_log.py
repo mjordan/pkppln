@@ -24,10 +24,10 @@ class ServiceLog(PlnCommand):
             [deposit]
         )
         entries = cursor.fetchall()
-        print '{0:<15} {1:<20} {2:<20} {3:<10}'.format(
+        print '{0:<18} {1:<20} {2:<20} {3:<10}'.format(
             'Service', 'Started', 'Finished', 'Outcome')
         for entry in entries:
-            print '{0:<15} {1:<20} {2:<20} {3:<10}'.format(
+            print '{0:<18} {1:<20} {2:<20} {3:<10}'.format(
                 entry['microservice'], str(entry['started_on']),
                 str(entry['finished_on']), entry['outcome'])
             if entry['error'] and args.verbose:

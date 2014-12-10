@@ -176,7 +176,8 @@ def get_deposits(state):
     try:
         cursor.execute("""
         SELECT * FROM deposits WHERE processing_state = %s
-        AND outcome = 'success' OR outcome = 'forced'; """, [state])
+        AND outcome='success' OR outcome='forced' OR outcome='reset'
+        """, [state])
     except MySQLdb.Error, e:
         logging.exception(e)
         sys.exit(1)

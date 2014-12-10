@@ -90,5 +90,5 @@ class PlnService(object):
                                       'forced')
                 self.log_microservice(deposit['deposit_uuid'],
                                       deposit_started,
-                                      deposit_ended, result,
+                                      deposit_ended, result + ' (ignored)',
                                       'FORCED UPDATE ' + error)

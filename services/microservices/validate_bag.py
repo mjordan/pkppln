@@ -3,7 +3,7 @@ from services.PlnService import PlnService
 import pkppln
 import bagit
 import zipfile
-
+import shutil
 
 class ValidateBag(PlnService):
 
@@ -29,6 +29,10 @@ class ValidateBag(PlnService):
                 return 'failure', 'Suspicious filename %s in zipped bag' % (name)
 
         expanded_path = pkppln.microservice_directory(self.state_after(), uuid)
+        if os.path.exists(expanded_path):
+            self.output(1, 'Removing old bag ' + expanded_path)
+            shutil.rmtree(expanded_path)
+
         zfile.extractall(expanded_path)
         bagpath = os.path.join(expanded_path, 'bag')
         self.output(1, 'extracted to ' + bagpath)
