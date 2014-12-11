@@ -10,6 +10,9 @@ class JournalHistory(PlnCommand):
             help='Journal UUID'
         )
 
+    def description(self):
+        return "Report all deposits for a journal."
+
     def execute(self, args):
         uuid = args.uuid
         mysql = pkppln.get_connection()

@@ -15,6 +15,9 @@ class ResetDeposit(PlnCommand):
             help='State to set the deposit to'
         )
 
+    def description(self):
+        return "Reset processing state of a deposit."
+
     def execute(self, args):
         mysql = pkppln.get_connection()
 

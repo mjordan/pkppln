@@ -1,4 +1,5 @@
 import pkppln
+from os.path import splitext, basename
 from commands.PlnCommand import PlnCommand
 
 
@@ -19,6 +20,9 @@ class JournalInfo(PlnCommand):
             [uuid]
         )
         return cursor.fetchall()
+    
+    def description(self):
+        return "Report all known journal metadata."
 
     def execute(self, args):
         uuid = args.uuid

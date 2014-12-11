@@ -4,6 +4,8 @@ from commands.PlnCommand import PlnCommand
 
 class ServiceLog(PlnCommand):
 
+    """Report all the activity on a deposit."""
+
     def add_args(self, parser):
         parser.add_argument(
             'deposit',
@@ -14,6 +16,9 @@ class ServiceLog(PlnCommand):
             help='Show verbose output',
             action='store_true'
         )
+
+    def description(self):
+        return "Report all processing steps for a deposit."
 
     def execute(self, args):
         deposit = args.deposit

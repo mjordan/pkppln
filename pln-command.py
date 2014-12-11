@@ -10,7 +10,7 @@ import traceback
 import argparse
 argparser = argparse.ArgumentParser(description='Run a staging command')
 argparser.add_argument('command', type=str, help='Name of the command to run')
-argparser.add_argument('subargs', nargs=argparse.REMAINDER)
+argparser.add_argument('subargs', nargs=argparse.REMAINDER, help='Arugments to subcommand')
 args = argparser.parse_args()
 
 command = args.command
