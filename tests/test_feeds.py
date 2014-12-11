@@ -9,14 +9,47 @@ import xml.etree.ElementTree as ET
 import json
 from os.path import abspath, dirname
 from _elementtree import XMLParser
+import requests
+
 sys.path.append(dirname(dirname(abspath(__file__))))
 from webapp.feeds.feed_server import terms_feed
-import requests
+import pkppln
 
 with_server = False
 
 
 class TestFeeds(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestFeeds, cls).setUpClass()
+        mysql = pkppln.get_connection()
+        cursor = mysql.cursor()
+        cursor.executemany(
+            """
+            INSERT INTO terms_of_use (current_version, last_updated, `key`, language, `text`)
+            VALUES ('Yes', '2014-09-20', %s, 'en-US', %s)
+            """,
+            [
+                ('utf8.single', u'I am good to go.'),
+                ('utf8.double', u'U+00E9: \xe9'),
+                ('utf8.triple', u'U+20AC: \u20AC'),
+                ('typographic.doublequote',  u'U+201C U+201D: \u201c\u201d'),
+                ('single.anglequote', u'U+2039 U+203A: \u2039\u203a')
+            ]
+        )
+        mysql.commit()
+
+    @classmethod
+    def tearDownClass(cls):
+        super(TestFeeds, cls).tearDownClass()
+        mysql = pkppln.get_connection()
+        cursor = mysql.cursor()
+        cursor.execute('DELETE FROM journals')
+        cursor.execute('DELETE FROM deposits')
+        cursor.execute('DELETE FROM microservices')
+        cursor.execute('DELETE FROM terms_of_use')
+        mysql.commit()
 
     def test_terms_rss(self):
         """
@@ -25,7 +58,8 @@ class TestFeeds(unittest.TestCase):
         """
         content = unicode(terms_feed('rss'))
         self.assertTrue('PKP PLN Terms' in content)
-        root = ET.fromstring(content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
+        root = ET.fromstring(
+            content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
         self.assertEquals('rss', root.tag)
         self.assertGreater(len(root.findall('.//item')), 0)
 
@@ -36,7 +70,8 @@ class TestFeeds(unittest.TestCase):
         """
         content = unicode(terms_feed('atom'))
         self.assertTrue('PKP PLN Terms' in content)
-        root = ET.fromstring(content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
+        root = ET.fromstring(
+            content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
         # must use full namespace here.
         self.assertEquals('{http://www.w3.org/2005/Atom}feed', root.tag)
         self.assertGreater(
@@ -70,8 +105,10 @@ class TestFeeds(unittest.TestCase):
         """
         if not with_server:
             return
-        r = requests.get('http://localhost:8080/terms/json')
-        self.assertEquals('application/json; charset=utf-8', r.headers['content-type'])
+        r = requests.get('http://localhost:8080/feeds/terms/json')
+        self.assertEqual(200, r.status_code)
+        self.assertEquals(
+            'application/json; charset=utf-8', r.headers['content-type'])
         js = json.loads(r.content)
         self.assertEquals(len(js), 5)
         self.assertEquals(js[0]['description'], 'I am good to go.')
@@ -83,31 +120,38 @@ class TestFeeds(unittest.TestCase):
     def test_server_atom(self):
         if not with_server:
             return
-        r = requests.get('http://localhost:8080/terms/atom')
+        r = requests.get('http://localhost:8080/feeds/terms/atom')
+        self.assertEqual(200, r.status_code)
         self.assertEquals('text/xml; charset=utf-8', r.headers['content-type'])
         root = ET.fromstring(r.content, parser=XMLParser(encoding='UTF-8'))
         entries = root.findall('.//{http://www.w3.org/2005/Atom}content')
         self.assertEquals(entries[0].text.strip(), u'I am good to go.')
         self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9')
         self.assertEquals(entries[2].text.strip(), u'U+20AC: \u20AC')
-        self.assertEquals(entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
-        self.assertEquals(entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+        self.assertEquals(
+            entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
+        self.assertEquals(
+            entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
 
     def test_server_rss(self):
         if not with_server:
             return
-        r = requests.get('http://localhost:8080/terms/rss')
+        r = requests.get('http://localhost:8080/feeds/terms/rss')
+        self.assertEqual(200, r.status_code)
         self.assertEquals('text/xml; charset=utf-8', r.headers['content-type'])
         root = ET.fromstring(r.content, parser=XMLParser(encoding='UTF-8'))
         entries = root.findall('.//item/description')
         self.assertEquals(entries[0].text.strip(), u'I am good to go.')
         self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9')
         self.assertEquals(entries[2].text.strip(), u'U+20AC: \u20AC')
-        self.assertEquals(entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
-        self.assertEquals(entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+        self.assertEquals(
+            entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
+        self.assertEquals(
+            entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
 
 if __name__ == '__main__':  # pragma: no cover
     if '--server' in sys.argv:
         with_server = True
         sys.argv.remove('--server')
+    pkppln.config_file_name = 'config_test.cfg'
     unittest.main()

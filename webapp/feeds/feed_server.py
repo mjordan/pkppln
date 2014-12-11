@@ -48,6 +48,6 @@ def terms_feed(feed='atom'):
     cursor.execute(
         'SELECT * FROM terms_of_use ORDER BY last_updated DESC LIMIT 10'
     )
-    terms = list(cursor.fetchall())
+    terms = cursor.fetchall()
     response.content_type = mimetype(feed)
     return template(template_file, encoding='utf8', terms=terms, json=json)
