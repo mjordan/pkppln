@@ -28,4 +28,3 @@ class ListDeposits(PlnCommand):
             print '\t'.join((deposit['deposit_uuid'],
                              deposit['processing_state'],
                              deposit['outcome']))
-        pass

@@ -30,4 +30,4 @@ class CheckStatus(PlnService):
             url = urlparse(status.attrib['src'])
             print ':'.join([url.hostname, status.attrib['state']])
 
-        return '', ''
+        return 'failed', ''

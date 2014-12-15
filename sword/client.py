@@ -110,9 +110,6 @@ class SwordClient(object):
         print response.headers['location']
         return response.headers['location'], response.content
 
-        # post the document
-        # return the response
-
     def modify_deposit(self, url, deposit):
         pass
 
