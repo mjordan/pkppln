@@ -11,8 +11,10 @@ before_script:
   - mysql -e 'create database pkpplntest;'
   - mysql pkpplntest < pkppln.sql
   - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
+  - sudo touch /var/log/mypln_sword_requests.log
   - sudo touch /var/log/myplnservices.log
   - sudo chmod a+rw /var/log/myplnservices.log
+  - sudo chmod a+rw /var/log/mypln_sword_requests.log
   - python server.py config_test.cfg > server.log &
   - sleep 4
 
