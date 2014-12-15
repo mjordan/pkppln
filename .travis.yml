@@ -10,7 +10,7 @@ before_script:
   - pip -q install -r requirements.txt
   - mysql -e 'create database pkpplntest;'
   - mysql pkpplntest < pkppln.sql
-  - mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
+  - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
   - python server.py config_test.cfg > server.log &
   - sleep 4
 
