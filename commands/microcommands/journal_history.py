@@ -20,19 +20,27 @@ class JournalHistory(PlnCommand):
         )
         entries = cursor.fetchall()
         if len(entries) == 0:
-            deposit = pkppln.get_deposit(uuid)
-            if deposit:
+            cursor.execute(
+                'SELECT * FROM journals WHERE deposit_uuid=%s',
+                [uuid]
+            )
+            journal = cursor.fetchone()
+            if journal:
                 cursor.execute('SELECT * FROM JOURNALS WHERE journal_uuid=%s',
-                               [deposit['journal_uuid']])
+                               [journal['journal_uuid']])
                 entries = cursor.fetchall()
 
         if len(entries) == 0:
-            print 'No journal found.'
-            return
+            return 'No journal found.'
 
-        print '\t'.join(['Title', 'ISSN', 'URL', 'Email', 'Deposit', 'Date'])
+        output = '\t'.join([
+            'Title', 'ISSN', 'URL', 'Email', 'Deposit', 'Date'
+        ])
+        output += '\n'
         for entry in entries:
-            print '\t'.join([entry['title'], entry['issn'],
-                             entry['journal_url'], entry['contact_email'],
-                             entry['deposit_uuid'],
-                             str(entry['date_deposited'])])
+            output += '\t'.join([entry['title'], entry['issn'],
+                                 entry['journal_url'], entry['contact_email'],
+                                 entry['deposit_uuid'],
+                                 str(entry['date_deposited'])])
+            output += '\n'
+        return output

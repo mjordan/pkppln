@@ -24,17 +24,25 @@ class JournalInfo(PlnCommand):
         uuid = args.uuid
         entries = self.get_journal_entries(uuid)
         if len(entries) == 0:
-            deposit = pkppln.get_deposit(uuid)
-            if deposit:
-                entries = self.get_journal_entries(deposit['journal_uuid'])
+            mysql = pkppln.get_connection()
+            cursor = mysql.cursor()
+            cursor.execute(
+                'SELECT * FROM journals WHERE deposit_uuid=%s',
+                [uuid]
+            )
+            journal = cursor.fetchone()
+            if journal:
+                entries = self.get_journal_entries(journal['journal_uuid'])
 
         if len(entries) == 0:
-            print 'No journal found.'
-            return
+            return 'No journal found.'
 
+        output = ''
         for entry in entries:
-            print 'Title:     ', entry['title']
-            print 'ISSN:      ', entry['issn']
-            print 'URL:       ', entry['journal_url']
-            print 'Email:     ', entry['contact_email']
-            print
+            output += 'Title:     ' + entry['title'] + '\n'
+            output += 'ISSN:      ' + entry['issn'] + '\n'
+            output += 'URL:       ' + entry['journal_url'] + '\n'
+            output += 'Email:     ' + entry['contact_email'] + '\n'
+            output += '\n'
+
+        return output

@@ -29,7 +29,7 @@ class PlnCommand(object):
         cmdargs = parser.parse_args(args.subargs)
         # args is a list of the unparsed arguments from the command line.
         # parse them out here and then call self.execute()
-        self.execute(cmdargs)
+        print self.execute(cmdargs)
 
     @abstractmethod
     def execute(self, args):
