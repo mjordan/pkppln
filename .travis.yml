@@ -3,13 +3,15 @@ language: python
 python:
   - "2.7"
 
+virtualenv:
+  system_site_packages: true
+
 before_script:
   - pip -q install -r requirements.txt
-  - cp config_travis.cfg config.cfg
   - mysql -e 'create database pkpplntest;'
   - mysql pkpplntest < pkppln.sql
   - mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
-  - python server.py > server.log &
+  - python server.py config_test.cfg > server.log &
   - sleep 4
 
 script:
