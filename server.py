@@ -3,10 +3,12 @@
 import sys
 
 import bottle
-import pkppln
 from os.path import abspath, dirname
 from bottle import run, get, static_file
 
+sys.path.append(dirname(abspath(__file__)))
+
+import pkppln
 import webapp.feeds.feed_server
 import webapp.sword.sword_server
 import webapp.admin.terms_server
