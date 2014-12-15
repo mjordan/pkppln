@@ -175,6 +175,6 @@ class TestPkpPln(unittest.TestCase):
             pkppln.microservice_directory('test1', 'abc'))
 
 
-if __name__ == '__main__':
-    pkppln.config_file_name = 'config_test.cfg'
+pkppln.config_file_name = 'config_test.cfg'
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()
