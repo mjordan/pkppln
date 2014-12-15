@@ -1,7 +1,5 @@
 language: python
 
-services:
-
 python:
   - "2.7"
 
@@ -10,6 +8,13 @@ before_script:
   - cp config_travis.cfg config.cfg
   - mysql -e 'create database mypln;'
   - mysql mypln < pkppln.sql
+  - python server.py > server.log &
+  - sleep 4
 
 script:
-  - python -m unittest discover test
+  - python -m unittest discover tests
+  
+after_script:
+  - killall python
+  - cat server.log
+  
