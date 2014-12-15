@@ -15,7 +15,7 @@ before_script:
   - sudo touch /var/log/myplnservices.log
   - sudo chmod a+rw /var/log/myplnservices.log
   - sudo chmod a+rw /var/log/mypln_sword_requests.log
-  - python server.py config_test.cfg > server.log &
+  - python server.py config_test.cfg > server.log 2>&1 &
   - sleep 4
 
 script:
