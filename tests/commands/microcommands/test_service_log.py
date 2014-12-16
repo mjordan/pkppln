@@ -17,34 +17,35 @@ class TestServiceLog(unittest.TestCase):
         mysql = pkppln.get_connection()
         cursor = mysql.cursor()
         cursor.executemany(
-            """INSERT INTO journals(journal_uuid, title, issn, journal_url,
-                   contact_email, deposit_uuid, date_deposited)
-               VALUES(%s, %s, %s, %s, %s, %s, %s)
-           """,
+            """INSERT INTO microservices (microservice, deposit_uuid,
+                            started_on, finished_on, outcome, error)
+               VALUES(%s, %s, %s, %s, %s, %s)
+            """,
             [
                 (
-                    'BBB187B8-61B2-BB38-86E2-C43902816AE8', 'Intl J Test',
-                    '9876-5432', 'http://ojs.dev/index.php/ijt',
-                    'test@example.com', 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33',
-                    '2014-12-01 10:35:16'
+                    'Harvest', 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33',
+                    '2014-12-10 10:00:00', '2014-12-10 10:35:16', 'success',
+                    ''
                 ),
                 (
-                    'BBB187B8-61B2-BB38-86E2-C43902816AE8', 'Intl J Test',
-                    '9876-5432', 'http://ojs.dev/index.php/ijt',
-                    'test@example.com', '315E8280-CD2D-1038-3D83-415E68DBF2E0',
-                    '2014-12-01 10:35:16'
+                    'validatePayload', 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33',
+                    '2014-12-10 10:00:00', '2014-12-10 10:35:16', 'success',
+                    ''
                 ),
                 (
-                    'BBB187B8-61B2-BB38-86E2-C43902816AE8', 'Intl J Testing',
-                    '9876-5432', 'http://ojs.dev/index.php/ijt',
-                    'test@example.com', '90F96C60-9989-506A-85B3-052ADEDC4831',
-                    '2014-12-01 10:35:16'
+                    'validateBag', 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33',
+                    '2014-12-10 10:00:00', '2014-12-10 10:35:16', 'success',
+                    ''
                 ),
                 (
-                    'BBB187B8-61B2-BB38-86E2-C43902816AE8', 'Intl J Testing',
-                    '9876-5432', 'http://ojs.dev/index.php/ijt',
-                    'test@example.com', 'D924C1EC-C38C-3FD4-2553-888758EA8FEA',
-                    '2014-12-01 10:35:16'
+                    'virusCheck', 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33',
+                    '2014-12-10 10:00:00', '2014-12-10 10:35:16', 'failed',
+                    ''
+                ),
+                (
+                    'Harvest', 'ABCABCAB-91E5-D61E-8409-DDFC230EBF33',
+                    '2014-12-10 10:00:00', '2014-12-10 10:35:16', 'success',
+                    ''
                 ),
             ]
         )
@@ -55,5 +56,19 @@ class TestServiceLog(unittest.TestCase):
         super(TestServiceLog, cls).tearDownClass()
         mysql = pkppln.get_connection()
         cursor = mysql.cursor()
-        cursor.execute('DELETE FROM journals')
+        cursor.execute('DELETE FROM microservices')
         mysql.commit()
+
+    def testServiceLog(self):
+        cmd = ServiceLog()
+        argsdict = {'deposit': 'BA7C44C8-91E5-D61E-8409-DDFC230EBF33'}
+        args = namedtuple('args', argsdict.keys())(**argsdict)
+        output = cmd.execute(args)
+        # header, four content lines, blank line.
+        self.assertEquals(6, len(output.split('\n')))
+        self.assertEquals(3, output.count('success'))
+        self.assertEquals(1, output.count('failed'))
+
+pkppln.config_file_name = 'config_test.cfg'
+if __name__ == '__main__':  # pragma: no cover
+    unittest.main()

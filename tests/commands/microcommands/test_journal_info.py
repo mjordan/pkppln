@@ -81,6 +81,6 @@ class TestJournalInfo(unittest.TestCase):
         self.assertEquals(1, output.count('Intl J Testing'))
 
 
+pkppln.config_file_name = 'config_test.cfg'
 if __name__ == '__main__':  # pragma: no cover
-    pkppln.config_file_name = 'config_test.cfg'
     unittest.main()

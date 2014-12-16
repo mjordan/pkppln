@@ -15,11 +15,10 @@ class VirusCheck(PlnService):
     mime-encoded content to a temporary directory and scans each one with
     clamd."""
 
-    clmd = clamd.ClamdUnixSocket()
-
-    filecount = 0
-
-    report = {}
+    def __init__(self):
+        self.clam = clamd.ClamdUnixSocket(path='/var/run/clamd.ctl')
+        self.filecount = 0
+        self.report = {}
 
     def state_before(self):
         return 'bagValidated'
@@ -35,7 +34,7 @@ class VirusCheck(PlnService):
             tmpfile = NamedTemporaryFile(delete=False)
             tmpfile.write(base64.decodestring(embed.text))
             tmpfile.close()
-            result = self.clmd.scan(tmpfile.name)
+            result = self.clam.scan(tmpfile.name)
             self.report[filename] = result[tmpfile.name]
             os.unlink(tmpfile.name)
 
@@ -49,7 +48,7 @@ class VirusCheck(PlnService):
         report_path = os.path.join(bag_path, 'data', 'virus_scan.txt')
         report_file = open(report_path, 'w')
         report_file.write('# Virus scan started ' + str(datetime.now())
-                          + ' by ' + self.clmd.version() + '\n')
+                          + ' by ' + self.clam.version() + '\n')
         bag_path = os.path.join(expanded_path, 'bag')
 
         bag = bagit.Bag(bag_path)
