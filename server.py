@@ -32,6 +32,18 @@ def static_fonts(filename):
     return static_file(filename, dirname(abspath(__file__)) + '/fonts/')
 
 
+@get('/deposits/<filename:path>')
+def static_deposit(filename):
+    # @TODO check if this is runnig in a test and allow uploads from
+    # deposits/received ONLY in that case.
+    return static_file(
+        filename,
+        dirname(abspath(__file__)) + '/deposits/',
+        download=filename,
+        mimetype='application/octet-stream'
+    )
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         pkppln.config_file_name = sys.argv[1]
