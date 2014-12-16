@@ -62,3 +62,6 @@ deposits/staged/*
 
 deposits/received/*
 !deposits/received/.gitkeep
+
+deposits/testing/*
+!deposits/testing/.gitkeep
