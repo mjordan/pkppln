@@ -55,3 +55,10 @@ target/
 .pydevproject
 .project
 config.cfg
+
+# PLN Deposits
+deposits/staged/*
+!deposits/staged/.gitkeep
+
+deposits/received/*
+!deposits/received/.gitkeep
