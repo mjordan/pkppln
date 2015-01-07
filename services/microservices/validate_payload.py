@@ -23,10 +23,7 @@ class ValidatePayload(PlnService):
         self.output(1, 'validating ' + filename)
         self.output(2, 'looking for\n' + filepath)
         bs = os.path.getsize(filepath)
-        # OJS reports file sizes in Kb (1024 bytes). When the payload is
-        # rebagged for LOCKSSOMatic, filesizes will be reported in kB (1000
-        # bytes).
-        kb = int(math.ceil(float(bs) / 1024.0))
+        kb = int(math.ceil(float(bs) / 1000.0))
         if size != kb:
             return 'failure', 'File sizes do not match: \n\t%s expected\n\t%s actual' % (size, kb)
         self.output(1, 'File sizes match')
