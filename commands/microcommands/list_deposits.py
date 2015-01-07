@@ -22,9 +22,9 @@ class ListDeposits(PlnCommand):
         deposits = cursor.fetchall()
         output = ''
         for deposit in deposits:
-            if hasattr(args, 'state') and deposit['processing_state'] != args.state:
+            if args.state is not None and deposit['processing_state'] != args.state:
                 continue
-            if hasattr(args, 'outcome') and deposit['outcome'] != args.outcome:
+            if args.outcome is not None and deposit['outcome'] != args.outcome:
                 continue
             output += '\t'.join((deposit['deposit_uuid'],
                                  deposit['processing_state'],
