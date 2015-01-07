@@ -20,7 +20,7 @@ verbosity_group.add_argument('-q', '--quiet', action='store_true',
                              default=False, help='Silence most output')
 argparser.add_argument('command', type=str, help='Name of the command to run')
 argparser.add_argument('subargs', nargs=argparse.REMAINDER)
-    args = argparser.parse_args()
+args = argparser.parse_args()
 
 command = args.command
 # dynamically load the module based on the parameter.
