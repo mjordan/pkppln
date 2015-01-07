@@ -64,6 +64,8 @@ class PlnService(object):
         self.output(2, 'Found ' + str(len(deposits)) +
                     ' deposits for service ' + args.service)
         for deposit in deposits:
+            if args.deposit is not None and deposit['deposit_uuid'] not in args.deposit:
+                continue
             self.output(1, deposit['deposit_url'])
             deposit_started = datetime.now()
             (result, error) = self.execute(deposit)

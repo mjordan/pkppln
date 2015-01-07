@@ -43,6 +43,8 @@ update_group.add_argument('-n', '--dry-run', action='store_true',
                           help='Do not update the deposit states')
 update_group.add_argument('-f', '--force', action='store_true',
                           help='Force updates to the deposit states.')
+argparser.add_argument('-d', '--deposit', action='append', 
+                       default=None, help='Run the service on one or more deposits')
 args = argparser.parse_args()
 if args.quiet:
     args.verbose = -1
