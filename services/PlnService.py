@@ -4,6 +4,31 @@ import abc
 from abc import abstractmethod
 import logging
 import MySQLdb
+import argparse
+
+
+def parse_arguments(arglist=None):
+    argparser = argparse.ArgumentParser(description='Run a staging service')
+    argparser.add_argument(
+        'service', type=str, help='Name of the service to run')
+
+    verbosity_group = argparser.add_mutually_exclusive_group()
+
+    verbosity_group.add_argument('-v', '--verbose', action='count', default=0,
+                                 help='Increase output verbosity')
+    verbosity_group.add_argument('-q', '--quiet', action='store_true',
+                                 default=False, help='Silence most output')
+    update_group = argparser.add_mutually_exclusive_group()
+    update_group.add_argument('-n', '--dry-run', action='store_true',
+                              help='Do not update the deposit states')
+    update_group.add_argument('-f', '--force', action='store_true',
+                              help='Force updates to the deposit states.')
+    argparser.add_argument('-d', '--deposit', action='append',
+                           default=None, help='Run the service on one or more deposits')
+    args = argparser.parse_args(arglist)
+    if args.quiet:
+        args.verbose = -1
+    return args
 
 
 class PlnService(object):
@@ -64,6 +89,8 @@ class PlnService(object):
         self.output(2, 'Found ' + str(len(deposits)) +
                     ' deposits for service ' + args.service)
         for deposit in deposits:
+            if args.deposit is not None and deposit['deposit_uuid'] not in args.deposit:
+                continue
             self.output(1, deposit['deposit_url'])
             deposit_started = datetime.now()
             (result, error) = self.execute(deposit)

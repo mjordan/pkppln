@@ -1,15 +1,28 @@
 language: python
 
-services:
-
 python:
   - "2.7"
 
+virtualenv:
+  system_site_packages: true
+
 before_script:
   - pip -q install -r requirements.txt
-  - cp config_travis.cfg config.cfg
-  - mysql -e 'create database mypln;'
-  - mysql mypln < pkppln.sql
+  - mysql -e 'create database pkpplntest;'
+  - mysql pkpplntest < pkppln.sql
+  - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
+  - sudo touch /var/log/mypln_sword_requests.log
+  - sudo touch /var/log/myplnservices.log
+  - sudo chmod a+rw /var/log/myplnservices.log
+  - sudo chmod a+rw /var/log/mypln_sword_requests.log
+  - python server.py config_test.cfg > server.log 2>&1 &
+  - sleep 4
 
 script:
-  - python -m unittest discover test
+  - python -m unittest discover tests
+  
+after_script:
+  - killall python
+  - cat server.log
+  - cat /var/log/myplnservices.log
+  

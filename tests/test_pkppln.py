@@ -146,13 +146,13 @@ class TestPkpPln(unittest.TestCase):
 
     def test_file_sha1(self):
         self.assertEquals(
-            'e8f5474bfb88e48f503cad41ad2f39495abcf543',
-            pkppln.file_sha1('tests/data/datafile'))
+            'c3c36be8e5415d39cd32591489605664c7c49f90',
+            pkppln.file_sha1('tests/data/402a6e97-dbd2-4aba-a3e4-234aabb4314c'))
 
     def test_file_md5(self):
         self.assertEquals(
-            'e34552303ce9c17d53f66689d883f63c',
-            pkppln.file_md5('tests/data/datafile'))
+            'd3c13e5aae040428377e71985e037453',
+            pkppln.file_md5('tests/data/402a6e97-dbd2-4aba-a3e4-234aabb4314c'))
 
     def test_input_path(self):
         self.assertEquals(
@@ -175,6 +175,6 @@ class TestPkpPln(unittest.TestCase):
             pkppln.microservice_directory('test1', 'abc'))
 
 
-if __name__ == '__main__':
-    pkppln.config_file_name = 'config_test.cfg'
+pkppln.config_file_name = 'config_test.cfg'
+if __name__ == '__main__':  # pragma: no cover
     unittest.main()

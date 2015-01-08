@@ -149,9 +149,7 @@ class TestFeeds(unittest.TestCase):
         self.assertEquals(
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
 
+pkppln.config_file_name = 'config_test.cfg'
+with_server = True
 if __name__ == '__main__':  # pragma: no cover
-    if '--server' in sys.argv:
-        with_server = True
-        sys.argv.remove('--server')
-    pkppln.config_file_name = 'config_test.cfg'
     unittest.main()

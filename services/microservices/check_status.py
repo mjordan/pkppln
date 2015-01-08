@@ -22,8 +22,8 @@ class CheckStatus(PlnService):
             config.get('URLs', 'lockssomatic_base_url'),
             journal_uuid
         )
-        service_document = client.statement(deposit)
-        root = ET.fromstring(service_document)
+        statement = client.statement(deposit)
+        root = ET.fromstring(statement)
         statuses = root.findall('.//lom:server', pkppln.namespaces)
         print deposit['deposit_url']
         for status in statuses:

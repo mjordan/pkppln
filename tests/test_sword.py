@@ -46,7 +46,7 @@ class TestSwordServer(unittest.TestCase):
         cursor.execute('DELETE FROM microservices')
         cursor.execute('DELETE FROM terms_of_use')
         mysql.commit()
-  
+
     def test_service_document(self):
         r = requests.get(
             'http://localhost:8080/api/sword/2.0/sd-iri',
@@ -66,7 +66,7 @@ class TestSwordServer(unittest.TestCase):
             entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
         self.assertEquals(
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
-   
+
     def test_service_document_no_journal_url(self):
         r = requests.get(
             'http://localhost:8080/api/sword/2.0/sd-iri',
@@ -76,7 +76,7 @@ class TestSwordServer(unittest.TestCase):
         )
         self.assertEquals(400, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
-   
+
     def test_service_document_no_on_behalf(self):
         r = requests.get(
             'http://localhost:8080/api/sword/2.0/sd-iri',
@@ -86,7 +86,7 @@ class TestSwordServer(unittest.TestCase):
         )
         self.assertEquals(400, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
-   
+
     def test_create_deposit(self):
         deposit = """
  <entry xmlns="http://www.w3.org/2005/Atom"
@@ -123,9 +123,9 @@ class TestSwordServer(unittest.TestCase):
         cursor.execute('SELECT * FROM journals')
         journals = list(cursor.fetchall())
         self.assertEquals(1, len(journals))
-        self.assertEquals('http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
-   
-   
+        self.assertEquals(
+            'http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
+
     def test_statement(self):
         deposit = """
  <entry xmlns="http://www.w3.org/2005/Atom"
@@ -216,12 +216,11 @@ class TestSwordServer(unittest.TestCase):
         self.assertEquals('edit', deposits[1]['action'])
         cursor.execute('SELECT * FROM journals')
         journals = list(cursor.fetchall())
-        self.assertEquals('http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
+        self.assertEquals(
+            'http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
 
 
+pkppln.config_file_name = 'config_test.cfg'
+with_server = True
 if __name__ == '__main__':  # pragma: no cover
-    pkppln.config_file_name = 'config_test.cfg'
-    if '--server' in sys.argv:
-        with_server = True
-        sys.argv.remove('--server')
     unittest.main()

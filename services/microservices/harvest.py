@@ -28,6 +28,8 @@ class Harvest(PlnService):
             self.output(2, 'HTTP ' + str(r.status_code))
             if r.status_code == 404:
                 raise Exception("Deposit URL %s not found" % (url))
+            if r.status_code != 200:
+                raise Exception("HTTP Error: " + str(r.status_code))
             f = open(harvest_bag, 'wb')
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:

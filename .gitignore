@@ -52,13 +52,16 @@ docs/_build/
 
 # PyBuilder
 target/
-config.cfg
-whitelist.txt
-blacklist.txt
-tools/views/css/*
-tools/views/fonts/*
-tools/views/js/*
-*.pyc
-.DS_Store
-.project
 .pydevproject
+.project
+config.cfg
+
+# PLN Deposits
+deposits/staged/*
+!deposits/staged/.gitkeep
+
+deposits/received/*
+!deposits/received/.gitkeep
+
+deposits/testing/*
+!deposits/testing/.gitkeep

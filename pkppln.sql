@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.6.20, for osx10.8 (x86_64)
 --
--- Host: localhost    Database: mypln
+-- Host: localhost    Database: pkpplntest
 -- ------------------------------------------------------
 -- Server version	5.6.20-log
 
@@ -39,7 +39,7 @@ CREATE TABLE `deposits` (
   `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `deposited_lom` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +69,7 @@ CREATE TABLE `journals` (
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=291 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -126,7 +126,7 @@ CREATE TABLE `terms_of_use` (
   `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `text` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=496 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,7 +136,6 @@ CREATE TABLE `terms_of_use` (
 
 LOCK TABLES `terms_of_use` WRITE;
 /*!40000 ALTER TABLE `terms_of_use` DISABLE KEYS */;
-INSERT INTO `terms_of_use` (`id`, `current_version`, `last_updated`, `key`, `language`, `text`) VALUES (12,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.jm_has_authority','en-US','I have the legal and contractual authority to include this journal\'s content in a secure preservation network and, if and when necessary, to make the content available in the PKP PLN.'),(13,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.pkp_can_use_cc_by','en-US','I agree to allow the PKP-PLN to make post-trigger event content available under the CC-BY (or current equivalent) license.'),(14,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.pkp_can_use_address','en-US','I agree to allow the PKP-PLN to include this journal\'s title and ISSN, and the email address of the Primary Contact, with the preserved journal content.'),(15,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.licensing_is_current','en-US','I confirm that licensing information pertaining to articles in this journal is accurate at the time of publication.'),(16,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.terms_may_be_revised','en-US','I acknowledge these terms may be revised from time to time and I will be required to review and agree to them each time this occurs.'),(17,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.jm_will_not_violate','en-US','I agree not to violate any laws and regulations that may be applicable to this network and the content.'),(18,'Yes','2014-09-20 17:00:00','plugins.generic.pln.terms_of_use.pkp_may_not_preserve','en-US','I agree that the PKP-PLN reserves the right, for whatever reason, not to preserve or make content available.');
 /*!40000 ALTER TABLE `terms_of_use` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -149,4 +148,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-19 15:55:57
+-- Dump completed on 2014-12-15 13:43:18

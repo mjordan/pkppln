@@ -2,10 +2,9 @@
 Generate atom, rss, and json feeds of new service terms.
 """
 
-import sys
-from os.path import abspath, isfile, dirname
+from os.path import isfile, dirname
 import bottle
-from bottle import route, run, template, response, HTTPResponse
+from bottle import route, template, response, HTTPResponse
 import json
 import pkppln
 

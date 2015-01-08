@@ -27,8 +27,7 @@ class ResetDeposit(PlnCommand):
 
         if update and log:
             mysql.commit()
-            return
+            return ''
 
         mysql.rollback()
-        print "Failed."
-        print "Update: ", update, " log: ", log
+        return "Failed.\n  Update: " + str(update) + "\n  log: " + str(log)

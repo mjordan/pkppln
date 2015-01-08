@@ -3,10 +3,12 @@
 import sys
 
 import bottle
-import pkppln
 from os.path import abspath, dirname
 from bottle import run, get, static_file
 
+sys.path.append(dirname(abspath(__file__)))
+
+import pkppln
 import webapp.feeds.feed_server
 import webapp.sword.sword_server
 import webapp.admin.terms_server
@@ -28,6 +30,18 @@ def static_js(filename):
 @get('/fonts/<filename:path>')
 def static_fonts(filename):
     return static_file(filename, dirname(abspath(__file__)) + '/fonts/')
+
+
+@get('/deposits/<filename:path>')
+def static_deposit(filename):
+    # @TODO check if this is runnig in a test and allow uploads from
+    # deposits/received ONLY in that case.
+    return static_file(
+        filename,
+        dirname(abspath(__file__)) + '/deposits/',
+        download=filename,
+        mimetype='application/octet-stream'
+    )
 
 
 if __name__ == '__main__':
