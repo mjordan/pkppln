@@ -4,6 +4,9 @@ from commands.PlnCommand import PlnCommand
 
 class ListJournals(PlnCommand):
 
+    def description(self):
+        return "Report all journals that have made a deposit."
+
     def execute(self, args):
         mysql = pkppln.get_connection()
         cursor = mysql.cursor()

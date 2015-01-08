@@ -7,6 +7,9 @@ from services.PlnService import parse_arguments
 
 class Process(PlnCommand):
 
+    def description(self):
+        return "Run all processing steps for a deposit."
+
     def add_args(self, parser):
         parser.add_argument('deposit',
                             help='Deposit to process')

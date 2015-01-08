@@ -5,6 +5,9 @@ from commands.PlnCommand import PlnCommand
 
 class ListCommands(PlnCommand):
 
+    def description(self):
+        return "List all commands available."
+
     def execute(self, args):
         path = dirname(abspath(__file__))
         files = [basename(p) for p in glob(path + '/*.py')]
