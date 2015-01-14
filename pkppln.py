@@ -194,6 +194,24 @@ def get_deposits(state):
     return cursor.fetchall()
 
 
+def get_journal_deposits(journal_uuid, state):
+    """
+    Get the deposits that have the indicated processing state value
+    and return them to the microservice for processing.
+    """
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute("""
+        SELECT * FROM deposits WHERE journal_uuid = %s AND
+        processing_state = %s AND outcome <> 'failed'
+        """, [journal_uuid, state])
+    except MySQLdb.Error, e:
+        logging.exception(e)
+        sys.exit(1)
+    return cursor.fetchall()
+
+
 def update_deposit(deposit_uuid, state, result):
     """
     Update a deposit in the database. Does not do a commit or rollback. The
@@ -284,6 +302,21 @@ def get_journal(uuid):
     if cursor.rowcount:
         return cursor.fetchone()
     return None
+
+
+def get_journals():
+    """Get all distinct journals from the database, sorted by title"""
+    mysql = get_connection()
+    cursor = mysql.cursor()
+
+    cursor.execute('''select title, journal_url, issn, 
+        max(date_deposited) as recent_deposit, journal_uuid
+        from mypln.journals
+        group by title, journal_url, journal_uuid, issn
+        order by title, journal_url, journal_uuid, issn
+        ''')
+    journals = cursor.fetchall()
+    return journals
 
 
 def insert_journal(journal_uuid, title, issn, journal_url, email,

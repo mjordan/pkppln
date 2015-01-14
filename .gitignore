@@ -65,3 +65,6 @@ deposits/received/*
 
 deposits/testing/*
 !deposits/testing/.gitkeep
+
+# cconfiguration file.
+config.cfg

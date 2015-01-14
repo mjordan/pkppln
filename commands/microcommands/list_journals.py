@@ -8,15 +8,7 @@ class ListJournals(PlnCommand):
         return "Report all journals that have made a deposit."
 
     def execute(self, args):
-        mysql = pkppln.get_connection()
-        cursor = mysql.cursor()
-        cursor.execute(
-            '''select title, journal_url,
-                        max(date_deposited) as recent_deposit, journal_uuid
-                from mypln.journals
-                group by title, journal_url, journal_uuid
-                ''')
-        journals = cursor.fetchall()
+        journals = pkppln.get_journals()
         output = ''
         for journal in journals:
             output += '\t'.join((journal['title'], journal['journal_url'],
