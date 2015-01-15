@@ -287,7 +287,7 @@ def get_journal(uuid):
 
 
 def insert_journal(journal_uuid, title, issn, journal_url, email,
-                   deposit_uuid):
+                   deposit_uuid, publisher_name='x', publisher_url='z'):
     """
     Insert a journal record to the database. Does not do a rollback() on
     failure or a commit() on success - that is the repsonsibility of the
@@ -297,10 +297,12 @@ def insert_journal(journal_uuid, title, issn, journal_url, email,
     try:
         cursor.execute("""
         INSERT INTO journals (journal_uuid, title, issn, journal_url,
-        contact_email, deposit_uuid, date_deposited)
-        VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+            contact_email, deposit_uuid, date_deposited, publisher_name,
+            publisher_url)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                        (journal_uuid, title, issn, journal_url, email,
-                        deposit_uuid, datetime.now()))
+                        deposit_uuid, datetime.now(), publisher_name,
+                        publisher_url))
     except MySQLdb.Error as e:
         logging.exception(e)
         return False

@@ -146,9 +146,13 @@ def create_deposit(journal_uuid):
         parser=XMLParser(encoding='UTF-8')
     )
 
+    pkppln.log_message('CREATE DEPOSIT: ' + request.body.getvalue())
+
     title = root.find('entry:title', namespaces).text
     issn = root.find('pkp:issn', namespaces).text
     journal_url = root.find('pkp:journal_url', namespaces).text
+    publisher_name = root.find('pkp:publisherName', namespaces).text
+    publisher_url = root.find('pkp:publisherUrl', namespaces).text
     email = root.find('entry:email', namespaces).text
     urn_id = root.find('entry:id', namespaces).text
     deposit_uuid = urn_id.replace('urn:uuid:', '')
@@ -168,7 +172,8 @@ def create_deposit(journal_uuid):
             return HTTPResponse(status=501)
     # hold off on the mysql commit - ensure that the journal gets inserted
     # as well.
-    if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email, deposit_uuid) is False:
+    if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email,
+                             deposit_uuid, publisher_name, publisher_url) is False:
         mysql.rollback()
         return HTTPResponse(status=501)
 
@@ -205,6 +210,8 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
     issn = root.find('pkp:issn', namespaces).text
     journal_url = root.find('pkp:journal_url', namespaces).text
     email = root.find('entry:email', namespaces).text
+    publisher_name = root.find('pkp:publisherName', namespaces).text
+    publisher_url = root.find('pkp:publisherUrl', namespaces).text
     urn_id = root.find('entry:id', namespaces).text
     deposit_uuid = urn_id.replace('urn:uuid:', '')
 
@@ -225,7 +232,8 @@ def edit_deposit(journal_uuid, deposit_uuid_param):
             mysql.rollback()
             return HTTPResponse(status=501)
 
-    if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email, deposit_uuid) is False:
+    if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email,
+                             deposit_uuid, publisher_name, publisher_url) is False:
         mysql.rollback()
         return HTTPResponse(status=501)
 
