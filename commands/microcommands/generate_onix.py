@@ -1,14 +1,18 @@
 import pkppln
 from commands.PlnCommand import PlnCommand
 from lxml import etree as et
-from lxml.builder import E
+from lxml.builder import ElementMaker
 from datetime import datetime
 
 namespaces = {
     'oph': 'http://www.editeur.org/onix/serials/SOH',
     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-    'xmlns': 'http://www.w3.org/1999/xhtml'
 }
+
+E = ElementMaker(
+    namespace=namespaces['oph'],
+    nsmap=namespaces
+)
 
 
 class GenerateOnix(PlnCommand):
@@ -22,11 +26,17 @@ class GenerateOnix(PlnCommand):
                 E.Sender(
                     E.SenderName('Public Knowledge Project PLN')
                 ),
-                E.SenderDateTime(
+                E.SentDateTime(
                     datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
                 ),
                 E.CompleteFile()
-            )
+            ),
+            {
+                # set the schema location. unfortunately ElementMaker doesn't
+                # understand prefixed attribute names.
+                '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': '',
+                'version': '0.2'
+            }
         )
 
         holdingsList = E.HoldingsList(
@@ -72,7 +82,7 @@ class GenerateOnix(PlnCommand):
                 E.NotificationType('00'),
                 E.ResourceVersion(
                     E.ResourceVersionIdentifier(
-                        E.ResourceVersionIdType('07'),
+                        E.ResourceVersionIDType('07'),
                         E.IDValue(journal['issn'])
                     ),
                     E.Title(
@@ -81,20 +91,22 @@ class GenerateOnix(PlnCommand):
                     ),
                     E.Publisher(
                         E.PublishingRole('01'),
-                        E.PublisherName('Open Journal System')
+                        E.PublisherName(journal['publisher_name'])
                     ),
                     E.OnlinePackage(
                         E.Website(
                             E.WebsiteRole('05'),
                             E.WebsiteLink(journal['journal_url'])
                         ),
-                        E.packageDetail(
+                        E.PackageDetail(
                             E.Coverage(
                                 # item-by-item
                                 E.CoverageDescriptionLevel('03'),
-                                E.SupplimentInclusion('04'),
+                                E.SupplementInclusion('04'),
                                 E.IndexInclusion('04'),
                                 self.addDeposits(deposits),
+                                # MISSING EpubFormat, PreservationStatus, 
+                                # AND VerificationStatus
                             )
                         )
                     )

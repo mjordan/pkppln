@@ -310,11 +310,11 @@ def get_journals():
     cursor = mysql.cursor()
 
     cursor.execute('''
-        select title, journal_url, publisher_name, publisher_url,
+        select title, journal_url, publisher_name, publisher_url, issn,
             max(date_deposited) as recent_deposit, journal_uuid
         from journals
-        group by title, journal_url, journal_uuid, publisher_name, publisher_url
-        order by title, journal_url, journal_uuid, issn
+        group by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
+        order by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
         ''')
     journals = cursor.fetchall()
     return journals
