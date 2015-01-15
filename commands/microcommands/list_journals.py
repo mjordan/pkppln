@@ -11,8 +11,10 @@ class ListJournals(PlnCommand):
         journals = pkppln.get_journals()
         output = ''
         for journal in journals:
-            output += '\t'.join((journal['title'], journal['journal_url'],
-                                 str(journal['recent_deposit']),
-                                 journal['journal_uuid']))
+            output += '\t'.join((
+                journal['title'], journal['journal_url'],
+                journal['publisher_name'], journal['publisher_url'],
+                str(journal['recent_deposit']),
+                journal['journal_uuid']))
             output += '\n'
         return output
