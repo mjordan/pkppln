@@ -68,6 +68,8 @@ CREATE TABLE `journals` (
   `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
   `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `publisher_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `publisher_url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=291 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
