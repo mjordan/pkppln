@@ -96,9 +96,14 @@ class TestSwordServer(unittest.TestCase):
     <title>Journal of Foo Studies</title>
     <pkp:issn>1234-123x</pkp:issn>
     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
-    <pkp:content size="102400" checksumType="sha1" volume="4" issue = "3" pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
+    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" 
+    pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">
+        http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip
+    </pkp:content>
 </entry>
         """
         r = requests.post(
@@ -135,6 +140,8 @@ class TestSwordServer(unittest.TestCase):
     <title>Journal of Foo Studies</title>
     <pkp:issn>1234-123x</pkp:issn>
     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
     <pkp:content size="102400" checksumType="sha1" volume="4" issue = "3" pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
@@ -167,6 +174,8 @@ class TestSwordServer(unittest.TestCase):
     <title>Journal of Foo Studies</title>
     <pkp:issn>1234-123x</pkp:issn>
     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
     <pkp:content size="102400" checksumType="sha1" volume="4" issue = "3" pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
@@ -187,6 +196,8 @@ class TestSwordServer(unittest.TestCase):
     <title>Journal of Bar Studies</title>
     <pkp:issn>1234-123x</pkp:issn>
     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
     <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" pubdate="2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>

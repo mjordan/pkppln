@@ -33,10 +33,11 @@ class TestPkpPln(unittest.TestCase):
         )
         cursor.execute("""INSERT INTO `journals` (`id`, `journal_uuid`,
         `title`, `issn`, `journal_url`, `contact_email`, `deposit_uuid`,
-        `date_deposited`) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
+        `date_deposited`, `publisher_name`, `publisher_url`)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                        ['1', '456', 'IJTesting', '123456',
                         'http://example.com', 'example@example.com', '1234',
-                        '2010-12-25'])
+                        '2010-12-25', 'Intl Publr', 'http://pub.example.com'])
         mysql.commit()
 
     def tearDown(self):
@@ -137,7 +138,9 @@ class TestPkpPln(unittest.TestCase):
         <pkp:issn>123456</pkp:issn>
         <pkp:date_deposited>2010-12-25</pkp:date_deposited>
         <pkp:contact_email>example@example.com</pkp:contact_email>
+        <pkp:publisher_url>http://pub.example.com</pkp:publisher_url>
         <pkp:deposit_uuid>1234</pkp:deposit_uuid>
+        <pkp:publisher_name>Intl Publr</pkp:publisher_name>
         <pkp:id>1</pkp:id></pkp:root>""".replace('\n        ', '')
         self.assertEquals(expected, xml)
 
