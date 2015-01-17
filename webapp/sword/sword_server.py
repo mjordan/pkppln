@@ -151,8 +151,19 @@ def create_deposit(journal_uuid):
     title = root.find('entry:title', namespaces).text
     issn = root.find('pkp:issn', namespaces).text
     journal_url = root.find('pkp:journal_url', namespaces).text
-    publisher_name = root.find('pkp:publisherName', namespaces).text
-    publisher_url = root.find('pkp:publisherUrl', namespaces).text
+
+    node = root.find('pkp.publisherName')
+    if(node is None):
+        publisher_name = '(unknown)'
+    else:
+        publisher_name = node.text
+
+    node = root.find('pkp:publisherUrl')
+    if node is None:
+        publisher_url = ''
+    else:
+        publisher_url = node.text
+
     email = root.find('entry:email', namespaces).text
     urn_id = root.find('entry:id', namespaces).text
     deposit_uuid = urn_id.replace('urn:uuid:', '')
