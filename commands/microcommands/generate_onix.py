@@ -3,6 +3,7 @@ from commands.PlnCommand import PlnCommand
 from lxml import etree as et
 from lxml.builder import ElementMaker
 from datetime import datetime
+import time
 
 namespaces = {
     'oph': 'http://www.editeur.org/onix/serials/SOH',
@@ -47,27 +48,50 @@ class GenerateOnix(PlnCommand):
         onix.append(holdingsList)
         return onix, holdingsList
 
-    def addDeposits(self, deposits):
-        element = E.FixedCoverage()
-        for deposit in deposits:
-            release = E.Release(
-                E.Enumeration(
-                    E.Level1(
-                        E.Unit('Volume'),
-                        E.Number(deposit['deposit_volume'])
-                    ),
-                    E.Level2(
-                        E.Unit('Issue'),
-                        E.Number(deposit['deposit_issue'])
+    def addDeposit(self, deposit):
+        element = E.PackageDetail(
+            E.Coverage(
+                # item-by-item
+                E.CoverageDescriptionLevel('03'),
+                E.SupplementInclusion('04'),
+                E.IndexInclusion('04'),
+                E.FixedCoverage(
+                    E.Release(
+                        E.Enumeration(
+                            E.Level1(
+                                E.Unit('Volume'),
+                                E.Number(deposit['deposit_volume'])
+                            ),
+                            E.Level2(
+                                E.Unit('Issue'),
+                                E.Number(deposit['deposit_issue'])
+                            )
+                        ),
+                        E.NominalDate(
+                            E.Calendar('00'),
+                            E.DateFormat('00'),
+                            E.Date(deposit['deposit_pubdate'].replace('-', ''))
+                        )
                     )
-                ),
-                E.NominalDate(
-                    E.Calendar('00'),
-                    E.DateFormat('YYYY-MM-DD'),
-                    E.Date(deposit['deposit_pubdate'])
                 )
+            ),
+            E.PreservationStatus(
+                E.PreservationStatusCode('05'),
+                E.DateOfStatus(deposit['deposited_lom'].strftime('%Y%m%d')),
+            ),
+            E.VerificationStatus('01'),
+        )
+        return element
+
+    def addAllDeposits(self, journal, deposits):
+        element = E.OnlinePackage(
+            E.Website(
+                E.WebsiteRole('05'),
+                E.WebsiteLink(journal['journal_url'])
             )
-            element.append(release)
+        )
+        for deposit in deposits:
+            element.append(self.addDeposit(deposit))
         return element
 
     def addJournals(self, holdingsList):
@@ -93,23 +117,7 @@ class GenerateOnix(PlnCommand):
                         E.PublishingRole('01'),
                         E.PublisherName(journal['publisher_name'])
                     ),
-                    E.OnlinePackage(
-                        E.Website(
-                            E.WebsiteRole('05'),
-                            E.WebsiteLink(journal['journal_url'])
-                        ),
-                        E.PackageDetail(
-                            E.Coverage(
-                                # item-by-item
-                                E.CoverageDescriptionLevel('03'),
-                                E.SupplementInclusion('04'),
-                                E.IndexInclusion('04'),
-                                self.addDeposits(deposits),
-                                # MISSING EpubFormat, PreservationStatus, 
-                                # AND VerificationStatus
-                            )
-                        )
-                    )
+                    self.addAllDeposits(journal, deposits)
                 )
             )
             holdingsList.append(record)
