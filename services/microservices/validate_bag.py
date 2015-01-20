@@ -5,6 +5,7 @@ import bagit
 import zipfile
 import shutil
 
+
 class ValidateBag(PlnService):
 
     """Validate a bag in a deposit"""

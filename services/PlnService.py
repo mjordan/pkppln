@@ -2,8 +2,6 @@ from datetime import datetime
 import pkppln
 import abc
 from abc import abstractmethod
-import logging
-import MySQLdb
 import argparse
 
 

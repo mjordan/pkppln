@@ -3,16 +3,10 @@ from commands.PlnCommand import PlnCommand
 from lxml import etree as et
 from lxml.builder import ElementMaker
 from datetime import datetime
-import time
-
-namespaces = {
-    'oph': 'http://www.editeur.org/onix/serials/SOH',
-    'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-}
 
 E = ElementMaker(
-    namespace=namespaces['oph'],
-    nsmap=namespaces
+    namespace=pkppln.namespaces['oph'],
+    nsmap=pkppln.namespaces
 )
 
 
@@ -22,6 +16,7 @@ class GenerateOnix(PlnCommand):
         return "Generate ONIX-PH XML."
 
     def skeleton(self):
+        """Create the skeleton of an ONIX xml document."""
         onix = E.ONIXPreservationHoldings(
             E.Header(
                 E.Sender(
@@ -49,6 +44,8 @@ class GenerateOnix(PlnCommand):
         return onix, holdingsList
 
     def addDeposit(self, deposit):
+        """Create a PackageDetail element and return it. Called once for
+        each deposit in the system."""
         element = E.PackageDetail(
             E.Coverage(
                 # item-by-item
@@ -84,6 +81,8 @@ class GenerateOnix(PlnCommand):
         return element
 
     def addAllDeposits(self, journal, deposits):
+        """Add all deposits to the xml. Each one is wrapped in an OnlinePackage
+        element."""
         element = E.OnlinePackage(
             E.Website(
                 E.WebsiteRole('05'),
@@ -95,6 +94,7 @@ class GenerateOnix(PlnCommand):
         return element
 
     def addJournals(self, holdingsList):
+        """Add all the journals to the xml."""
         for journal in pkppln.get_journals():
             deposits = pkppln.get_journal_deposits(
                 journal['journal_uuid'],

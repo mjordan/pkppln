@@ -15,12 +15,12 @@ class PlnCommand(object):
 
     def name(self):
         return type(self).__name__
-    
+
     def module(self):
         filepath = inspect.getfile(self.__class__)
         filename = basename(filepath)
         module_name = splitext(filename)[0]
-        return module_name;
+        return module_name
 
     def output(self, n, message=''):
         """Output a message at verbosity n."""
@@ -38,7 +38,8 @@ class PlnCommand(object):
     def run(self, args):
         parser = argparse.ArgumentParser(
             description=self.description(),
-            usage='%(prog)s [global options] ' + self.module() + ' [command options]'
+            usage='%(prog)s [global options] ' +
+            self.module() + ' [command options]'
         )
         self.add_args(parser)
         cmdargs = parser.parse_args(args.subargs)

@@ -13,7 +13,7 @@ class ListDeposits(PlnCommand):
             '--outcome',
             help='Only show deposits with this outcome'
         )
-        
+
     def description(self):
         return "List all deposits in the staging service."
 

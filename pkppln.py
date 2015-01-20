@@ -27,6 +27,8 @@ namespaces = {
     'sword': 'http://purl.org/net/sword/',
     'app': 'http://www.w3.org/2007/app',
     'lom': 'http://lockssomatic.info/SWORD2',
+    'oph': 'http://www.editeur.org/onix/serials/SOH',
+    'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 }
 
 

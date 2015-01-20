@@ -6,7 +6,7 @@ import shutil
 
 class StageBag(PlnService):
 
-    """Move the serialized bag file into the staging area, so that 
+    """Move the serialized bag file into the staging area, so that
     LOCKSSOMatic may harvest it later."""
 
     def state_before(self):

@@ -5,6 +5,9 @@ from commands.PlnCommand import PlnCommand
 
 class ResetDeposit(PlnCommand):
 
+    """Set the state of a deposit, so that it may be reprocessed or
+    have a processing step skipped."""
+
     def add_args(self, parser):
         parser.add_argument(
             'uuid',

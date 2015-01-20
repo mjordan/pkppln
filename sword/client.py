@@ -6,20 +6,19 @@ from datetime import datetime
 
 
 class SwordClient(object):
-
-    sd_iri = None
-
-    col_iri = None
-
-    checksum_type = None
-
-    max_upload_size = None
+    """Very simple and special purpose SWORD client for the PLN to make
+    deposits to LOCKSSOMatic an check on their status."""
 
     def __init__(self, sd_iri, provider_uuid):
+        """Initialize the client with the service document IRI and a
+        content provider UUID."""
         self.sd_iri = sd_iri
         self.provider_uuid = provider_uuid
+        self.checksum_type = None
+        self.max_upload_size = None
 
     def service_document(self):
+        """Fetch a service document and parse it for more information."""
         headers = {
             'X-On-Behalf-Of': self.provider_uuid
         }
@@ -49,6 +48,7 @@ class SwordClient(object):
         return root
 
     def _checksum(self, filepath):
+        """Calculate a checksum for a deposit."""
         if self.checksum_type == 'md5':
             return pkppln.file_md5(filepath)
         if self.checksum_type == 'sha1':
@@ -57,7 +57,7 @@ class SwordClient(object):
 
     def create_deposit(self, url, filepath, deposit, journal):
         """
-        Send a deposit to the sword server. The deposit is staged at url for 
+        Send a deposit to the sword server. The deposit is staged at url for
         the server to download, and on the local file system at filepath.
 
         Throws an exception if the deposit failed.
@@ -111,9 +111,11 @@ class SwordClient(object):
         return response.headers['location'], response.content
 
     def modify_deposit(self, url, deposit):
+        """We do not modify deposits. Only create new ones."""
         pass
 
     def statement(self, deposit):
+        """Get the sword statement for a deposit, check on its status."""
         receipt = requests.get(deposit['deposit_receipt'])
         if receipt.status_code != 200:
             raise Exception(str(receipt.status_code) +
