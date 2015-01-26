@@ -168,14 +168,21 @@ def check_access(uuid):
         return 'No'
 
 
-def get_all_terms(language='en-US'):
+def get_all_terms(language='en-us'):
     mysql = get_connection()
     cursor = mysql.cursor()
+    log_message('getting all terms for ' + language)
     try:
         cursor.execute("""
             SELECT * FROM terms_of_use
-            WHERE language = %s AND current_version = 'Yes'
-            ORDER BY weight ASC""", [language])
+            WHERE LOWER(language) = %s AND current_version = 'Yes'
+            ORDER BY weight ASC""", [language.lower()])
+        if cursor.rowcount == 0:
+            log_message('found no terms.')
+            cursor.execute("""
+                SELECT * FROM terms_of_use
+                WHERE LOWER(language) = 'en-us' AND current_version = 'Yes'
+                ORDER BY weight ASC""")            
     except MySQLdb.Error as exception:
         log_message(exception, level=logging.CRITICAL)
         sys.exit(1)
