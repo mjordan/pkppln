@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.15, for osx10.7 (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.20, for osx10.8 (x86_64)
 --
--- Host: localhost    Database: pkppln
+-- Host: localhost    Database: mypln
 -- ------------------------------------------------------
--- Server version	5.6.15
+-- Server version	5.6.20-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -38,8 +38,9 @@ CREATE TABLE `deposits` (
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `deposited_lom` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `deposit_receipt` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -61,7 +62,7 @@ CREATE TABLE `journals` (
   `publisher_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `publisher_url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=323 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -80,7 +81,7 @@ CREATE TABLE `microservices` (
   `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `error` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=722 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,6 +98,7 @@ CREATE TABLE `terms_of_use` (
   `key` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `text` text COLLATE utf8_unicode_ci NOT NULL,
+  `weight` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -110,4 +112,4 @@ CREATE TABLE `terms_of_use` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-01-15 16:21:30
+-- Dump completed on 2015-01-26 12:56:44
