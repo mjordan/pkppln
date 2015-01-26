@@ -32,8 +32,11 @@ def service_document():
     journal_url = request.headers.get('Journal-URL')
     language = request.headers.get('Accept-Language', 'en-US')
 
-    if obh is None or journal_url is None:
-        return HTTPResponse(status=400)
+    if obh is None:
+        return HTTPResponse(status=400, body='Missing On-Behalf-Of header')
+
+    if journal_url is None:
+        journal_url = ''
 
     pkppln.log_message(
         '\t'.join([request.get('REMOTE_ADDR'), 'sd', obh, journal_url]))
