@@ -26,15 +26,23 @@
 	  <div class="alert alert-success" role="alert">{{ message }}</div>
     %end
 
-	<p>Drag and drop the terms below to set their order.</p>
+    <p class="text-right">
+      <a href="/admin/terms/add_term/new">Add new term</a> | 
+      <a href="/admin/terms/list">List all terms</a>
+    </p>
+
+	<p>Drag and drop the terms below to set their order. This form will only
+	show the current English-language terms, but will apply the sorting to all
+	terms, based on the key.</p>
 
 	<form action="/admin/terms/sort" method="post" role="form">
 	<input type='hidden' name='order' id='order' value=''>
 	<ul class="list-group" id='list-order'>
     %for term in terms:    
     <li class="list-group-item" id="{{term['key']}}">
-    	{{term['key']}}<br>
     	{{term['text']}}
+    	<br>
+    	<span class='text-muted'>{{term['key']}}</span>
     </li>
     %end
     </ul>

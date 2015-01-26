@@ -21,7 +21,8 @@
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
     <p class="text-right">
-      <a href="/admin/terms/add_term/new">Add new term</a>
+      <a href="/admin/terms/add_term/new">Add new term</a> | 
+      <a href="/admin/terms/sort">Sort the terms</a>
     </p>
 
     <table class="table table-striped">
