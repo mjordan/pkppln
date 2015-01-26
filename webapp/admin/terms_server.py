@@ -53,6 +53,29 @@ def terms_list():
                         message='Sorry, there are no terms of use.')
 
 
+@get('/admin/terms/sort')
+def terms_sort():
+    """Show all the terms."""
+    pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/sort')
+    terms = pkppln.get_all_terms()
+    return template('terms_sort', terms=terms, message=None)
+
+
+@post('/admin/terms/sort')
+def terms_sort_save():
+    pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/sort')
+    mysql = pkppln.get_connection()
+    term_order = request.forms.get('order').split(',')
+    for idx, key in enumerate(term_order):
+        terms = pkppln.get_term(key)
+        for term in terms:
+            term['weight'] = idx
+            pkppln.update_term(term)
+    mysql.commit()
+    terms = pkppln.get_all_terms()
+    return template('terms_sort', terms=terms, message="Saved")
+
+
 @get('/admin/terms/add_term/:term_id')
 def add_term(term_id=''):
     """Add a new term."""

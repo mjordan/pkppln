@@ -168,6 +168,57 @@ def check_access(uuid):
         return 'No'
 
 
+def get_all_terms(language='en-US'):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute("""
+            SELECT * FROM terms_of_use
+            WHERE language = %s AND current_version = 'Yes'
+            ORDER BY weight ASC""", [language])
+    except MySQLdb.Error as exception:
+        log_message(exception, level=logging.CRITICAL)
+        sys.exit(1)
+    return cursor.fetchall()
+
+
+def get_term(key):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute('SELECT * FROM terms_of_use WHERE `key` = %s', [key])
+    except MySQLdb.Error, e:
+        logging.exception(e)
+        sys.exit(1)
+    return cursor.fetchall()
+
+
+def update_term(term):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    try:
+        cursor.execute("""
+        UPDATE terms_of_use SET
+            current_version = %s,
+            last_updated = %s,
+            `key` = %s,
+            language = %s,
+            `text` = %s,
+            weight = %s
+        WHERE id = %s""", [
+            term['current_version'], term['last_updated'], term['key'],
+            term['language'], term['text'], term['weight'], term['id']
+        ])
+        # @todo: check to make sure cursor.rowcount == 1 and not 0.
+    except MySQLdb.Error as exception:
+        logging.exception(exception)
+        return False
+    if cursor.rowcount == 1:
+        return True
+    else:
+        return False
+
+
 def get_deposit(uuid):
     mysql = get_connection()
     cursor = mysql.cursor()

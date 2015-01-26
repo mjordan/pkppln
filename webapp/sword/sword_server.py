@@ -38,22 +38,9 @@ def service_document():
     pkppln.log_message(
         '\t'.join([request.get('REMOTE_ADDR'), 'sd', obh, journal_url]))
 
-    try:
-        cursor = pkppln.get_connection().cursor()
-        cursor.execute(
-            """
-            SELECT * FROM terms_of_use
-            WHERE language = %s and current_version = 'Yes'
-            """,
-            [language]
-        )
-    except MySQLdb.Error as exception:
-        pkppln.log_message(exception, level=logging.CRITICAL)
-        sys.exit(1)
-
     # Get the 'accepting deposits' value.
     accepting = pkppln.check_access(obh)
-    terms = cursor.fetchall()
+    terms = pkppln.get_all_terms(language)
 
     if len(terms) > 0:
         return template(
