@@ -37,6 +37,7 @@
 
 	<form action="/admin/terms/sort" method="post" role="form">
 	<input type='hidden' name='order' id='order' value=''>
+	
 	<ul class="list-group" id='list-order'>
     %for term in terms:    
     <li class="list-group-item" id="{{term['key']}}">
@@ -46,6 +47,7 @@
     </li>
     %end
     </ul>
+    
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Save</button>
     </div>

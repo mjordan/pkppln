@@ -182,7 +182,7 @@ def get_all_terms(language='en-us'):
             cursor.execute("""
                 SELECT * FROM terms_of_use
                 WHERE LOWER(language) = 'en-us' AND current_version = 'Yes'
-                ORDER BY weight ASC""")            
+                ORDER BY weight ASC""")
     except MySQLdb.Error as exception:
         log_message(exception, level=logging.CRITICAL)
         sys.exit(1)
@@ -198,6 +198,24 @@ def get_term(key):
         logging.exception(e)
         sys.exit(1)
     return cursor.fetchall()
+
+
+def get_localized_term(key, language='en-us'):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    log_message('getting all terms for ' + language)
+    try:
+        cursor.execute("""
+            SELECT * FROM terms_of_use
+            WHERE `key` = %s AND LOWER(language) = %s
+                AND current_version = 'Yes'""",
+                       [key, language.lower()])
+        if cursor.rowcount > 1:
+            raise 'Expected 0 or 1 row, found ' + cursor.rowcount
+    except MySQLdb.Error as exception:
+        log_message(exception, level=logging.CRITICAL)
+        sys.exit(1)
+    return cursor.fetchone()
 
 
 def update_term(term):
