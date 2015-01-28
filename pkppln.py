@@ -7,7 +7,7 @@ from datetime import datetime
 import ConfigParser
 import MySQLdb
 import MySQLdb.cursors
-from os.path import abspath, dirname
+from os.path import abspath, dirname, getmtime
 import xml.etree.ElementTree as element_tree
 from xml.etree.ElementTree import Element, SubElement
 
@@ -20,6 +20,7 @@ Set pkppln.config_file_name to something else before calling get_config()
 for testing.
 """
 config_file_name = 'config.cfg'
+config_path = dirname(abspath(__file__)) + '/' + config_file_name
 namespaces = {
     'entry': 'http://www.w3.org/2005/Atom',
     'pkp': 'http://pkp.sfu.ca/SWORD',
@@ -36,7 +37,6 @@ def __config():
     """
     Parse the config file and return the result. Internal use only.
     """
-    config_path = dirname(abspath(__file__)) + '/' + config_file_name
     config = ConfigParser.ConfigParser()
     success = config.read(config_path)
     if config_path not in success:
@@ -44,6 +44,9 @@ def __config():
     return config
 
 _config = None
+_mysql = None
+_logger = None
+_config_mtime = None
 
 
 def get_config():
@@ -72,8 +75,6 @@ def __connect():
         charset="utf8"
     )
     return con
-
-_mysql = None
 
 
 def get_connection():
@@ -105,7 +106,18 @@ def __request_logger():
     logger.addHandler(log_filehandle)
     return logger
 
-_logger = None
+
+def initialize():
+    """If the config file has been modified since the last time it was read
+    then reset the _config, _mysql, and _logger variables. This will force
+    them to be recreated on the next call to get_config(), get_connection(),
+    or get_logger()."""
+    global _config_mtime, _config, _mysql, _logger
+    if _config_mtime is None or _config_mtime < getmtime(config_path):
+        _config_mtime = getmtime(config_path)
+        _config = None
+        _mysql = None
+        _logger = None
 
 
 def get_logger():

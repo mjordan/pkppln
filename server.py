@@ -13,7 +13,17 @@ import webapp.feeds.feed_server
 import webapp.sword.sword_server
 import webapp.admin.terms_server
 
+
+# make sure that the config file is reread, if necessary.
+def init():
+    pkppln._config = None
+    pkppln._logger = None
+    pkppln._mysql = None
+
+
+# init stuff.
 application = bottle.default_app()
+application.add_hook('before_request', pkppln.initialize)
 
 
 # Routes for static files - CSS, Javascript, etc.
