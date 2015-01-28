@@ -1,3 +1,6 @@
-MySQL-python==1.2.5
 bottle==0.12.7
-
+bagit==1.5.2
+clamd==1.0.2
+MySQL-python==1.2.5
+lxml==3.4.1
+requests==2.4.3

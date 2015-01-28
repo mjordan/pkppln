@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import sys
+
+import bottle
+from os.path import abspath, dirname
+from bottle import run, get, static_file
+
+sys.path.append(dirname(abspath(__file__)))
+
+import pkppln
+import webapp.feeds.feed_server
+import webapp.sword.sword_server
+import webapp.admin.terms_server
+
+
+# make sure that the config file is reread, if necessary.
+def init():
+    pkppln._config = None
+    pkppln._logger = None
+    pkppln._mysql = None
+
+
+# init stuff.
+application = bottle.default_app()
+application.add_hook('before_request', pkppln.initialize)
+
+
+# Routes for static files - CSS, Javascript, etc.
+@get('/css/<filename:path>')
+def static_css(filename):
+    return static_file(filename, dirname(abspath(__file__)) + '/css/')
+
+
+@get('/js/<filename:path>')
+def static_js(filename):
+    return static_file(filename, dirname(abspath(__file__)) + '/js/')
+
+
+@get('/fonts/<filename:path>')
+def static_fonts(filename):
+    return static_file(filename, dirname(abspath(__file__)) + '/fonts/')
+
+
+@get('/deposits/<filename:path>')
+def static_deposit(filename):
+    # @TODO check if this is runnig in a test and allow uploads from
+    # deposits/received ONLY in that case.
+    return static_file(
+        filename,
+        dirname(abspath(__file__)) + '/deposits/',
+        download=filename,
+        mimetype='application/octet-stream'
+    )
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        pkppln.config_file_name = sys.argv[1]
+    bottle.debug(True)
+    run(application, host='127.0.0.1', port=8080, reloader=True)

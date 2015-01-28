@@ -1,0 +1,6 @@
+pip install -r requirements.txt
+
+Install clamav.
+Configure clamd to run, with a unix socket at /var/run/clamav/clamd.ctl. You
+man need to create the clamav directory in /var/run.
+ 

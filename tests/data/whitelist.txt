@@ -1,0 +1,15 @@
+; lines starting with a semicolon are ignored.
+; so are blank lines
+
+06538032-042b-427d-b2bb-18bf45f50d57
+66486334-2057-4118-a709-13fb8d1b56c6
+
+; beb9468e-514d-41b3-8286-83e39d17bdcf
+; 357dcf9e-24e3-4e8f-a6f8-3fbffa18e17c
+
+9109ba87-2816-4e7e-944b-c0d4f4587954
+7bb7893c-00a2-42f8-bee2-b5deb6d9dce7
+348c33a1-da2b-4ba1-8916-c2d1d569ec0f
+841bc1fa-de04-403b-a79e-2e15a6adcbdd
+6a15cbe7-a0bc-4874-80bb-9e638ababd2d
+1c589662-0f8c-4cb4-a83c-898075848bd3
