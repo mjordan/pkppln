@@ -32,7 +32,8 @@ from services.PlnService import parse_arguments
 
 args = parse_arguments()
 
-microservice = args.service
+# allow hyphens in service names.
+microservice = args.service.replace('-', '_')
 # dynamically load the module based on the parameter.
 service_module = 'services.microservices.' + microservice
 try:

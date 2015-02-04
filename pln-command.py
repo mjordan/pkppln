@@ -22,7 +22,8 @@ argparser.add_argument('command', type=str, help='Name of the command to run')
 argparser.add_argument('subargs', nargs=argparse.REMAINDER, help='Arugments to subcommand')
 args = argparser.parse_args()
 
-command = args.command
+# allow hyphens in command names.
+command = args.command.replace('-', '_')
 # dynamically load the module based on the parameter.
 command_module = 'commands.microcommands.' + command
 try:
