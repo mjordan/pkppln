@@ -44,7 +44,7 @@ def __config():
     return config
 
 _config = None
-_mysql = None
+_dbconn = None
 _logger = None
 _config_mtime = None
 
@@ -82,10 +82,16 @@ def get_connection():
     Connect to the database and return a database connection. You must
     get the cursor manually. Autocommit is not enabled.
     """
-    global _mysql
-    if _mysql is None:
-        _mysql = __connect()
-    return _mysql
+    global _dbconn
+    if _dbconn is None:
+        _dbconn = __connect()
+
+    try:
+        _dbconn.ping(True)
+    except (AttributeError, MySQLdb.OperationalError):
+        _dbconn = __connect()
+
+    return _dbconn
 
 
 def __request_logger():
@@ -109,14 +115,14 @@ def __request_logger():
 
 def initialize():
     """If the config file has been modified since the last time it was read
-    then reset the _config, _mysql, and _logger variables. This will force
+    then reset the _config, _dbconn, and _logger variables. This will force
     them to be recreated on the next call to get_config(), get_connection(),
     or get_logger()."""
-    global _config_mtime, _config, _mysql, _logger
+    global _config_mtime, _config, _dbconn, _logger
     if _config_mtime is None or _config_mtime < getmtime(config_path):
         _config_mtime = getmtime(config_path)
         _config = None
-        _mysql = None
+        _dbconn = None
         _logger = None
 
 
