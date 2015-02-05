@@ -25,11 +25,19 @@
       <a href="/admin/terms/sort">Sort the terms</a>
     </p>
 
+    <h2>Languages</h2>
+    <ul class='list-group row'>
+    %for lang in languages:
+      <li class='list-group-item col-sm-2'>
+      	<a href="?lang={{ lang['lang_code'] }}">{{ lang['lang_code'] }}</a>
+      </li>
+    %end
+    </ul>
+
     <table class="table table-striped">
     <thead>
     <tr>
       <th>ID</th>
-      <th>Current version</th>
       <th>Last updated</th>
       <th>Key</th>
       <th>Locale</th>
@@ -41,15 +49,12 @@
     %for term in terms:
     <tr>
     <td>{{term['id']}}</td>
-    <td>{{term['current_version']}}</td>
-    <td>{{term['last_updated']}}</td>
-    <td>{{term['key']}}</td>
-    <td>{{term['language']}}</td>
-    <td>{{term['text']}}</td>
+    <td>{{term['created']}}</td>
+    <td>{{term['key_code']}}</td>
+    <td>{{term['lang_code']}}</td>
+    <td>{{term['content']}}</td>
     <td>
-      <a href="/admin/terms/edit_term/{{term['id']}}">Edit</a> /
-      <a href="/admin/terms/add_term/{{term['id']}}">Clone</a> /
-      <a class="confirm-delete" href="/admin/terms/delete_term/{{term['id']}}">Delete</a>
+      <a href="/admin/terms/edit_term/{{term['id']}}">Edit</a>
     </td>
     %end
     </tr>

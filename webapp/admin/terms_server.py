@@ -36,18 +36,13 @@ def get_term_details(term_id):
 @get('/admin/terms/list')
 def terms_list():
     """Show all the terms."""
-    pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/list')
-
-    try:
-        cursor = pkppln.get_connection().cursor()
-        cursor.execute("SELECT * FROM terms_of_use")
-        terms = cursor.fetchall()
-    except MySQLdb.Error as exception:
-        pkppln.log_message(exception, level=logging.CRITICAL)
-        sys.exit(1)
+    lang = request.query.lang or 'en-us'
+    pkppln.log_message(request.get('REMOTE_ADDR') + ' - ' + 'admin/terms/list ' + lang)
+    terms = pkppln.get_all_terms(lang)
+    languages = pkppln.get_term_languages()
 
     if len(terms):
-        return template('terms_list', terms=terms)
+        return template('terms_list', languages=languages, terms=terms)
     else:
         return template('messages', section='no_terms',
                         message='Sorry, there are no terms of use.')

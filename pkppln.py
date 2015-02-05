@@ -97,17 +97,13 @@ def get_connection():
 def __request_logger():
     """Get a logging object. Internal use only."""
     config = get_config()
-    logging.basicConfig(
-        filename=config.get('Paths', 'error_log'),
-        level=logging.INFO,
-        format=logging.BASIC_FORMAT
-    )
-
-    logger = logging.getLogger('pkppln_requests')
+    logger = logging.getLogger('pkppln_log')
     logger.setLevel(logging.INFO)
-    log_filehandle = logging.FileHandler(config.get('Paths', 'request_log'))
+    log_filehandle = logging.FileHandler(
+        config.get('Paths', 'log_file'))
     log_filehandle.setLevel(logging.INFO)
-    log_formatter = logging.Formatter('%(asctime)s\t%(message)s')
+    log_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     log_filehandle.setFormatter(log_formatter)
     logger.addHandler(log_filehandle)
     return logger
@@ -126,6 +122,7 @@ def initialize():
         _logger = None
 
 
+# @TODO use a separate error logger.
 def get_logger():
     """Get a logging object."""
     global _logger
@@ -136,8 +133,7 @@ def get_logger():
 
 def log_message(message, level=logging.INFO):
     """Log a message, with optional logging level."""
-    logger = get_logger()
-    logger.log(level, message)
+    get_logger().log(level, message)
 
 
 def check_access(uuid):
@@ -186,54 +182,84 @@ def check_access(uuid):
         return 'No'
 
 
-def get_all_terms(language='en-us'):
+def get_term_languages():
     mysql = get_connection()
     cursor = mysql.cursor()
-    log_message('getting all terms for ' + language)
     try:
         cursor.execute("""
-            SELECT * FROM terms_of_use
-            WHERE LOWER(language) = %s AND current_version = 'Yes'
-            ORDER BY weight ASC""", [language.lower()])
+            SELECT distinct(lang_code) FROM terms_of_use;
+        """)
         if cursor.rowcount == 0:
-            log_message('found no terms.')
-            cursor.execute("""
-                SELECT * FROM terms_of_use
-                WHERE LOWER(language) = 'en-us' AND current_version = 'Yes'
-                ORDER BY weight ASC""")
+            log_message(
+                'found no terms of use languages.',
+                'error',
+                logging.CRITICAL
+            )
+            sys.exit(1)
     except MySQLdb.Error as exception:
         log_message(exception, level=logging.CRITICAL)
         sys.exit(1)
     return cursor.fetchall()
 
 
-def get_term(key):
+def get_term_keys():
     mysql = get_connection()
     cursor = mysql.cursor()
-    try:
-        cursor.execute('SELECT * FROM terms_of_use WHERE `key` = %s', [key])
-    except MySQLdb.Error, e:
-        logging.exception(e)
-        sys.exit(1)
-    return cursor.fetchall()
-
-
-def get_localized_term(key, language='en-us'):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    log_message('getting all terms for ' + language)
     try:
         cursor.execute("""
-            SELECT * FROM terms_of_use
-            WHERE `key` = %s AND LOWER(language) = %s
-                AND current_version = 'Yes'""",
-                       [key, language.lower()])
-        if cursor.rowcount > 1:
-            raise 'Expected 0 or 1 row, found ' + cursor.rowcount
+            SELECT distinct(key_code) FROM terms_of_use;
+        """)
+        if cursor.rowcount == 0:
+            log_message(
+                'found no terms of use key codes.',
+                'error',
+                logging.CRITICAL
+            )
+            sys.exit(1)
     except MySQLdb.Error as exception:
         log_message(exception, level=logging.CRITICAL)
         sys.exit(1)
-    return cursor.fetchone()
+    return cursor.fetchall()
+
+
+def get_all_terms(language='en-us'):
+    key_codes = get_term_keys()
+    terms = []
+    for key_code in key_codes:
+        term = get_term(key_code, language)
+        if term is None:
+            if language == 'en-us':
+                log_message(
+                    'Cannot find term' + key_code + ' in en-US',
+                    'error',
+                    logging.CRITICAL
+                )
+                sys.exit(1)
+            else:
+                log_message(
+                    'Cannot find term ' + key_code['key_code'] + ' in ' + language,
+                    logging.WARN
+                )
+                term = get_term(key_code)
+        terms.append(term)
+    return terms
+
+
+def get_term(key_code, lang_code='en-us'):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    code = key_code['key_code']
+    try:
+        cursor.execute("""
+        SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
+        ORDER BY id DESC
+        LIMIT 1
+        """, [lang_code.lower(), code])
+    except MySQLdb.Error as e:
+        log_message(e, level=logging.CRITICAL)
+        sys.exit(1)
+    term = cursor.fetchone()
+    return term
 
 
 def update_term(term):
