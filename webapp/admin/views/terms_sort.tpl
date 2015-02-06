@@ -26,10 +26,7 @@
 	  <div class="alert alert-success" role="alert">{{ message }}</div>
     %end
 
-    <p class="text-right">
-      <a href="/admin/terms/add_term">Add new term</a> | 
-      <a href="/admin/terms/list">List all terms</a>
-    </p>
+	% include('terms_nav.tpl')
 
 	<p>Drag and drop the terms below to set their order. This form will only
 	show the current English-language terms, but will apply the sorting to all
@@ -52,6 +49,10 @@
         <button type="submit" class="btn btn-primary">Save</button>
     </div>
     </form>
+
+	% include('terms_nav.tpl')
+
+	</div>
 
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

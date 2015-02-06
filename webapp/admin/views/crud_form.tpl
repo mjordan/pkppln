@@ -21,6 +21,9 @@
 
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
+
+	% include('terms_nav.tpl')
+    
     <h2>{{form_title}}</h2>
 
     <form action="/admin/terms/save" method="POST" role="form">
@@ -49,7 +52,8 @@
             <button type="submit" class="btn btn-primary">Save</button>
         </div>
     </form>
-    <p class="text-left"><a href="/admin/terms/list">Cancel / return to list</a></p>
+    
+	% include('terms_nav.tpl')
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

@@ -20,10 +20,8 @@
   <body>
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
-    <p class="text-right">
-      <a href="/admin/terms/add_term/new">Add new term</a> | 
-      <a href="/admin/terms/sort">Sort the terms</a>
-    </p>
+
+	% include('terms_nav.tpl')
 
 	<p>Showing complete history for {{ key_code }}.
 
@@ -48,7 +46,9 @@
     %end
     </tbody>
     </table>
-    <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
+    
+	% include('terms_nav.tpl')
+
     </div>
 
     <!-- jQuery -->

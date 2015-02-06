@@ -22,9 +22,10 @@
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
 
+	% include('terms_nav.tpl')
+
     <div>{{message}}</div>
 
-    <p class="text-left"><a href="/admin/terms/list">Return to list</a></p>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
