@@ -326,7 +326,6 @@ def update_term(term):
     except MySQLdb.Error as exception:
         logging.exception(exception)
         return sys.exit(1)
-    log_message('rows: ' + str(cursor.rowcount))
     mysql.commit()
     return True
 

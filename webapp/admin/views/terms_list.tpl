@@ -24,13 +24,18 @@
 	% include('terms_nav.tpl')
 
     <h2>Languages</h2>
-    <ul class='list-group row'>
+    <div class='list-group row'>
     %for lang in languages:
-      <li class='list-group-item col-sm-2'>
-      	<a href="?lang={{ lang['lang_code'] }}">{{ lang['lang_code'] }}</a>
-      </li>
+      	<a class='list-group-item col-sm-2 {{"disabled" if display_lang == lang['lang_code'] else '' }}' href="?lang={{ lang['lang_code'] }}">{{ lang['lang_code'] }}</a>
     %end
-    </ul>
+    </div>
+	
+	% if display_lang != 'en-US':
+	  <a href="/admin/terms/translate?lang={{ display_lang }}">Edit translation</a>
+    % else:
+      <a href="/admin/terms/translate">New translation</a>
+	% end
+
 
     <table class="table table-striped">
     <thead>

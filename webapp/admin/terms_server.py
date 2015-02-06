@@ -6,17 +6,16 @@ Copyright (c) 2014-2015 John Willinsky
 Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
-# @todo: Add filters to routes as per http://bottlepy.org/docs/dev/routing.html.
+# @todo Add filters to routes as per http://bottlepy.org/docs/dev/routing.html
 
 import sys
 from os.path import dirname
-import re
 import MySQLdb
-from datetime import datetime
-from bottle import request, template, get, post, route
+from bottle import request, template, get, post
 import bottle
 import pkppln
 import logging
+from distutils.command.config import LANG_EXT
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 
@@ -37,16 +36,17 @@ def get_term_details(term_id):
 @get('/admin/terms/list')
 def terms_list():
     """Show all the terms."""
-    lang = request.query.lang or 'en-us'
+    lang = request.query.lang or 'en-US'
     pkppln.log_message(
         request.get('REMOTE_ADDR') + ' - ' + 'admin/terms/list ' + lang)
     terms = pkppln.get_all_terms(lang)
     languages = pkppln.get_term_languages()
 
     if len(terms):
-        return template('terms_list', languages=languages, terms=terms)
+        return template('terms_list', languages=languages, display_lang=lang,
+                        terms=terms)
     else:
-        return template('messages', section='no_terms',
+        return template('messages', section='no_terms', display_lang=lang,
                         message='Sorry, there are no terms of use.')
 
 
@@ -85,6 +85,42 @@ def terms_sort_save():
             pkppln.update_term(term)
     terms = pkppln.get_all_terms()
     return template('terms_sort', terms=terms, message="Saved")
+
+
+@get('/admin/terms/translate')
+def terms_translate():
+    """Show all the terms."""
+    lang = request.query.lang
+    pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/translate')
+    terms = pkppln.get_all_terms(lang)
+    en_terms = {}
+    for t in pkppln.get_all_terms('en-US'):
+        en_terms[t['key_code']] = t
+
+    return template('terms_translate', terms=terms, en_terms=en_terms,
+                    display_lang=lang, message=None)
+
+
+@post('/admin/terms/translate')
+def terms_translate_save():
+    """Show all the terms."""
+    lang = request.forms.get('display_lang')
+    pkppln.log_message('dl: ' + str(lang))
+    pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/translate')
+    terms = pkppln.get_all_terms(lang)
+    for term in terms:
+        content = request.forms.get(term['key_code'], '').strip()
+        if content == '':
+            continue
+        term['lang_code'] = lang
+        term['content'] = content
+        pkppln.edit_term(term)
+    en_terms = {}
+    for t in pkppln.get_all_terms('en-US'):
+        en_terms[t['key_code']] = t
+
+    return template('terms_translate', terms=terms, en_terms=en_terms,
+                    display_lang=lang, message='Translation saved.')
 
 
 @get('/admin/terms/add_term')
