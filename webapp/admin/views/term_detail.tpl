@@ -21,28 +21,19 @@
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
     <p class="text-right">
-      <a href="/admin/terms/add_term">Add new term</a> | 
+      <a href="/admin/terms/add_term/new">Add new term</a> | 
       <a href="/admin/terms/sort">Sort the terms</a>
     </p>
 
-    <h2>Languages</h2>
-    <ul class='list-group row'>
-    %for lang in languages:
-      <li class='list-group-item col-sm-2'>
-      	<a href="?lang={{ lang['lang_code'] }}">{{ lang['lang_code'] }}</a>
-      </li>
-    %end
-    </ul>
+	<p>Showing complete history for {{ key_code }}.
 
     <table class="table table-striped">
     <thead>
     <tr>
       <th>ID</th>
       <th>Last updated</th>
-      <th>Key</th>
-      <th>Locale</th>
+      <th>Language</th>
       <th>Text</th>
-      <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -50,13 +41,8 @@
     <tr>
     <td>{{term['id']}}</td>
     <td>{{term['created']}}</td>
-    <td>{{term['key_code']}}</td>
     <td>{{term['lang_code']}}</td>
     <td>{{term['content']}}</td>
-    <td>
-      <a href="/admin/terms/edit_term/{{term['key_code']}}/{{ term['lang_code']}}">Edit</a><br>
-      <a href="/admin/terms/detail/{{term['key_code']}}">History</a>
-    </td>
     %end
     </tr>
     %end

@@ -27,7 +27,7 @@
     %end
 
     <p class="text-right">
-      <a href="/admin/terms/add_term/new">Add new term</a> | 
+      <a href="/admin/terms/add_term">Add new term</a> | 
       <a href="/admin/terms/list">List all terms</a>
     </p>
 
@@ -40,10 +40,10 @@
 	
 	<ul class="list-group" id='list-order'>
     %for term in terms:    
-    <li class="list-group-item" id="{{term['key']}}">
-    	{{term['text']}}
+    <li class="list-group-item" id="{{term['key_code']}}">
+    	{{term['content']}}
     	<br>
-    	<span class='text-muted'>{{term['key']}}</span>
+    	<span class='text-muted'>{{term['key_code']}}</span>
     </li>
     %end
     </ul>

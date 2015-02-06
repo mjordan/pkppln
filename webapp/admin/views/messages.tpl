@@ -22,25 +22,7 @@
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
 
-    % if section == 'no_terms':
     <div>{{message}}</div>
-    % end
-
-    % if section == 'term_deleted':
-    <div>{{message}}</div>
-    % end
-
-    % if section == 'term_added':
-    <div>{{message}}</div>
-    % end
-
-    % if section == 'term_updated':
-    <div>{{message}}</div>
-    % end
-
-    % if section == 'invalid_parameter':
-    <div>{{message}}</div>
-    % end
 
     <p class="text-left"><a href="/admin/terms/list">Return to list</a></p>
 

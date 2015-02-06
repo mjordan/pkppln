@@ -187,12 +187,11 @@ def get_term_languages():
     cursor = mysql.cursor()
     try:
         cursor.execute("""
-            SELECT distinct(lang_code) FROM terms_of_use;
+            SELECT distinct(lang_code) FROM terms_of_use ORDER BY lang_code;
         """)
         if cursor.rowcount == 0:
             log_message(
                 'found no terms of use languages.',
-                'error',
                 logging.CRITICAL
             )
             sys.exit(1)
@@ -207,7 +206,7 @@ def get_term_keys():
     cursor = mysql.cursor()
     try:
         cursor.execute("""
-            SELECT distinct(key_code) FROM terms_of_use;
+            SELECT distinct(key_code) FROM terms_of_use ORDER BY key_code;
         """)
         if cursor.rowcount == 0:
             log_message(
@@ -237,18 +236,25 @@ def get_all_terms(language='en-us'):
                 sys.exit(1)
             else:
                 log_message(
-                    'Cannot find term ' + key_code['key_code'] + ' in ' + language,
+                    'Cannot find term ' +
+                    key_code['key_code'] + ' in ' + language,
                     logging.WARN
                 )
                 term = get_term(key_code)
         terms.append(term)
+    terms.sort(key=lambda t: int(t['weight']))
     return terms
 
 
 def get_term(key_code, lang_code='en-us'):
     mysql = get_connection()
     cursor = mysql.cursor()
-    code = key_code['key_code']
+    
+    if isinstance(key_code, dict):
+        code = key_code['key_code']
+    else:
+        code = key_code
+        
     try:
         cursor.execute("""
         SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
@@ -262,30 +268,67 @@ def get_term(key_code, lang_code='en-us'):
     return term
 
 
-def update_term(term):
+def get_terms_key(key_code):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    
+    if isinstance(key_code, dict):
+        code = key_code['key_code']
+    else:
+        code = key_code
+        
+    try:
+        cursor.execute("""
+        SELECT * FROM terms_of_use WHERE key_code = %s
+        """, [code])
+    except MySQLdb.Error as e:
+        log_message(e, level=logging.CRITICAL)
+        sys.exit(1)
+    term = cursor.fetchall()
+    return term
+
+
+def edit_term(term):
+    """Insert a new version of the term."""
     mysql = get_connection()
     cursor = mysql.cursor()
     try:
         cursor.execute("""
-        UPDATE terms_of_use SET
-            current_version = %s,
-            last_updated = %s,
-            `key` = %s,
-            language = %s,
-            `text` = %s,
-            weight = %s
-        WHERE id = %s""", [
-            term['current_version'], term['last_updated'], term['key'],
-            term['language'], term['text'], term['weight'], term['id']
+        INSERT INTO terms_of_use (weight, key_code, lang_code, content)
+        VALUES(%s, %s, %s, %s)""",  [
+            term['weight'], term['key_code'], term['lang_code'],
+            term['content']
         ])
         # @todo: check to make sure cursor.rowcount == 1 and not 0.
     except MySQLdb.Error as exception:
         logging.exception(exception)
         return False
     if cursor.rowcount == 1:
+        mysql.commit()
         return True
     else:
         return False
+    pass
+
+
+def update_term(term):
+    """Minor change - don't insert a new version of the term."""
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    log_message('id,w: ' + str(term['id']) + ' ' + str(term['weight']))
+    try:
+        cursor.execute("""
+        UPDATE terms_of_use SET
+            weight = %s
+        WHERE id = %s""", [
+            term['weight'], term['id']
+        ])
+    except MySQLdb.Error as exception:
+        logging.exception(exception)
+        return sys.exit(1)
+    log_message('rows: ' + str(cursor.rowcount))
+    mysql.commit()
+    return True
 
 
 def get_deposit(uuid):
