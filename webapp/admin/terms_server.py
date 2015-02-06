@@ -1,8 +1,8 @@
 """
 Simple CRUD tool for PKP PLN terms of use.
 
-Copyright (c) 2014 Simon Fraser University Library
-Copyright (c) 2014 John Willinsky
+Copyright (c) 2014-2015 Simon Fraser University Library
+Copyright (c) 2014-2015 John Willinsky
 Distributed under the GNU GPL v3. For full terms see the file COPYING.
 """
 
@@ -33,6 +33,7 @@ def get_term_details(term_id):
     return term
 
 
+@get('/admin/terms/list_terms')
 @get('/admin/terms/list')
 def terms_list():
     """Show all the terms."""
