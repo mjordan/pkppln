@@ -15,9 +15,9 @@
 
     <pkp:terms_of_use>
         % for term in terms:
-        <pkp:{{term['key']}} updated="{{term['last_updated']}}">
-          {{term['text']}}
-        </pkp:{{term['key']}}>
+        <pkp:{{term['key_code']}} updated="{{term['created']}}">
+          {{term['content']}}
+        </pkp:{{term['key_code']}}>
         % end
     </pkp:terms_of_use>
 

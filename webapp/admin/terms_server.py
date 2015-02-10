@@ -16,6 +16,7 @@ import bottle
 import pkppln
 import logging
 from distutils.command.config import LANG_EXT
+from pkppln import log_message
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 
@@ -79,6 +80,7 @@ def terms_sort_save():
     pkppln.log_message(request.get('REMOTE_ADDR') + '\t' + 'admin/terms/sort')
     term_order = request.forms.get('order').split(',')
     for idx, key in enumerate(term_order):
+        log_message('key: ' + key)
         terms = pkppln.get_terms_key(key)
         for term in terms:
             term['weight'] = idx

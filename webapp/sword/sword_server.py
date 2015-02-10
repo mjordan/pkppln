@@ -13,8 +13,7 @@ import MySQLdb
 from _elementtree import XMLParser
 import logging
 import bottle
-from bottle import request, template, get, post, put, HTTPResponse,\
-    response
+from bottle import request, template, get, post, put, HTTPResponse, response
 
 import pkppln
 from pkppln import namespaces
@@ -54,6 +53,91 @@ def service_document():
             sword_server_base_url=config.get('URLs', 'sword_server_base_url'))
     else:
         return HTTPResponse(status=404)
+
+
+# @put('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/edit')
+
+
+def insert_content(deposit_action, deposit_uuid, journal_uuid, content):
+    deposit_sha1 = content.get('checksumValue')
+    deposit_volume = content.get('volume')
+    deposit_issue = content.get('issue')
+    deposit_pubdate = content.get('pubdate')
+    deposit_size = content.get('size')
+    deposit_url = content.text
+
+    return pkppln.insert_deposit(
+        deposit_uuid, journal_uuid, deposit_action,
+        deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
+        deposit_url, deposit_size, 'depositedByJournal', 'success')
+
+
+@post('/api/sword/2.0/col-iri/<journal_uuid>')
+def create_deposit(journal_uuid):
+    """
+    Routing for creating a Deposit. On-Behalf-Of is
+    the journal UUID.
+    """
+    config = pkppln.get_config()
+    if len(journal_uuid) == 0:
+        return HTTPResponse(status=400)
+
+    root = et.fromstring(
+        request.body.getvalue(),
+        parser=XMLParser(encoding='UTF-8')
+    )
+
+    pkppln.log_message(request.body.getvalue())
+
+    title = root.find('entry:title', namespaces).text
+    issn = root.find('pkp:issn', namespaces).text
+    journal_url = root.find('pkp:journal_url', namespaces).text
+
+    node = root.find('pkp:publisherName', namespaces)
+    if node is not None and node.text is not None:
+        publisher_name = node.text
+    else:
+        publisher_name = '(unknown)'
+
+    node = root.find('pkp:publisherUrl', namespaces)
+    if node is not None and node.text is not None:
+        publisher_url = node.text
+    else:
+        publisher_url = ''
+
+    email = root.find('entry:email', namespaces).text
+    urn_id = root.find('entry:id', namespaces).text
+    deposit_uuid = urn_id.replace('urn:uuid:', '')
+
+    pkppln.log_message('\t'.join([request.get('REMOTE_ADDR'), 'create',
+                                  journal_uuid, deposit_uuid]))
+
+    journal = pkppln.get_journal(journal_uuid)
+    if journal is None:
+        result = pkppln.insert_journal(journal_uuid, title, issn, journal_url,
+                                       email, publisher_name, publisher_url)
+        if result:
+            pkppln.db_commit()
+
+    # We generate our own timestamp for inserting into the database.
+    # updated = root.find('entry:updated', namespaces=namespaces)
+    contents = root.findall('pkp:content', namespaces)
+
+    for content in contents:
+        if insert_content('add', deposit_uuid, journal_uuid, content) is False:
+            return HTTPResponse(status=501)
+    pkppln.db_commit()
+
+    # @todo how do i set the location?
+    response.status = 201
+    response.set_header('Location', '/'.join((
+        '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
+    ))
+    return template('deposit_receipt', journal_uuid=journal_uuid,
+                    deposit_uuid=deposit_uuid, journal_title=title,
+                    sword_server_base_url=config.get(
+                        'URLs', 'sword_server_base_url')
+                    )
 
 
 @get('/api/sword/2.0/cont-iri/<journal_uuid>/<deposit_uuid>/state')
@@ -102,94 +186,6 @@ def sword_statement(journal_uuid, deposit_uuid):
         return template('sword_statement', deposit=deposits[0], states=states)
     else:
         return HTTPResponse(status=404)
-
-# @put('/api/sword/2.0/cont-iri/<on_behalf_of>/<deposit_uuid>/edit')
-
-
-def insert_content(action, deposit_uuid, journal_uuid, content):
-    size = content.get('size')
-    checksum_type = content.get('checksumType')
-    checksum_value = content.get('checksumValue')
-    volume = content.get('volume')
-    issue = content.get('issue')
-    pubdate = content.get('pubdate')
-
-    return pkppln.insert_deposit(
-        action, deposit_uuid, volume, issue, pubdate, journal_uuid,
-        checksum_value, content.text, size, 'depositedByJournal',
-        'success'
-    )
-
-
-@post('/api/sword/2.0/col-iri/<journal_uuid>')
-def create_deposit(journal_uuid):
-    """
-    Routing for creating a Deposit. On-Behalf-Of is
-    the journal UUID.
-    """
-    config = pkppln.get_config()
-    if len(journal_uuid) == 0:
-        return HTTPResponse(status=400)
-
-    root = et.fromstring(
-        request.body.getvalue(),
-        parser=XMLParser(encoding='UTF-8')
-    )
-
-    pkppln.log_message('CREATE DEPOSIT: ' + request.body.getvalue())
-
-    title = root.find('entry:title', namespaces).text
-    issn = root.find('pkp:issn', namespaces).text
-    journal_url = root.find('pkp:journal_url', namespaces).text
-
-    node = root.find('pkp.publisherName')
-    if(node is None):
-        publisher_name = '(unknown)'
-    else:
-        publisher_name = node.text
-
-    node = root.find('pkp:publisherUrl')
-    if node is None:
-        publisher_url = ''
-    else:
-        publisher_url = node.text
-
-    email = root.find('entry:email', namespaces).text
-    urn_id = root.find('entry:id', namespaces).text
-    deposit_uuid = urn_id.replace('urn:uuid:', '')
-
-    pkppln.log_message('\t'.join([request.get('REMOTE_ADDR'), 'create',
-                                  journal_uuid, deposit_uuid]))
-
-    # We generate our own timestamp for inserting into the database.
-    # updated = root.find('entry:updated', namespaces=namespaces)
-    contents = root.findall('pkp:content', namespaces)
-
-    # SHOULD BE A START TRANSACTION HERE.
-    mysql = pkppln.get_connection()
-    for content in contents:
-        if insert_content('add', deposit_uuid, journal_uuid, content) is False:
-            mysql.rollback()
-            return HTTPResponse(status=501)
-    # hold off on the mysql commit - ensure that the journal gets inserted
-    # as well.
-    if pkppln.insert_journal(journal_uuid, title, issn, journal_url, email,
-                             deposit_uuid, publisher_name, publisher_url) is False:
-        mysql.rollback()
-        return HTTPResponse(status=501)
-
-    mysql.commit()
-
-    # @todo how do i set the location?
-    response.status = 201
-    response.set_header('Location', '/'.join((
-        '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid, deposit_uuid, 'edit')
-    ))
-    return template('deposit_receipt', journal_uuid=journal_uuid,
-                    deposit_uuid=deposit_uuid, journal_title=title,
-                    sword_server_base_url=config.get(
-                        'URLs', 'sword_server_base_url')
-                    )
 
 
 @put('/api/sword/2.0/cont-iri/<journal_uuid>/<deposit_uuid_param>/edit')

@@ -109,6 +109,9 @@ def __request_logger():
     return logger
 
 
+# -----------------------------------------------------------------------------
+
+
 def initialize():
     """If the config file has been modified since the last time it was read
     then reset the _config, _dbconn, and _logger variables. This will force
@@ -120,6 +123,9 @@ def initialize():
         _config = None
         _dbconn = None
         _logger = None
+
+
+# -----------------------------------------------------------------------------
 
 
 # @TODO use a separate error logger.
@@ -134,6 +140,9 @@ def get_logger():
 def log_message(message, level=logging.INFO):
     """Log a message, with optional logging level."""
     get_logger().log(level, message)
+
+
+# -----------------------------------------------------------------------------
 
 
 def check_access(uuid):
@@ -182,43 +191,83 @@ def check_access(uuid):
         return 'No'
 
 
-def get_term_languages():
+# -----------------------------------------------------------------------------
+
+
+def db_query(sql, params=None):
     mysql = get_connection()
     cursor = mysql.cursor()
+    if params is None:
+        params = []
     try:
-        cursor.execute("""
-            SELECT distinct(lang_code) FROM terms_of_use ORDER BY lang_code;
-        """)
-        if cursor.rowcount == 0:
-            log_message(
-                'found no terms of use languages.',
-                logging.CRITICAL
-            )
-            sys.exit(1)
+        cursor.execute(sql, params)
     except MySQLdb.Error as exception:
-        log_message(exception, level=logging.CRITICAL)
+        log_message('Database error: {}'.format(exception), logging.CRITICAL)
         sys.exit(1)
     return cursor.fetchall()
+
+
+def db_execute(sql, params=None):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    if params is None:
+        params = []
+    try:
+        cursor.execute(sql, params)
+    except MySQLdb.Error as exception:
+        log_message('Database error: {}'.format(exception), logging.CRITICAL)
+        sys.exit(1)
+    return cursor.rowcount
+
+
+def db_commit():
+    mysql = get_connection()
+    mysql.commit()
+
+
+# -----------------------------------------------------------------------------
+
+
+def get_term_languages():
+    languages = db_query("""
+            SELECT distinct(lang_code) FROM terms_of_use ORDER BY lang_code;
+        """)
+    if len(languages) == 0:
+        log_message(
+            'found no terms of use languages.',
+            logging.CRITICAL
+        )
+        sys.exit(1)
+    return languages
 
 
 def get_term_keys():
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
+    key_codes = db_query("""
             SELECT distinct(key_code) FROM terms_of_use ORDER BY key_code;
         """)
-        if cursor.rowcount == 0:
-            log_message(
-                'found no terms of use key codes.',
-                'error',
-                logging.CRITICAL
-            )
-            sys.exit(1)
-    except MySQLdb.Error as exception:
-        log_message(exception, level=logging.CRITICAL)
+    if len(key_codes) == 0:
+        log_message(
+            'found no terms of use key codes.',
+            logging.CRITICAL
+        )
         sys.exit(1)
-    return cursor.fetchall()
+    return key_codes
+
+
+def get_term(key_code, lang_code='en-us'):
+    if isinstance(key_code, dict):
+        code = key_code['key_code']
+    else:
+        code = key_code
+
+    terms = db_query("""
+        SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
+        ORDER BY id DESC
+        LIMIT 1
+        """, [lang_code.lower(), code])
+    if len(terms) == 1:
+        return terms[0]
+    return None
 
 
 def get_all_terms(language='en-us'):
@@ -229,15 +278,14 @@ def get_all_terms(language='en-us'):
         if term is None:
             if language == 'en-us':
                 log_message(
-                    'Cannot find term' + key_code + ' in en-US',
-                    'error',
+                    'Cannot find term ' + key_code + ' in en-US',
                     logging.CRITICAL
                 )
                 sys.exit(1)
             else:
                 log_message(
-                    'Cannot find term ' +
-                    key_code['key_code'] + ' in ' + language,
+                    'Cannot find term '
+                    + key_code['key_code'] + ' in ' + language,
                     logging.WARN
                 )
                 term = get_term(key_code)
@@ -246,99 +294,49 @@ def get_all_terms(language='en-us'):
     return terms
 
 
-def get_term(key_code, lang_code='en-us'):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    
-    if isinstance(key_code, dict):
-        code = key_code['key_code']
-    else:
-        code = key_code
-        
-    try:
-        cursor.execute("""
-        SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
-        ORDER BY id DESC
-        LIMIT 1
-        """, [lang_code.lower(), code])
-    except MySQLdb.Error as e:
-        log_message(e, level=logging.CRITICAL)
-        sys.exit(1)
-    term = cursor.fetchone()
-    return term
-
-
 def get_terms_key(key_code):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    
     if isinstance(key_code, dict):
         code = key_code['key_code']
     else:
         code = key_code
-        
-    try:
-        cursor.execute("""
+    terms = db_query("""
         SELECT * FROM terms_of_use WHERE key_code = %s
         """, [code])
-    except MySQLdb.Error as e:
-        log_message(e, level=logging.CRITICAL)
-        sys.exit(1)
-    term = cursor.fetchall()
-    return term
+    if len(terms) > 0:
+        return terms
+    return None
 
 
 def edit_term(term):
-    """Insert a new version of the term."""
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
+    result = db_execute("""
         INSERT INTO terms_of_use (weight, key_code, lang_code, content)
         VALUES(%s, %s, %s, %s)""",  [
-            term['weight'], term['key_code'], term['lang_code'],
-            term['content']
-        ])
-        # @todo: check to make sure cursor.rowcount == 1 and not 0.
-    except MySQLdb.Error as exception:
-        logging.exception(exception)
-        return False
-    if cursor.rowcount == 1:
-        mysql.commit()
+        term['weight'], term['key_code'], term['lang_code'],
+        term['content']
+    ])
+    if result == 1:
+        db_commit()
         return True
     else:
         return False
-    pass
 
 
 def update_term(term):
     """Minor change - don't insert a new version of the term."""
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    log_message('id,w: ' + str(term['id']) + ' ' + str(term['weight']))
-    try:
-        cursor.execute("""
-        UPDATE terms_of_use SET
-            weight = %s
-        WHERE id = %s""", [
-            term['weight'], term['id']
-        ])
-    except MySQLdb.Error as exception:
-        logging.exception(exception)
-        return sys.exit(1)
-    mysql.commit()
-    return True
+    result = db_execute("UPDATE terms_of_use SET weight = %s WHERE id = %s", [
+        term['weight'], term['id']
+    ])
+    if result == 1:
+        db_commit()
+        return True
+    else:
+        return False
+
+# -----------------------------------------------------------------------------
 
 
 def get_deposit(uuid):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', [uuid])
-    except MySQLdb.Error, e:
-        logging.exception(e)
-        sys.exit(1)
-    return cursor.fetchone()
+    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', [uuid])
 
 
 def get_deposits(state):
@@ -346,34 +344,10 @@ def get_deposits(state):
     Get the deposits that have the indicated processing state value
     and return them to the microservice for processing.
     """
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
-        SELECT * FROM deposits WHERE processing_state = %s AND outcome <> 'failed'
+    return db_query("""
+        SELECT * FROM deposits
+        WHERE processing_state = %s AND outcome <> 'failed'
         """, [state])
-    except MySQLdb.Error, e:
-        logging.exception(e)
-        sys.exit(1)
-    return cursor.fetchall()
-
-
-def get_journal_deposits(journal_uuid, state):
-    """
-    Get the deposits that have the indicated processing state value
-    and return them to the microservice for processing.
-    """
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
-        SELECT * FROM deposits WHERE journal_uuid = %s AND
-        processing_state = %s AND outcome <> 'failed'
-        """, [journal_uuid, state])
-    except MySQLdb.Error, e:
-        logging.exception(e)
-        sys.exit(1)
-    return cursor.fetchall()
 
 
 def update_deposit(deposit_uuid, state, result):
@@ -381,133 +355,108 @@ def update_deposit(deposit_uuid, state, result):
     Update a deposit in the database. Does not do a commit or rollback. The
     caller must decide to commit or rollback the transaction.
     """
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
+    result = db_execute("""
         UPDATE deposits SET
         processing_state = %s, outcome = %s
         WHERE deposit_uuid = %s""",
-                       [state, result, deposit_uuid])
-        # @todo: check to make sure cursor.rowcount == 1 and not 0.
-    except MySQLdb.Error as exception:
-        logging.exception(exception)
-        return False
-    if cursor.rowcount == 1:
+                        [state, result, deposit_uuid])
+    if result == 1:
         return True
     else:
         return False
 
 
 def record_deposit(deposit, receipt):
-    """Successfully sent deposit to lockssomatic. Record the receipt."""
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
+    """Successfully sent deposit to lockssomatic. Record the receipt. Does not
+    do a commit or rollback. The caller must decide to commit or rollback
+    the transaction."""
+    result = db_execute("""
         UPDATE deposits SET
         deposit_receipt = %s
         WHERE deposit_uuid = %s""",
-                       [receipt, deposit['deposit_uuid']])
-        # @todo: check to make sure cursor.rowcount == 1 and not 0.
-    except MySQLdb.Error as exception:
-        logging.exception(exception)
+                        [receipt, deposit['deposit_uuid']])
+    if result == 1:
+        return True
+    else:
         return False
-    return True
 
 
-def insert_deposit(action, deposit_uuid, deposit_volume, deposit_issue,
-                   deposit_pubdate, on_behalf_of, checksum_value, url, size,
-                   processing_state, outcome):
+def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
+                   deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
+                   deposit_url, deposit_size, processing_state, outcome):
     """
     Insert a deposit record to the database. Does not do a rollback() on
     failure or a commit() on success - that is the repsonsibility of the
     caller.
     """
-    try:
-        cursor = get_connection().cursor()
-        cursor.execute("""
-        INSERT INTO deposits (action, deposit_uuid, deposit_volume,
-        deposit_issue, deposit_pubdate, date_deposited, journal_uuid,
-        sha1_value, deposit_url, size, processing_state, outcome, pln_state)
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                       (action, deposit_uuid, deposit_volume, deposit_issue,
-                        deposit_pubdate, datetime.now(), on_behalf_of,
-                        checksum_value, url, size, processing_state, outcome,
-                        'in_progress'))
-    except MySQLdb.Error as exception:
-        logging.exception(exception)
+    result = db_execute("""
+        INSERT INTO deposits (deposit_uuid, journal_uuid, deposit_action,
+        deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
+        deposit_url, deposit_size, processing_state, outcome, pln_state)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        [deposit_uuid, journal_uuid, deposit_action,
+                         deposit_volume, deposit_issue, deposit_pubdate,
+                         deposit_sha1, deposit_url, deposit_size,
+                         processing_state, outcome, "inProgress"
+                         ])
+    if result == 1:
+        return True
+    else:
         return False
-    return True
 
 
-def log_microservice(service, uuid, start_time, end_time, result, error):
-    """Log the service action ot the database."""
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    try:
-        cursor.execute("""
-        INSERT INTO microservices (microservice, deposit_uuid, started_on,
-        finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
-                       [service, uuid, start_time, end_time,
-                        result, error])
-    except MySQLdb.Error as mysql_error:
-        logging.exception(mysql_error)
-        return False
-    return True
+# -----------------------------------------------------------------------------
+
+
+def get_journal_deposits(journal_uuid, state):
+    """
+    Get the deposits that have the indicated processing state value
+    and return them to the microservice for processing.
+    """
+    return db_query("""
+        SELECT * FROM deposits WHERE journal_uuid = %s AND
+        processing_state = %s AND outcome <> 'failed'
+        """, [journal_uuid, state])
 
 
 def get_journal(uuid):
-    """Get a journal from the database and return it."""
-    mysql = get_connection()
-    cursor = mysql.cursor()
+    journals = db_query("SELECT * FROM journals WHERE journal_uuid = %s",
+                        [uuid])
+    if len(journals) == 0:
+        return None
+    if len(journals) == 1:
+        return journals[0]
+    log_message('Multiple journal records with UUID ' + uuid, logging.CRITICAL)
 
-    cursor.execute("SELECT * FROM journals WHERE deposit_uuid = %s", [uuid])
-    if cursor.rowcount:
-        return cursor.fetchone()
-    return None
+
+def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
+                   publisher_name, publisher_url):
+    """
+    Insert a journal record to the database. Does not do a rollback() on
+    failure or a commit() on success - that is the repsonsibility of the
+    caller.
+    """
+    result = db_execute("""
+        INSERT INTO journals (journal_uuid, title, issn, journal_url,
+        contact_email, publisher_name, publisher_url)
+        VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+                        [journal_uuid, title, issn, journal_url, contact_email,
+                         publisher_name, publisher_url])
+    if result == 1:
+        return True
+    else:
+        return False
 
 
 def get_journals():
     """Get all distinct journals from the database, sorted by title"""
-    mysql = get_connection()
-    cursor = mysql.cursor()
-
-    cursor.execute('''
+    return db_query('''
         select title, journal_url, publisher_name, publisher_url, issn,
             max(date_deposited) as recent_deposit, journal_uuid
         from journals
         group by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
         order by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
         ''')
-    journals = cursor.fetchall()
-    return journals
-
-
-def insert_journal(journal_uuid, title, issn, journal_url, email,
-                   deposit_uuid, publisher_name='x', publisher_url='z'):
-    """
-    Insert a journal record to the database. Does not do a rollback() on
-    failure or a commit() on success - that is the repsonsibility of the
-    caller.
-    """
-    cursor = get_connection().cursor()
-    try:
-        cursor.execute("""
-        INSERT INTO journals (journal_uuid, title, issn, journal_url,
-            contact_email, deposit_uuid, date_deposited, publisher_name,
-            publisher_url)
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                       (journal_uuid, title, issn, journal_url, email,
-                        deposit_uuid, datetime.now(), publisher_name,
-                        publisher_url))
-    except MySQLdb.Error as e:
-        logging.exception(e)
-        return False
-    if cursor.rowcount == 1:
-        return True
-    else:
-        return False
 
 
 def get_journal_xml(uuid):
@@ -528,6 +477,22 @@ def get_journal_xml(uuid):
                 value = journal[key]
             element.text = str(value)
         return element_tree.tostring(root)
+
+
+# -----------------------------------------------------------------------------
+
+
+def log_microservice(service, uuid, start_time, end_time, result, error):
+    """Log the service action ot the database."""
+    result = db_execute("""
+        INSERT INTO microservices (microservice, deposit_uuid, started_on,
+        finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
+                        [service, uuid, start_time, end_time,
+                         result, error])
+    db_commit()
+
+
+# -----------------------------------------------------------------------------
 
 
 def deposit_filename(url):
