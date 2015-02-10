@@ -87,8 +87,6 @@ def create_deposit(journal_uuid):
         parser=XMLParser(encoding='UTF-8')
     )
 
-    pkppln.log_message(request.body.getvalue())
-
     title = root.find('entry:title', namespaces).text
     issn = root.find('pkp:issn', namespaces).text
     journal_url = root.find('pkp:journal_url', namespaces).text
