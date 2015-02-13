@@ -35,7 +35,7 @@ class TermsApp(WebApp):
         self.route('/translate', method='POST', callback=self.terms_translate_save)
         self.route('/add_term', method='GET', callback=self.add_term)
         self.route('/edit_term/:key_code', method='GET', callback=self.edit_term)
-        self.route('/edit_term/:key_code/:lang_code',method='GET', callback=self.edit_term)
+        self.route('/edit_term/:key_code/:lang_code', method='GET', callback=self.edit_term)
         self.route('/save', method='GET', callback=self.save_term)
 
     def terms_list(self):
