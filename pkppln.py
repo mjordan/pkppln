@@ -33,6 +33,31 @@ namespaces = {
 }
 
 
+_config = None
+_dbconn = None
+_logger = None
+_config_mtime = None
+
+
+# -----------------------------------------------------------------------------
+
+
+def initialize():
+    """If the config file has been modified since the last time it was read
+    then reset the _config, _dbconn, and _logger variables. This will force
+    them to be recreated on the next call to get_config(), get_connection(),
+    or get_logger()."""
+    global _config_mtime, _config, _dbconn, _logger
+    if _config_mtime is None or _config_mtime < getmtime(config_path):
+        _config_mtime = getmtime(config_path)
+        _config = None
+        _dbconn = None
+        _logger = None
+
+
+# -----------------------------------------------------------------------------
+
+
 def __config():
     """
     Parse the config file and return the result. Internal use only.
@@ -43,11 +68,6 @@ def __config():
         raise Exception('Cannot load config file ' + config_path)
     return config
 
-_config = None
-_dbconn = None
-_logger = None
-_config_mtime = None
-
 
 def get_config():
     """
@@ -57,6 +77,9 @@ def get_config():
     if _config is None:
         _config = __config()
     return _config
+
+
+# -----------------------------------------------------------------------------
 
 
 def __connect():
@@ -94,6 +117,39 @@ def get_connection():
     return _dbconn
 
 
+def db_query(sql, params=None):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    if params is None:
+        params = []
+    try:
+        cursor.execute(sql, params)
+    except MySQLdb.Error as exception:
+        log_message('Database error: {}'.format(exception), logging.CRITICAL)
+        sys.exit(1)
+    return cursor.fetchall()
+
+
+def db_execute(sql, params=None):
+    mysql = get_connection()
+    cursor = mysql.cursor()
+    if params is None:
+        params = []
+    try:
+        cursor.execute(sql, params)
+    except MySQLdb.Error as exception:
+        log_message('Database error: {}'.format(exception), logging.CRITICAL)
+        sys.exit(1)
+    return cursor.rowcount
+
+
+def db_commit():
+    mysql = get_connection()
+    mysql.commit()
+
+# -----------------------------------------------------------------------------
+
+
 def __request_logger():
     """Get a logging object. Internal use only."""
     config = get_config()
@@ -107,25 +163,6 @@ def __request_logger():
     log_filehandle.setFormatter(log_formatter)
     logger.addHandler(log_filehandle)
     return logger
-
-
-# -----------------------------------------------------------------------------
-
-
-def initialize():
-    """If the config file has been modified since the last time it was read
-    then reset the _config, _dbconn, and _logger variables. This will force
-    them to be recreated on the next call to get_config(), get_connection(),
-    or get_logger()."""
-    global _config_mtime, _config, _dbconn, _logger
-    if _config_mtime is None or _config_mtime < getmtime(config_path):
-        _config_mtime = getmtime(config_path)
-        _config = None
-        _dbconn = None
-        _logger = None
-
-
-# -----------------------------------------------------------------------------
 
 
 # @TODO use a separate error logger.
@@ -190,39 +227,6 @@ def check_access(uuid):
     else:
         return 'No'
 
-
-# -----------------------------------------------------------------------------
-
-
-def db_query(sql, params=None):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    if params is None:
-        params = []
-    try:
-        cursor.execute(sql, params)
-    except MySQLdb.Error as exception:
-        log_message('Database error: {}'.format(exception), logging.CRITICAL)
-        sys.exit(1)
-    return cursor.fetchall()
-
-
-def db_execute(sql, params=None):
-    mysql = get_connection()
-    cursor = mysql.cursor()
-    if params is None:
-        params = []
-    try:
-        cursor.execute(sql, params)
-    except MySQLdb.Error as exception:
-        log_message('Database error: {}'.format(exception), logging.CRITICAL)
-        sys.exit(1)
-    return cursor.rowcount
-
-
-def db_commit():
-    mysql = get_connection()
-    mysql.commit()
 
 
 # -----------------------------------------------------------------------------
