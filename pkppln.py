@@ -97,7 +97,7 @@ def get_connection():
 def __request_logger():
     """Get a logging object. Internal use only."""
     config = get_config()
-    logger = logging.getLogger('pkppln_log')
+    logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     log_filehandle = logging.FileHandler(
         config.get('Paths', 'log_file'))
@@ -254,6 +254,11 @@ def get_term_keys():
     return key_codes
 
 
+def get_term_details(term_id):
+    """Fetch the details for a single term."""
+    return db_query("SELECT * FROM terms_of_use WHERE id = %s", [term_id])
+
+
 def get_term(key_code, lang_code='en-us'):
     if isinstance(key_code, dict):
         code = key_code['key_code']
@@ -315,7 +320,6 @@ def edit_term(term):
         term['content']
     ])
     if result == 1:
-        db_commit()
         return True
     else:
         return False
