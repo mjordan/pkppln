@@ -18,9 +18,15 @@ def after_request():
         request.app.__class__.__name__ + "#" + request.route.callback.__name__
     ]), logging.INFO)
 
+
+def before_request():
+    pkppln.initialize()
+
+
 static_path = dirname(abspath(__file__)) + '/static'
 
 app = bottle.default_app()
+app.add_hook('before_request', before_request)
 app.add_hook('after_request', after_request)
 app.mount('/static/', StaticApp('Static', static_path))
 app.mount('/admin/terms/', TermsApp('Terms'))

@@ -11,6 +11,16 @@ from os.path import abspath, dirname, getmtime
 import xml.etree.ElementTree as element_tree
 from xml.etree.ElementTree import Element, SubElement
 
+
+class PlnError(Exception):
+    """General purpose error exception."""
+    def __init(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 """
 Common functions for the PKP PLN staging server.
 """
@@ -34,24 +44,21 @@ namespaces = {
 
 
 _config = None
-_dbconn = None
 _logger = None
 _config_mtime = None
 
 
 # -----------------------------------------------------------------------------
 
-
 def initialize():
     """If the config file has been modified since the last time it was read
     then reset the _config, _dbconn, and _logger variables. This will force
     them to be recreated on the next call to get_config(), get_connection(),
     or get_logger()."""
-    global _config_mtime, _config, _dbconn, _logger
+    global _config_mtime, _config, _logger
     if _config_mtime is None or _config_mtime < getmtime(config_path):
         _config_mtime = getmtime(config_path)
         _config = None
-        _dbconn = None
         _logger = None
 
 
@@ -71,7 +78,8 @@ def __config():
 
 def get_config():
     """
-    Get a configuration object for the application.
+    Get a configuration object for the application, and caches it for
+    future use.
     """
     global _config
     if _config is None:
@@ -82,7 +90,7 @@ def get_config():
 # -----------------------------------------------------------------------------
 
 
-def __connect():
+def get_connection():
     """
     Connect to the database and return a database connection. You must
     get the cursor manually. Autocommit is not enabled. Internal use only.
@@ -100,52 +108,52 @@ def __connect():
     return con
 
 
-def get_connection():
-    """
-    Connect to the database and return a database connection. You must
-    get the cursor manually. Autocommit is not enabled.
-    """
-    global _dbconn
-    if _dbconn is None:
-        _dbconn = __connect()
+def db_query(sql, params=None, db=None):
+    """Runs a SELECT query against the database and returns the results.
+    Logs and raises errors if they occur. Supply a db parameter to reuse
+    a database connection if one is available, otherwise it will connect
+    to the database."""
+    if db is None:
+        db = get_connection()
 
-    try:
-        _dbconn.ping(True)
-    except (AttributeError, MySQLdb.OperationalError):
-        _dbconn = __connect()
-
-    return _dbconn
-
-
-def db_query(sql, params=None):
-    mysql = get_connection()
-    cursor = mysql.cursor()
+    cursor = db.cursor()
     if params is None:
         params = []
+
     try:
         cursor.execute(sql, params)
     except MySQLdb.Error as exception:
         log_message('Database error: {}'.format(exception), logging.CRITICAL)
-        sys.exit(1)
+        raise
     return cursor.fetchall()
 
 
-def db_execute(sql, params=None):
-    mysql = get_connection()
-    cursor = mysql.cursor()
+def db_execute(sql, params=None, db=None, autocommit=False):
+    """Runs a DML query against the database. If autocommit is false (the
+    default) then there will be no call to db.commit. Supply a db parameter to
+    reuse a database connection if one is available, otherwise it will connect
+    to the database, and it will autocommit. Logs and raises errors if they 
+    occur. Returns a count of the rows affected by the DML."""
+
+    if db is None:
+        db = get_connection()
+        autocommit = True
+
+    cursor = db.cursor()
     if params is None:
         params = []
+
     try:
         cursor.execute(sql, params)
     except MySQLdb.Error as exception:
         log_message('Database error: {}'.format(exception), logging.CRITICAL)
-        sys.exit(1)
+        raise
+
+    if autocommit:
+        db.commit()
+
     return cursor.rowcount
 
-
-def db_commit():
-    mysql = get_connection()
-    mysql.commit()
 
 # -----------------------------------------------------------------------------
 
@@ -167,7 +175,7 @@ def __request_logger():
 
 # @TODO use a separate error logger.
 def get_logger():
-    """Get a logging object."""
+    """Get a logging object, and cache it for future use."""
     global _logger
     if _logger is None:
         _logger = __request_logger()
@@ -228,42 +236,43 @@ def check_access(uuid):
         return 'No'
 
 
-
 # -----------------------------------------------------------------------------
 
 
 def get_term_languages():
+    """Get a list of language codes (en-CA, en-US, etc.) from the database."""
     languages = db_query("""
             SELECT distinct(lang_code) FROM terms_of_use ORDER BY lang_code;
         """)
     if len(languages) == 0:
-        log_message(
-            'found no terms of use languages.',
-            logging.CRITICAL
-        )
-        sys.exit(1)
+        m = 'Found no terms of use languages in the database.'
+        log_message(m, logging.CRITICAL)
+        raise PlnError(m)
     return languages
 
 
 def get_term_keys():
+    """Get a list of keys from the database."""
     key_codes = db_query("""
             SELECT distinct(key_code) FROM terms_of_use ORDER BY key_code;
         """)
     if len(key_codes) == 0:
-        log_message(
-            'found no terms of use key codes.',
-            logging.CRITICAL
-        )
-        sys.exit(1)
+        m = 'Found no terms of use keys in the database.'
+        log_message(m, logging.CRITICAL)
+        raise PlnError(m)
     return key_codes
 
 
 def get_term_details(term_id):
-    """Fetch the details for a single term."""
+    """Fetch the details for a single term based on its numeric id."""
     return db_query("SELECT * FROM terms_of_use WHERE id = %s", [term_id])
 
 
 def get_term(key_code, lang_code='en-us'):
+    """Get all instances of a term, based on a key. key_code may be a string
+    or hash containing a 'key_code' key. Returns one a single term if there is
+    only one instance of the term in the database, otherwise it returns a 
+    list (which may be empty)."""
     if isinstance(key_code, dict):
         code = key_code['key_code']
     else:
@@ -280,17 +289,19 @@ def get_term(key_code, lang_code='en-us'):
 
 
 def get_all_terms(language='en-us'):
+    """Get all of the terms from the database based on the available term
+    keys. If there are terms which are not available in the language, then the
+    en-US term will be included and a warning message will be logged.. The 
+    result is sorted by term weights."""
     key_codes = get_term_keys()
     terms = []
     for key_code in key_codes:
         term = get_term(key_code, language)
         if term is None:
             if language == 'en-us':
-                log_message(
-                    'Cannot find term ' + key_code + ' in en-US',
-                    logging.CRITICAL
-                )
-                sys.exit(1)
+                m = 'Cannot find term ' + key_code + ' in en-US'
+                log_message(m, logging.CRITICAL)
+                raise PlnError(m)
             else:
                 log_message(
                     'Cannot find term '
@@ -304,6 +315,7 @@ def get_all_terms(language='en-us'):
 
 
 def get_terms_key(key_code):
+    """Return all of the translated terms for the key in no particular order"""
     if isinstance(key_code, dict):
         code = key_code['key_code']
     else:
@@ -317,33 +329,31 @@ def get_terms_key(key_code):
 
 
 def edit_term(term):
+    """Terms are never really 'edited' so store the new version of the term
+    in the database."""
     result = db_execute("""
         INSERT INTO terms_of_use (weight, key_code, lang_code, content)
         VALUES(%s, %s, %s, %s)""",  [
         term['weight'], term['key_code'], term['lang_code'],
         term['content']
     ])
-    if result == 1:
-        return True
-    else:
-        return False
+    return result == 1
 
 
 def update_term(term):
-    """Minor change - don't insert a new version of the term."""
+    """Changing the weight of a term is the only time a new version isn't saved
+    to the database. Do the update."""
     result = db_execute("UPDATE terms_of_use SET weight = %s WHERE id = %s", [
         term['weight'], term['id']
     ])
-    if result == 1:
-        db_commit()
-        return True
-    else:
-        return False
+    return result == 1
+
 
 # -----------------------------------------------------------------------------
 
 
 def get_deposit(uuid):
+    """Return a deposit from the database."""
     return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', [uuid])
 
 
@@ -358,6 +368,7 @@ def get_deposits(state):
         """, [state])
 
 
+# @TODO must add a db parameter here.
 def update_deposit(deposit_uuid, state, result):
     """
     Update a deposit in the database. Does not do a commit or rollback. The
@@ -368,12 +379,10 @@ def update_deposit(deposit_uuid, state, result):
         processing_state = %s, outcome = %s
         WHERE deposit_uuid = %s""",
                         [state, result, deposit_uuid])
-    if result == 1:
-        return True
-    else:
-        return False
+    return result == 1
 
 
+# @TODO must add a db parameter here.
 def record_deposit(deposit, receipt):
     """Successfully sent deposit to lockssomatic. Record the receipt. Does not
     do a commit or rollback. The caller must decide to commit or rollback
@@ -383,12 +392,10 @@ def record_deposit(deposit, receipt):
         deposit_receipt = %s
         WHERE deposit_uuid = %s""",
                         [receipt, deposit['deposit_uuid']])
-    if result == 1:
-        return True
-    else:
-        return False
+    return result == 1
 
 
+# @TODO must add a db parameter here.
 def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
                    deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
                    deposit_url, deposit_size, processing_state, outcome):
@@ -407,10 +414,7 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
                          deposit_sha1, deposit_url, deposit_size,
                          processing_state, outcome, "inProgress"
                          ])
-    if result == 1:
-        return True
-    else:
-        return False
+    return result == 1
 
 
 # -----------------------------------------------------------------------------
@@ -428,15 +432,17 @@ def get_journal_deposits(journal_uuid, state):
 
 
 def get_journal(uuid):
+    """Get a journal from the database. Returns None or 1 journal."""
     journals = db_query("SELECT * FROM journals WHERE journal_uuid = %s",
                         [uuid])
     if len(journals) == 0:
         return None
     if len(journals) == 1:
         return journals[0]
-    log_message('Multiple journal records with UUID ' + uuid, logging.CRITICAL)
+    # uuid is a primary key - there can never be more than one.
 
 
+# @TODO add a db parameter.
 def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
                    publisher_name, publisher_url):
     """
@@ -450,10 +456,7 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
                         [journal_uuid, title, issn, journal_url, contact_email,
                          publisher_name, publisher_url])
-    if result == 1:
-        return True
-    else:
-        return False
+    return result == 1
 
 
 def get_journals():
@@ -462,34 +465,38 @@ def get_journals():
         select title, journal_url, publisher_name, publisher_url, issn,
             max(date_deposited) as recent_deposit, journal_uuid
         from journals
-        group by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
-        order by title, journal_url, journal_uuid, issn, publisher_name, publisher_url
+        group by title, journal_url, journal_uuid, issn, 
+            publisher_name, publisher_url
+        order by title, journal_url, journal_uuid, issn, 
+            publisher_name, publisher_url
         ''')
 
 
 def get_journal_xml(uuid):
     """
-    Query information about the root that produced this deposit and wrap it
+    Query information about the journal that produced this deposit and wrap it
     in XML to include in the Bag.
     """
-
     journal = get_journal(uuid)
-    if journal is not None:
-        element_tree.register_namespace('pkp', 'http://pkp.sfu.ca/SWORD')
-        root = Element('{http://pkp.sfu.ca/SWORD}root')
-        for key in journal:
-            element = SubElement(root, 'pkp:' + key)
-            if key == 'date_deposited':
-                value = journal[key].strftime('%Y-%m-%d')
-            else:
-                value = journal[key]
-            element.text = str(value)
-        return element_tree.tostring(root)
+    if journal is None:
+        return None
+
+    element_tree.register_namespace('pkp', 'http://pkp.sfu.ca/SWORD')
+    root = Element('{http://pkp.sfu.ca/SWORD}root')
+    for key in journal:
+        element = SubElement(root, 'pkp:' + key)
+        if key == 'date_deposited':
+            value = journal[key].strftime('%Y-%m-%d')
+        else:
+            value = journal[key]
+        element.text = str(value)
+    return element_tree.tostring(root)
 
 
 # -----------------------------------------------------------------------------
 
 
+# @TODO add a db parameter.
 def log_microservice(service, uuid, start_time, end_time, result, error):
     """Log the service action ot the database."""
     result = db_execute("""
@@ -497,10 +504,11 @@ def log_microservice(service, uuid, start_time, end_time, result, error):
         finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
                         [service, uuid, start_time, end_time,
                          result, error])
-    db_commit()
+    return result == 1
 
 
 # -----------------------------------------------------------------------------
+# Utility methods.
 
 
 def deposit_filename(url):
@@ -523,6 +531,7 @@ def file_sha1(filepath):
     return calculated_sha1.hexdigest()
 
 
+# @TODO is this ever used?
 def file_md5(filepath):
     """Calculate an md5 checksum for a file."""
     input_file = open(filepath, 'rb')
