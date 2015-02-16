@@ -7,16 +7,16 @@
 	<link href="http://example.org/feed/terms/atom" rel="self" />
 	<link href="http://example.org/" />
 	<id>http://path/to/feed</id>
-	<updated>{{terms[0]['last_updated']}}</updated>
+	<updated>{{terms[0]['created']}}</updated>
 
 	% for term in terms:
 	<entry>
 		<title>Term updated</title>
 		<link href="http://pkppln/path/to/term" />
 		<id>{{term['id']}}</id>
-		<updated>{{term['last_updated']}}</updated>
+		<updated>{{term['created']}}</updated>
 		<content type="text">
-			{{term['text']}}
+			{{term['content']}}
 		</content>
 	</entry>
 	% end

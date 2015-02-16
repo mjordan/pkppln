@@ -13,7 +13,9 @@ from xml.etree.ElementTree import Element, SubElement
 
 
 class PlnError(Exception):
+
     """General purpose error exception."""
+
     def __init(self, value):
         self.value = value
 
@@ -239,11 +241,11 @@ def check_access(uuid):
 # -----------------------------------------------------------------------------
 
 
-def get_term_languages():
+def get_term_languages(db=None):
     """Get a list of language codes (en-CA, en-US, etc.) from the database."""
     languages = db_query("""
             SELECT distinct(lang_code) FROM terms_of_use ORDER BY lang_code;
-        """)
+        """, db=db)
     if len(languages) == 0:
         m = 'Found no terms of use languages in the database.'
         log_message(m, logging.CRITICAL)
@@ -251,11 +253,11 @@ def get_term_languages():
     return languages
 
 
-def get_term_keys():
+def get_term_keys(db=None):
     """Get a list of keys from the database."""
     key_codes = db_query("""
             SELECT distinct(key_code) FROM terms_of_use ORDER BY key_code;
-        """)
+        """, db=db)
     if len(key_codes) == 0:
         m = 'Found no terms of use keys in the database.'
         log_message(m, logging.CRITICAL)
@@ -263,12 +265,14 @@ def get_term_keys():
     return key_codes
 
 
-def get_term_details(term_id):
+def get_term_details(term_id, db=None):
     """Fetch the details for a single term based on its numeric id."""
-    return db_query("SELECT * FROM terms_of_use WHERE id = %s", [term_id])
+    return db_query("SELECT * FROM terms_of_use WHERE id = %s",
+                    [term_id],
+                    db=db)
 
 
-def get_term(key_code, lang_code='en-us'):
+def get_term(key_code, lang_code='en-us', db=None):
     """Get all instances of a term, based on a key. key_code may be a string
     or hash containing a 'key_code' key. Returns one a single term if there is
     only one instance of the term in the database, otherwise it returns a 
@@ -282,21 +286,21 @@ def get_term(key_code, lang_code='en-us'):
         SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
         ORDER BY id DESC
         LIMIT 1
-        """, [lang_code.lower(), code])
+        """, [lang_code.lower(), code], db=db)
     if len(terms) == 1:
         return terms[0]
     return None
 
 
-def get_all_terms(language='en-us'):
+def get_all_terms(language='en-us', db=None):
     """Get all of the terms from the database based on the available term
     keys. If there are terms which are not available in the language, then the
     en-US term will be included and a warning message will be logged.. The 
     result is sorted by term weights."""
-    key_codes = get_term_keys()
+    key_codes = get_term_keys(db=db)
     terms = []
     for key_code in key_codes:
-        term = get_term(key_code, language)
+        term = get_term(key_code, language, db=db)
         if term is None:
             if language == 'en-us':
                 m = 'Cannot find term ' + key_code + ' in en-US'
@@ -314,7 +318,7 @@ def get_all_terms(language='en-us'):
     return terms
 
 
-def get_terms_key(key_code):
+def get_terms_key(key_code, db=None):
     """Return all of the translated terms for the key in no particular order"""
     if isinstance(key_code, dict):
         code = key_code['key_code']
@@ -322,13 +326,13 @@ def get_terms_key(key_code):
         code = key_code
     terms = db_query("""
         SELECT * FROM terms_of_use WHERE key_code = %s
-        """, [code])
+        """, [code], db=db)
     if len(terms) > 0:
         return terms
     return None
 
 
-def edit_term(term):
+def edit_term(term, db=None):
     """Terms are never really 'edited' so store the new version of the term
     in the database."""
     result = db_execute("""
@@ -336,28 +340,28 @@ def edit_term(term):
         VALUES(%s, %s, %s, %s)""",  [
         term['weight'], term['key_code'], term['lang_code'],
         term['content']
-    ])
+    ], db=db)
     return result == 1
 
 
-def update_term(term):
+def update_term(term, db=None):
     """Changing the weight of a term is the only time a new version isn't saved
     to the database. Do the update."""
-    result = db_execute("UPDATE terms_of_use SET weight = %s WHERE id = %s", [
+    db_execute("UPDATE terms_of_use SET weight = %s WHERE id = %s", [
         term['weight'], term['id']
-    ])
-    return result == 1
+    ], db=db)
 
 
 # -----------------------------------------------------------------------------
 
 
-def get_deposit(uuid):
+def get_deposit(uuid, db=None):
     """Return a deposit from the database."""
-    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', [uuid])
+    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', 
+                    [uuid], db=db)
 
 
-def get_deposits(state):
+def get_deposits(state, db=None):
     """
     Get the deposits that have the indicated processing state value
     and return them to the microservice for processing.
@@ -365,11 +369,11 @@ def get_deposits(state):
     return db_query("""
         SELECT * FROM deposits
         WHERE processing_state = %s AND outcome <> 'failed'
-        """, [state])
+        """, [state], db=db)
 
 
 # @TODO must add a db parameter here.
-def update_deposit(deposit_uuid, state, result):
+def update_deposit(deposit_uuid, state, result, db=None):
     """
     Update a deposit in the database. Does not do a commit or rollback. The
     caller must decide to commit or rollback the transaction.
@@ -378,12 +382,12 @@ def update_deposit(deposit_uuid, state, result):
         UPDATE deposits SET
         processing_state = %s, outcome = %s
         WHERE deposit_uuid = %s""",
-                        [state, result, deposit_uuid])
+                        [state, result, deposit_uuid], db=db)
     return result == 1
 
 
 # @TODO must add a db parameter here.
-def record_deposit(deposit, receipt):
+def record_deposit(deposit, receipt, db=None):
     """Successfully sent deposit to lockssomatic. Record the receipt. Does not
     do a commit or rollback. The caller must decide to commit or rollback
     the transaction."""
@@ -391,14 +395,16 @@ def record_deposit(deposit, receipt):
         UPDATE deposits SET
         deposit_receipt = %s
         WHERE deposit_uuid = %s""",
-                        [receipt, deposit['deposit_uuid']])
+                        [receipt, deposit['deposit_uuid']], db=db)
     return result == 1
 
 
 # @TODO must add a db parameter here.
 def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
-                   deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
-                   deposit_url, deposit_size, processing_state, outcome):
+                   deposit_volume, deposit_issue, deposit_pubdate,
+                   deposit_sha1, deposit_url, deposit_size,
+                   processing_state, outcome, db=None):
+    log_message('inserting deposit with db ' + str(db))
     """
     Insert a deposit record to the database. Does not do a rollback() on
     failure or a commit() on success - that is the repsonsibility of the
@@ -413,14 +419,14 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
                          deposit_volume, deposit_issue, deposit_pubdate,
                          deposit_sha1, deposit_url, deposit_size,
                          processing_state, outcome, "inProgress"
-                         ])
+                         ], db=db)
     return result == 1
 
 
 # -----------------------------------------------------------------------------
 
 
-def get_journal_deposits(journal_uuid, state):
+def get_journal_deposits(journal_uuid, state, db=None):
     """
     Get the deposits that have the indicated processing state value
     and return them to the microservice for processing.
@@ -428,13 +434,13 @@ def get_journal_deposits(journal_uuid, state):
     return db_query("""
         SELECT * FROM deposits WHERE journal_uuid = %s AND
         processing_state = %s AND outcome <> 'failed'
-        """, [journal_uuid, state])
+        """, [journal_uuid, state], db=db)
 
 
-def get_journal(uuid):
+def get_journal(uuid, db=None):
     """Get a journal from the database. Returns None or 1 journal."""
     journals = db_query("SELECT * FROM journals WHERE journal_uuid = %s",
-                        [uuid])
+                        [uuid], db=db)
     if len(journals) == 0:
         return None
     if len(journals) == 1:
@@ -444,7 +450,7 @@ def get_journal(uuid):
 
 # @TODO add a db parameter.
 def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
-                   publisher_name, publisher_url):
+                   publisher_name, publisher_url, db=None):
     """
     Insert a journal record to the database. Does not do a rollback() on
     failure or a commit() on success - that is the repsonsibility of the
@@ -455,11 +461,11 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
         contact_email, publisher_name, publisher_url)
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
                         [journal_uuid, title, issn, journal_url, contact_email,
-                         publisher_name, publisher_url])
+                         publisher_name, publisher_url], db=db)
     return result == 1
 
 
-def get_journals():
+def get_journals(db=None):
     """Get all distinct journals from the database, sorted by title"""
     return db_query('''
         select title, journal_url, publisher_name, publisher_url, issn,
@@ -469,15 +475,15 @@ def get_journals():
             publisher_name, publisher_url
         order by title, journal_url, journal_uuid, issn, 
             publisher_name, publisher_url
-        ''')
+        ''', db=db)
 
 
-def get_journal_xml(uuid):
+def get_journal_xml(uuid, db=None):
     """
     Query information about the journal that produced this deposit and wrap it
     in XML to include in the Bag.
     """
-    journal = get_journal(uuid)
+    journal = get_journal(uuid, db=db)
     if journal is None:
         return None
 
@@ -497,7 +503,8 @@ def get_journal_xml(uuid):
 
 
 # @TODO add a db parameter.
-def log_microservice(service, uuid, start_time, end_time, result, error):
+def log_microservice(service, uuid, start_time, end_time, result,
+                     error, db=None):
     """Log the service action ot the database."""
     result = db_execute("""
         INSERT INTO microservices (microservice, deposit_uuid, started_on,

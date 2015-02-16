@@ -12,9 +12,6 @@ from os.path import dirname
 from bottle import Bottle, request, template
 import bottle
 import pkppln
-import MySQLdb
-import logging
-import sys
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 
@@ -24,7 +21,7 @@ from webapp.webapp import WebApp
 class TermsApp(WebApp):
 
     def __init__(self, name):
-        super(TermsApp, self).__init__(name)
+        WebApp.__init__(self, "TermsApp")
         self.route('/', method='GET', callback=self.terms_list)
         self.route('/list', method='GET', callback=self.terms_list)
         self.route('/list_terms', method='GET', callback=self.terms_list)
@@ -36,13 +33,14 @@ class TermsApp(WebApp):
         self.route('/add_term', method='GET', callback=self.add_term)
         self.route('/edit_term/:key_code', method='GET', callback=self.edit_term)
         self.route('/edit_term/:key_code/:lang_code', method='GET', callback=self.edit_term)
-        self.route('/save', method='GET', callback=self.save_term)
+        self.route('/save', method='POST', callback=self.save_term)
 
     def terms_list(self):
         """Show all the terms."""
         lang = request.query.lang or 'en-US'
-        terms = pkppln.get_all_terms(lang)
-        languages = pkppln.get_term_languages()
+        handle = pkppln.get_connection()
+        terms = pkppln.get_all_terms(lang, db=handle)
+        languages = pkppln.get_term_languages(db=handle)
 
         if len(terms):
             return template('terms_list', languages=languages,
@@ -52,30 +50,38 @@ class TermsApp(WebApp):
                             message='Sorry, there are no terms of use.')
 
     def term_detail(self, key_code):
-        terms = pkppln.get_term_details(key_code)
+        terms = pkppln.get_terms_key(key_code)
         return template('term_detail', terms=terms, key_code=key_code)
 
     def terms_sort(self):
         """Show all the terms."""
-        terms = pkppln.get_all_terms()
+        handle = pkppln.get_connection()
+        terms = pkppln.get_all_terms(db=handle)
         return template('terms_sort', terms=terms, message=None)
 
     def terms_sort_save(self):
+        handle = pkppln.get_connection()
         term_order = request.forms.get('order').split(',')
         for idx, key in enumerate(term_order):
-            terms = pkppln.get_terms_key(key)
+            terms = pkppln.get_terms_key(key, db=handle)
             for term in terms:
                 term['weight'] = idx
-                pkppln.update_term(term)
-        terms = pkppln.get_all_terms()
+                try:
+                    pkppln.update_term(term, db=handle)
+                except:
+                    handle.rollback()
+                    raise
+        handle.commit()
+        terms = pkppln.get_all_terms(db=handle)
         return template('terms_sort', terms=terms, message="Saved")
 
     def terms_translate(self):
         """Show all the terms."""
+        handle = pkppln.get_connection()
         lang = request.query.lang
-        terms = pkppln.get_all_terms(lang)
+        terms = pkppln.get_all_terms(lang, db=handle)
         en_terms = {}
-        for t in pkppln.get_all_terms('en-US'):
+        for t in pkppln.get_all_terms('en-US', db=handle):
             en_terms[t['key_code']] = t
 
         return template('terms_translate', terms=terms, en_terms=en_terms,
@@ -84,16 +90,22 @@ class TermsApp(WebApp):
     def terms_translate_save(self):
         """Show all the terms."""
         lang = request.forms.get('display_lang')
-        terms = pkppln.get_all_terms(lang)
+        handle = pkppln.get_connection()
+        terms = pkppln.get_all_terms(lang, db=handle)
         for term in terms:
             content = request.forms.get(term['key_code'], '').strip()
             if content == '':
                 continue
             term['lang_code'] = lang
             term['content'] = content
-            pkppln.edit_term(term)
+            try:
+                pkppln.edit_term(term, db=handle)
+            except:
+                handle.rollback()
+                raise
         en_terms = {}
-        for t in pkppln.get_all_terms('en-US'):
+        handle.commit()
+        for t in pkppln.get_all_terms('en-US', handle):
             en_terms[t['key_code']] = t
 
         return template('terms_translate', terms=terms, en_terms=en_terms,
@@ -106,8 +118,9 @@ class TermsApp(WebApp):
 
     def edit_term(self, key_code, lang_code='en-us'):
         """We need to keep all versions of each term of use."""
+        handle = pkppln.get_connection()
         form_title = 'Edit term of use'
-        term = pkppln.get_term(key_code, lang_code)
+        term = pkppln.get_term(key_code, lang_code, db=handle)
         if term is None:
             return template('messages',
                             message='That term does not exist.')
@@ -126,7 +139,12 @@ class TermsApp(WebApp):
         term['content'] = request.forms.get('text').strip()
         term['id'] = request.forms.get('id', '').strip()
         term['weight'] = request.forms.get('weight', '1').strip()
-        pkppln.edit_term(term)
-        pkppln.db_commit()
+        handle = pkppln.get_connection()
+        try:
+            pkppln.edit_term(term, handle)
+        except:
+            handle.rollback()
+            raise
+        handle.commit()
         return template('messages',
                         message='A new version of the term has been saved.')
