@@ -16,6 +16,7 @@ class VirusCheck(PlnService):
     clamd."""
 
     def __init__(self):
+        PlnService.__init__(self)
         self.clam = clamd.ClamdUnixSocket(path='/var/run/clamd.ctl')
         self.filecount = 0
         self.report = {}

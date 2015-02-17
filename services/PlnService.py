@@ -3,6 +3,7 @@ import pkppln
 import abc
 from abc import abstractmethod
 import argparse
+import logging
 
 
 def parse_arguments(arglist=None):
@@ -39,11 +40,16 @@ class PlnService(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    args = None
+    def __init__(self):
+        self.args = None
+        self.handle = pkppln.get_connection()
 
     def name(self):
         """The name of the service, identical to the class name."""
         return type(self).__name__
+
+    def log_message(self, message, level=logging.INFO):
+        pkppln.log_message(message, level=level, log_type='microservice_log')
 
     @abstractmethod
     def state_before(self):
@@ -68,12 +74,53 @@ class PlnService(object):
 
     def log_microservice(self, uuid, start_time, end_time, result, error):
         """Log the service action ot the database."""
-        mysql = pkppln.get_connection()
-        if pkppln.log_microservice(
-                self.name(), uuid, start_time, end_time, result, error):
-            mysql.commit()
-        else:
-            mysql.rollback()
+        try:
+            pkppln.log_microservice(
+                self.name(), uuid, start_time, end_time, result,
+                error, db=self.handle
+            )
+        except Exception as e:
+            self.log_message('Cannot log microservice: ' + str(e),
+                             logging.CRITICAL)
+            self.handle.rollback()
+            raise e
+
+    def process_deposit(self, deposit):
+        self.output(1, pkppln.deposit_filename(deposit['deposit_url']))
+
+        try:
+            deposit_started = datetime.now()
+            self.execute(deposit)
+            deposit_ended = datetime.now()
+            if self.args.dry_run:
+                return
+
+            pkppln.update_deposit(
+                deposit['deposit_uuid'], self.state_after(), 'success',
+                db=self.handle
+            )
+            self.log_microservice(
+                deposit['deposit_uuid'], deposit_started, deposit_ended,
+                'success', ''
+            )
+        except Exception as e:
+            error = str(e)
+            self.handle.rollback()
+            self.output(0, str(e))
+            self.log_microservice(
+                deposit['deposit_uuid'], deposit_started, deposit_started,
+                'failed', error
+            )
+            if self.args.force:
+                self.output(0, 'forcing update')
+                pkppln.update_deposit(
+                    deposit['deposit_uuid'], self.state_after(), 'forced',
+                    db=self.handle
+                )
+                self.log_microservice(
+                    deposit['deposit_uuid'], deposit_started, deposit_started,
+                    'failed (ignored)', 'FORCED UPDATE ' + error)
+        self.handle.commit()
 
     def run(self, args):
         """
@@ -83,37 +130,13 @@ class PlnService(object):
         'failure' if the service failed. An optional message may be returned.
         """
         self.args = args
-        deposits = pkppln.get_deposits(self.state_before())
+        deposits = pkppln.get_deposits(self.state_before(), self.handle)
+
         self.output(2, 'Found ' + str(len(deposits)) +
                     ' deposits for service ' + args.service)
+
         for deposit in deposits:
-            if args.deposit is not None and deposit['deposit_uuid'] not in args.deposit:
+            if (args.deposit is not None and
+                    deposit['deposit_uuid'] not in args.deposit):
                 continue
-            self.output(1, deposit['deposit_url'])
-            deposit_started = datetime.now()
-            (result, error) = self.execute(deposit)
-            deposit_ended = datetime.now()
-            self.output(1, result)
-            self.output(0, error)
-
-            if args.dry_run:
-                continue
-
-            if result == 'success':
-                pkppln.update_deposit(deposit['deposit_uuid'],
-                                      self.state_after(),
-                                      'success')
-                self.log_microservice(deposit['deposit_uuid'],
-                                      deposit_started,
-                                      deposit_ended,
-                                      result,
-                                      error)
-            elif args.force:
-                self.output(0, 'forcing update')
-                pkppln.update_deposit(deposit['deposit_uuid'],
-                                      self.state_after(),
-                                      'forced')
-                self.log_microservice(deposit['deposit_uuid'],
-                                      deposit_started,
-                                      deposit_ended, result + ' (ignored)',
-                                      'FORCED UPDATE ' + error)
+            self.process_deposit(deposit)

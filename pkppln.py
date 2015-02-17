@@ -160,13 +160,13 @@ def db_execute(sql, params=None, db=None, autocommit=False):
 # -----------------------------------------------------------------------------
 
 
-def __request_logger():
+def __request_logger(log_type='server_log'):
     """Get a logging object. Internal use only."""
     config = get_config()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     log_filehandle = logging.FileHandler(
-        config.get('Paths', 'log_file'))
+        config.get('Paths', log_type))
     log_filehandle.setLevel(logging.INFO)
     log_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -176,17 +176,19 @@ def __request_logger():
 
 
 # @TODO use a separate error logger.
-def get_logger():
+def get_logger(log_type='server_log'):
     """Get a logging object, and cache it for future use."""
     global _logger
     if _logger is None:
-        _logger = __request_logger()
-    return _logger
+        _logger = {}
+    if log_type not in _logger:
+        _logger[log_type] = __request_logger(log_type)
+    return _logger[log_type]
 
 
-def log_message(message, level=logging.INFO):
+def log_message(message, level=logging.INFO, log_type='server_log'):
     """Log a message, with optional logging level."""
-    get_logger().log(level, message)
+    get_logger(log_type).log(level, message)
 
 
 # -----------------------------------------------------------------------------
@@ -357,7 +359,7 @@ def update_term(term, db=None):
 
 def get_deposit(uuid, db=None):
     """Return a deposit from the database."""
-    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s', 
+    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s',
                     [uuid], db=db)
 
 
@@ -502,16 +504,13 @@ def get_journal_xml(uuid, db=None):
 # -----------------------------------------------------------------------------
 
 
-# @TODO add a db parameter.
 def log_microservice(service, uuid, start_time, end_time, result,
                      error, db=None):
     """Log the service action ot the database."""
-    result = db_execute("""
+    db_execute("""
         INSERT INTO microservices (microservice, deposit_uuid, started_on,
         finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
-                        [service, uuid, start_time, end_time,
-                         result, error])
-    return result == 1
+               [service, uuid, start_time, end_time, result, error], db)
 
 
 # -----------------------------------------------------------------------------

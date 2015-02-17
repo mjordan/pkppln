@@ -38,13 +38,7 @@ class ValidateBag(PlnService):
         bagpath = os.path.join(expanded_path, 'bag')
         self.output(1, 'extracted to ' + bagpath)
 
-        try:
-            bag = bagit.Bag(bagpath)
-            if not bag.is_valid():
-                return 'failure', 'Bag is not valid.'
-            else:
-                self.output(2, 'bag is valid.')
-        except Exception as exception:
-            return 'failure', exception.message
-
-        return 'success', ''
+        bag = bagit.Bag(bagpath)
+        if not bag.is_valid():
+            raise Exception('Bag is not valid.')
+        self.output(2, 'bag is valid.')
