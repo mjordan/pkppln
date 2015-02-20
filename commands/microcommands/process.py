@@ -20,12 +20,17 @@ class Process(PlnCommand):
             return 'No deposit'
         uuid = args.deposit
         service_args = args.srvargs + ['-d', uuid]
+
         for service in ListServices().services():
-            print service
+            self.output(1, service)
             module_name = 'services.microservices.' + service
             module = __import__(module_name, fromlist=[service])
             class_name = string.capwords(service, '_').replace('_', '')
             module_class = getattr(module, class_name)
             service_object = module_class()
             args = parse_arguments(service_args + [service])
-            service_object.run(args)
+            try:
+                service_object.run(args)
+            except Exception as e:
+                self.output(0, str(e))
+                raise

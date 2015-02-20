@@ -6,6 +6,7 @@ from datetime import datetime
 
 
 class SwordClient(object):
+
     """Very simple and special purpose SWORD client for the PLN to make
     deposits to LOCKSSOMatic an check on their status."""
 
@@ -13,6 +14,7 @@ class SwordClient(object):
         """Initialize the client with the service document IRI and a
         content provider UUID."""
         self.sd_iri = sd_iri
+        self.col_iri = None
         self.provider_uuid = provider_uuid
         self.checksum_type = None
         self.max_upload_size = None
@@ -24,10 +26,17 @@ class SwordClient(object):
         }
         response = requests.get(self.sd_iri, headers=headers)
         if response.status_code != 200:
+            print response.content
             raise Exception(str(response.status_code) + ' ' + response.reason)
 
         # check response code here.
-        root = ET.fromstring(response.content)
+        try:
+            root = ET.fromstring(response.content)
+        except:
+            print '>>>>' + self.sd_iri
+            print response.content
+            raise
+
         collection = root.find(
             './/app:collection',
             namespaces=pkppln.namespaces

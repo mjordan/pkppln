@@ -359,8 +359,11 @@ def update_term(term, db=None):
 
 def get_deposit(uuid, db=None):
     """Return a deposit from the database."""
-    return db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s',
-                    [uuid], db=db)
+    result = db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s',
+                      [uuid], db=db)
+    if result is None:
+        return None
+    return result[0]
 
 
 def get_deposits(state, db=None):
@@ -395,7 +398,8 @@ def record_deposit(deposit, receipt, db=None):
     the transaction."""
     result = db_execute("""
         UPDATE deposits SET
-        deposit_receipt = %s
+        deposit_receipt = %s,
+        deposited_lom = NOW()
         WHERE deposit_uuid = %s""",
                         [receipt, deposit['deposit_uuid']], db=db)
     return result == 1
@@ -428,15 +432,15 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
 # -----------------------------------------------------------------------------
 
 
-def get_journal_deposits(journal_uuid, state, db=None):
+def get_journal_deposits(journal_uuid, db=None):
     """
     Get the deposits that have the indicated processing state value
     and return them to the microservice for processing.
     """
     return db_query("""
-        SELECT * FROM deposits WHERE journal_uuid = %s AND
-        processing_state = %s AND outcome <> 'failed'
-        """, [journal_uuid, state], db=db)
+        SELECT * FROM deposits WHERE journal_uuid = %s
+        ORDER BY date_deposited
+        """, [journal_uuid], db=db)
 
 
 def get_journal(uuid, db=None):
@@ -469,15 +473,7 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
 
 def get_journals(db=None):
     """Get all distinct journals from the database, sorted by title"""
-    return db_query('''
-        select title, journal_url, publisher_name, publisher_url, issn,
-            max(date_deposited) as recent_deposit, journal_uuid
-        from journals
-        group by title, journal_url, journal_uuid, issn, 
-            publisher_name, publisher_url
-        order by title, journal_url, journal_uuid, issn, 
-            publisher_name, publisher_url
-        ''', db=db)
+    return db_query('''select * from journals order by title''', db=db)
 
 
 def get_journal_xml(uuid, db=None):

@@ -96,10 +96,11 @@ class GenerateOnix(PlnCommand):
     def addJournals(self, holdingsList):
         """Add all the journals to the xml."""
         for journal in pkppln.get_journals():
-            deposits = pkppln.get_journal_deposits(
+            # THIS FUNCTION HAS CHANGED.
+            all_deposits = pkppln.get_journal_deposits(
                 journal['journal_uuid'],
-                'deposited'
             )
+            deposits = [x for x in all_deposits if x['processing_state'] == 'deposited']
             if len(deposits) == 0:
                 continue
             record = E.HoldingsRecord(
@@ -125,4 +126,4 @@ class GenerateOnix(PlnCommand):
     def execute(self, args):
         onix, holdingsList = self.skeleton()
         self.addJournals(holdingsList)
-        return et.tostring(onix, pretty_print=True, encoding="UTF-8")
+        self.output(0, et.tostring(onix, pretty_print=True, encoding="UTF-8"))

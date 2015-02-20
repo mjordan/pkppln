@@ -1,6 +1,7 @@
 from datetime import datetime
 import pkppln
 from commands.PlnCommand import PlnCommand
+import traceback
 
 
 class ResetDeposit(PlnCommand):
@@ -22,15 +23,13 @@ class ResetDeposit(PlnCommand):
         return "Reset processing state of a deposit."
 
     def execute(self, args):
-        mysql = pkppln.get_connection()
-
-        update = pkppln.update_deposit(args.uuid, args.state, 'reset')
-        log = pkppln.log_microservice(args.state, args.uuid, datetime.now(),
-                                      datetime.now(), 'reset', '')
-
-        if update and log:
-            mysql.commit()
-            return ''
-
-        mysql.rollback()
-        return "Failed.\n  Update: " + str(update) + "\n  log: " + str(log)
+        try:
+            pkppln.update_deposit(args.uuid, args.state,
+                                  'reset', db=self.handle)
+            pkppln.log_microservice(args.state, args.uuid, datetime.now(),
+                                    datetime.now(), 'reset', '',
+                                    db=self.handle)
+        except Exception as e:
+            self.handle.rollback()
+            raise
+        self.handle.commit()

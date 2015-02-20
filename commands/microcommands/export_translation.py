@@ -30,11 +30,11 @@ class ExportTranslation(PlnCommand):
 
         for term in terms:
             message = SubElement(locale, 'message')
-            message.set('key', term['key'])
-            message.text = term['text']
-        return et.tostring(
+            message.set('key', term['key_code'])
+            message.text = term['content']
+        self.output(0, et.tostring(
             locale,
             pretty_print=True,
             encoding="UTF-8",
             xml_declaration=True
-        )
+        ))
