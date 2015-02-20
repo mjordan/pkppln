@@ -31,23 +31,20 @@ class ValidateExport(PlnService):
                 continue
             payload_xml = os.path.join(bag_path, payload_file)
             if not os.path.isfile(payload_xml):
-                return 'failed', 'Cannot find export XML in ' + payload_xml
+                raise Exception('Cannot find export XML in ' + payload_xml)
+
             self.output(1, 'validating ' + payload_xml)
             parser = etree.XMLParser()
-            try:
-                document = etree.parse(payload_xml, parser=parser)
-            except Exception as error:
-                return 'failed', error.message
+            document = etree.parse(payload_xml, parser=parser)
+
             systemId = document.docinfo.system_url
             if not re.match(r'http://pkp.sfu.ca/.*/dtds', systemId):
-                return 'failed', 'Suspicious DOCTYPE: ' + systemId
+                raise('Suspicious DOCTYPE: ' + systemId)
+
             self.output(2, 'system id: ' + systemId)
-            result = None
-            try:
-                dtd = etree.DTD(systemId)
-                result = dtd.validate(document)
-            except Exception as error:
-                return 'failed', error.message
+
+            dtd = etree.DTD(systemId)
+            result = dtd.validate(document)
 
             if result is False:
                 for log in dtd.error_log:
@@ -56,7 +53,7 @@ class ValidateExport(PlnService):
                                          str(log.column), log.type_name,
                                          log.message))
                     message += '\n'
-                result = 'failure'
+                raise Exception(message)
             else:
                 self.output(2, 'validation passed')
 
@@ -66,5 +63,3 @@ class ValidateExport(PlnService):
             journal_file.write(journal_xml)
             journal_file.close()
             self.output(2, 'saved journal info to ' + journal_path)
-
-            return result, message

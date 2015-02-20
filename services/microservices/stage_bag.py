@@ -34,11 +34,6 @@ class StageBag(PlnService):
 
         self.output(2, 'Staging to ' + dest_file)
 
-        try:
-            if not os.path.exists(dest_path):
-                os.makedirs(dest_path)
-            shutil.move(source_file, dest_file)
-        except Exception as error:
-            return 'failed', str(error)
-
-        return 'success', ''
+        if not os.path.exists(dest_path):
+            os.makedirs(dest_path)
+        shutil.move(source_file, dest_file)

@@ -4,6 +4,7 @@ import abc
 from abc import abstractmethod
 import argparse
 import logging
+import traceback
 
 
 def parse_arguments(arglist=None):
@@ -82,6 +83,7 @@ class PlnService(object):
         except Exception as e:
             self.log_message('Cannot log microservice: ' + str(e),
                              logging.CRITICAL)
+            traceback.print_stack(self.run)
             self.handle.rollback()
             raise e
 
@@ -107,6 +109,7 @@ class PlnService(object):
             error = str(e)
             self.handle.rollback()
             self.output(0, str(e))
+            self.output(0, traceback.format_exc())
             self.log_microservice(
                 deposit['deposit_uuid'], deposit_started, deposit_started,
                 'failed', error

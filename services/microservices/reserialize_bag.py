@@ -16,8 +16,6 @@ class ReserializeBag(PlnService):
         return 'reserialized'
 
     def execute(self, deposit):
-        result = 'success'
-        message = ''
         config = pkppln.get_config()
 
         uuid = deposit['deposit_uuid']
@@ -29,11 +27,7 @@ class ReserializeBag(PlnService):
         bag.info['PKP-PLN-Deposit-UUID'] = uuid
         bag.save(manifests=True)
 
-        try:
-            bag.validate()
-        except Exception as error:
-            result = 'failed'
-            message += error.message
+        bag.validate()
 
         tar_filename = '.'.join([deposit['journal_uuid'], uuid, 'tar.gz'])
         tar_path = os.path.join(
@@ -48,11 +42,5 @@ class ReserializeBag(PlnService):
 
         self.output(1, 'Saving tar.gz to ' + tar_filepath)
 
-        try:
-            tar_file = tarfile.open(tar_filepath, 'w:gz')
-            tar_file.add(bag_path)
-        except Exception as error:
-            result = 'failed'
-            message += error.message
-
-        return result, message
+        tar_file = tarfile.open(tar_filepath, 'w:gz')
+        tar_file.add(bag_path)
