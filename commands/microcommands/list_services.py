@@ -12,8 +12,7 @@ class ListServices(PlnCommand):
                 'deposit_to_pln', 'check_status']
 
     def execute(self, args):
-        output = 'usage: pln-service.py [-h] [-v | -q] service ...\n'
-        output += 'where service is one of \n'
+        self.output(0, 'usage: pln-service.py [-h] [-v | -q] [ -n | -f ] service ...')
+        self.output(0, 'where service is one of ')
         for f in self.services():
-            output += '  ' + f + '\n'
-        return output
+            self.output(0, '  ' + f)
