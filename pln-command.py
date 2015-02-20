@@ -1,26 +1,31 @@
 #!/usr/bin/env python
 
 """
+Run a staging server command. This script will figure out where
+the command code is, load it, and run the command.
+
+usage: pln-command.py [-h] [-v | -q] [-n] command
+
+Run a staging command
+
+positional arguments:
+  command        Name of the command to run
+  subargs        Arugments to subcommand
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose  Increase output verbosity
+  -q, --quiet    Silence most output
+
+Use pln-command.py list_commands for a list of available commands
 """
 
 import string
 import sys
 import traceback
 
-import argparse
-argparser = argparse.ArgumentParser(
-    description='Run a staging command',
-    epilog='Use pln-command.py list_commands for a list of available commands'
-)
-verbosity_group = argparser.add_mutually_exclusive_group()
-
-verbosity_group.add_argument('-v', '--verbose', action='count', default=0,
-                             help='Increase output verbosity')
-verbosity_group.add_argument('-q', '--quiet', action='store_true',
-                             default=False, help='Silence most output')
-argparser.add_argument('command', type=str, help='Name of the command to run')
-argparser.add_argument('subargs', nargs=argparse.REMAINDER, help='Arugments to subcommand')
-args = argparser.parse_args()
+from commands.PlnCommand import parse_arguments
+args = parse_arguments()
 
 # allow hyphens in command names.
 command = args.command.replace('-', '_')
@@ -44,7 +49,7 @@ except Exception as error:
     sys.exit('Cannot instantiate command ' + command.capitalize()
              + "\n" + error.message)
 
-# run the service.
+# run the command.
 try:
     command_object.run(args)
 except Exception as error:
