@@ -32,7 +32,7 @@ Set pkppln.config_file_name to something else before calling get_config()
 for testing.
 """
 config_file_name = 'config.cfg'
-config_path = dirname(abspath(__file__)) + '/' + config_file_name
+
 namespaces = {
     'entry': 'http://www.w3.org/2005/Atom',
     'pkp': 'http://pkp.sfu.ca/SWORD',
@@ -52,14 +52,18 @@ _config_mtime = None
 
 # -----------------------------------------------------------------------------
 
+def config_path():
+    return dirname(abspath(__file__)) + '/' + config_file_name
+
+
 def initialize():
     """If the config file has been modified since the last time it was read
     then reset the _config, _dbconn, and _logger variables. This will force
     them to be recreated on the next call to get_config(), get_connection(),
     or get_logger()."""
     global _config_mtime, _config, _logger
-    if _config_mtime is None or _config_mtime < getmtime(config_path):
-        _config_mtime = getmtime(config_path)
+    if _config_mtime is None or _config_mtime < getmtime(config_path()):
+        _config_mtime = getmtime(config_path())
         _config = None
         _logger = None
 
@@ -72,9 +76,9 @@ def __config():
     Parse the config file and return the result. Internal use only.
     """
     config = ConfigParser.ConfigParser()
-    success = config.read(config_path)
-    if config_path not in success:
-        raise Exception('Cannot load config file ' + config_path)
+    success = config.read(config_path())
+    if config_path() not in success:
+        raise Exception('Cannot load config file ' + config_path())
     return config
 
 

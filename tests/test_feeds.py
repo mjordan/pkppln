@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: <encoding name> -*-
-
 """Tests for the Feeds module"""
 
 import unittest
@@ -9,54 +6,43 @@ import xml.etree.ElementTree as ET
 import json
 from os.path import abspath, dirname
 from _elementtree import XMLParser
-import requests
 
 sys.path.append(dirname(dirname(abspath(__file__))))
-from webapp.feeds.feed_server import terms_feed
+from webapp.feeds.feed_server import FeedsApp
 import pkppln
-
-with_server = False
 
 
 class TestFeeds(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestFeeds, cls).setUpClass()
-        mysql = pkppln.get_connection()
-        cursor = mysql.cursor()
-        cursor.executemany(
-            """
-            INSERT INTO terms_of_use (current_version, last_updated, `key`, language, `text`)
-            VALUES ('Yes', '2014-09-20', %s, 'en-US', %s)
-            """,
-            [
-                ('utf8.single', u'I am good to go.'),
-                ('utf8.double', u'U+00E9: \xe9'),
-                ('utf8.triple', u'U+20AC: \u20AC'),
-                ('typographic.doublequote',  u'U+201C U+201D: \u201c\u201d'),
-                ('single.anglequote', u'U+2039 U+203A: \u2039\u203a')
-            ]
-        )
-        mysql.commit()
+    def setUpClass(self):
+        super(TestFeeds, self).setUpClass()
+        self.app = FeedsApp("Feeds")
 
     @classmethod
-    def tearDownClass(cls):
-        super(TestFeeds, cls).tearDownClass()
-        mysql = pkppln.get_connection()
-        cursor = mysql.cursor()
-        cursor.execute('DELETE FROM journals')
-        cursor.execute('DELETE FROM deposits')
-        cursor.execute('DELETE FROM microservices')
-        cursor.execute('DELETE FROM terms_of_use')
-        mysql.commit()
+    def tearDownClass(self):
+        super(TestFeeds, self).tearDownClass()
+        self.app = None
+
+    def test_setup(self):
+        self.assertIsInstance(self.app, FeedsApp, "Saved a feeds app for use.")
+
+    def test_mimetype(self):
+        self.assertEquals(self.app.mimetype('atom'), 'text/xml; charset=utf-8')
+        self.assertEquals(self.app.mimetype('rss'), 'text/xml; charset=utf-8')
+        self.assertEquals(self.app.mimetype('json'), 'application/json; charset=utf-8')
+        self.assertEquals(self.app.mimetype('foo'), 'text/plain')
+
+    def test_feeds_index(self):
+        index = self.app.feeds_index()
+        self.assertGreater(len(index), 0)
 
     def test_terms_rss(self):
         """
         Generate an RSS feed. Verifies that the feed contains a known
         string, and that it has more than zero item elements.
         """
-        content = unicode(terms_feed('rss'))
+        content = unicode(self.app.terms_feed('rss'))
         self.assertTrue('PKP PLN Terms' in content)
         root = ET.fromstring(
             content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
@@ -68,7 +54,7 @@ class TestFeeds(unittest.TestCase):
         Generate an Atom Feed. Verifies that the feed contains a
         known string, and that it has more than zero entry elements.
         """
-        content = unicode(terms_feed('atom'))
+        content = unicode(self.app.terms_feed('atom'))
         self.assertTrue('PKP PLN Terms' in content)
         root = ET.fromstring(
             content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
@@ -83,7 +69,7 @@ class TestFeeds(unittest.TestCase):
         """
         Generate a JSON feed.
         """
-        content = unicode(terms_feed('json'))
+        content = unicode(self.app.terms_feed('json'))
         self.assertGreater(len(content), 0)
         root = json.loads(content)
         self.assertGreater(len(root), 0)
@@ -92,24 +78,13 @@ class TestFeeds(unittest.TestCase):
         """
         Attempt to generate an invalid feed.
         """
-        response = terms_feed('fooooooo')
+        response = self.app.terms_feed('foofoo')
         self.assertEquals('404 Not Found', response.status)
         self.assertEquals('', str(response))
 
     def test_server_json(self):
-        """
-        Get a JSON feed from the server (which should have been loaded from
-        pkpplntest.sql) and parse it as JSON. It contains a bunch of
-        unicode characters (incl. some problematic ones in the past) and check
-        the content.
-        """
-        if not with_server:
-            return
-        r = requests.get('http://localhost:8080/feeds/terms/json')
-        self.assertEqual(200, r.status_code)
-        self.assertEquals(
-            'application/json; charset=utf-8', r.headers['content-type'])
-        js = json.loads(r.content)
+        r = self.app.terms_feed('json')
+        js = json.loads(r)
         self.assertEquals(len(js), 5)
         self.assertEquals(js[0]['description'], 'I am good to go.')
         self.assertEquals(js[1]['description'], u'U+00E9: \xe9')
@@ -118,12 +93,8 @@ class TestFeeds(unittest.TestCase):
         self.assertEquals(js[4]['description'], u'U+2039 U+203A: \u2039\u203a')
 
     def test_server_atom(self):
-        if not with_server:
-            return
-        r = requests.get('http://localhost:8080/feeds/terms/atom')
-        self.assertEqual(200, r.status_code)
-        self.assertEquals('text/xml; charset=utf-8', r.headers['content-type'])
-        root = ET.fromstring(r.content, parser=XMLParser(encoding='UTF-8'))
+        r = self.app.terms_feed('atom')
+        root = ET.fromstring(r.encode('utf-8'))
         entries = root.findall('.//{http://www.w3.org/2005/Atom}content')
         self.assertEquals(entries[0].text.strip(), u'I am good to go.')
         self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9')
@@ -134,12 +105,8 @@ class TestFeeds(unittest.TestCase):
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
 
     def test_server_rss(self):
-        if not with_server:
-            return
-        r = requests.get('http://localhost:8080/feeds/terms/rss')
-        self.assertEqual(200, r.status_code)
-        self.assertEquals('text/xml; charset=utf-8', r.headers['content-type'])
-        root = ET.fromstring(r.content, parser=XMLParser(encoding='UTF-8'))
+        r = self.app.terms_feed('rss')
+        root = ET.fromstring(r.encode('utf-8'))
         entries = root.findall('.//item/description')
         self.assertEquals(entries[0].text.strip(), u'I am good to go.')
         self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9')
@@ -150,6 +117,5 @@ class TestFeeds(unittest.TestCase):
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
 
 pkppln.config_file_name = 'config_test.cfg'
-with_server = True
 if __name__ == '__main__':  # pragma: no cover
     unittest.main()
