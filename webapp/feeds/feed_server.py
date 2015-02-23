@@ -4,7 +4,7 @@ Generate atom, rss, and json feeds of new service terms.
 
 from os.path import isfile, dirname
 import bottle
-from bottle import route, template, response, HTTPResponse
+from bottle import template, request, response, HTTPResponse
 import json
 import pkppln
 
@@ -39,14 +39,14 @@ class FeedsApp(WebApp):
         """
         return template('feeds_index')
 
-    def terms_feed(self, feed='atom'):
+    def terms_feed(self, feed='atom', accept=None):
         """
         Generate a feed of the newest terms.
         """
-        # language = request.headers.get('Accept-Language', 'en-US')
+        language = self.get_request_lang(accept)
+
         # @TODO language needs to be processed a bit:
         # en-CA,en;q=0.8,en-GB;q=0.6,en-US;q=0.4
-        language = 'en-US'
         handle = pkppln.get_connection();
 
         template_file = 'terms_' + feed
@@ -55,4 +55,5 @@ class FeedsApp(WebApp):
             return HTTPResponse(status=404)
         terms = pkppln.get_all_terms(language, db=handle)
         response.content_type = self.mimetype(feed)
-        return template(template_file, encoding='utf8', terms=terms, json=json)
+        return template(template_file, encoding='utf8', terms=terms, 
+                        json=json, language=language)

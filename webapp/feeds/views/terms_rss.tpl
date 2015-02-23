@@ -2,6 +2,7 @@
 <rss version="2.0">
 <channel>
  <title>PKP PLN Terms</title>
+ <language>{{language}}</language>
  <description>The 10 most recent terms of service for the PKP PLN.</description>
  <link>http://example.org/feed/terms/rss</link>
  <pubDate>{{terms[0]['created']}}</pubDate>

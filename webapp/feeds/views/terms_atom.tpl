@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{language}}">
 
 	<title>PKP PLN Terms</title>
 	<subtitle>The 10 most recent terms of service for the PKP PLN.</subtitle>

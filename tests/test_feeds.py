@@ -2,15 +2,15 @@
 
 import unittest
 import sys
-import xml.etree.ElementTree as ET
 import json
 from os.path import abspath, dirname
-from _elementtree import XMLParser
+from lxml import etree as ET
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 from webapp.feeds.feed_server import FeedsApp
 import pkppln
 
+parser = ET.XMLParser()
 
 class TestFeeds(unittest.TestCase):
 
@@ -45,7 +45,7 @@ class TestFeeds(unittest.TestCase):
         content = unicode(self.app.terms_feed('rss'))
         self.assertTrue('PKP PLN Terms' in content)
         root = ET.fromstring(
-            content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
+            content.encode('UTF-8'), parser=parser)
         self.assertEquals('rss', root.tag)
         self.assertGreater(len(root.findall('.//item')), 0)
 
@@ -57,7 +57,7 @@ class TestFeeds(unittest.TestCase):
         content = unicode(self.app.terms_feed('atom'))
         self.assertTrue('PKP PLN Terms' in content)
         root = ET.fromstring(
-            content.encode('UTF-8'), parser=XMLParser(encoding='UTF-8'))
+            content.encode('UTF-8'), parser=parser)
         # must use full namespace here.
         self.assertEquals('{http://www.w3.org/2005/Atom}feed', root.tag)
         self.assertGreater(
@@ -115,6 +115,36 @@ class TestFeeds(unittest.TestCase):
             entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
         self.assertEquals(
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+
+    def test_server_rss_lang(self):
+        r = self.app.terms_feed('rss', 'en-CA')
+        root = ET.fromstring(r.encode('utf-8'))
+        lang = root.findall('.//language')
+        self.assertEquals(1, len(lang))
+        self.assertEquals('en-CA', lang[0].text)
+        entries = root.findall('.//item/description')
+        self.assertEquals(entries[0].text.strip(), u'I am good to go Canada')
+        self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9 Canada')
+        self.assertEquals(entries[2].text.strip(), u'U+20AC: \u20AC')
+        self.assertEquals(
+            entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
+        self.assertEquals(
+            entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+
+    def test_server_atom_lang(self):
+        r = self.app.terms_feed('atom', 'en-CA')
+        root = ET.fromstring(r.encode('utf-8'))
+        self.assertEquals('en-CA', root.xpath('//@xml:lang')[0])
+        entries = root.findall('.//{http://www.w3.org/2005/Atom}content')
+        self.assertEquals(entries[0].text.strip(), u'I am good to go Canada')
+        self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9 Canada')
+        self.assertEquals(entries[2].text.strip(), u'U+20AC: \u20AC')
+        self.assertEquals(
+            entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
+        self.assertEquals(
+            entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+
+
 
 pkppln.config_file_name = 'config_test.cfg'
 if __name__ == '__main__':  # pragma: no cover
