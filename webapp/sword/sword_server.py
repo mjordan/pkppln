@@ -34,7 +34,7 @@ class SwordServer(WebApp):
                    callback=self.create_deposit)
         self.route('/cont-iri/<journal_uuid>/<deposit_uuid>/state',
                    method='GET', callback=self.sword_statement)
-        self.route('/cont-iri/<journal_uuid>/<deposit_uuid>/state',
+        self.route('/cont-iri/<journal_uuid>/<deposit_uuid_param>/edit',
                    method='PUT', callback=self.edit_deposit)
 
     def service_document(self):
@@ -65,7 +65,7 @@ class SwordServer(WebApp):
         terms = pkppln.get_all_terms(language, db=handle)
 
         if len(terms) > 0:
-            response.content_type = 'text/xml'
+            response.content_type = 'text/xml; charset=UTF-8'
             return template(
                 'service_document',
                 accepting=accepting,
@@ -155,7 +155,7 @@ class SwordServer(WebApp):
             '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid,
             deposit_uuid, 'edit')
         ))
-        response.content_type = 'text/xml'
+        response.content_type = 'text/xml; charset=UTF-8'
         return template('deposit_receipt', journal_uuid=journal_uuid,
                         deposit_uuid=deposit_uuid, journal_title=title,
                         sword_server_base_url=config.get(
@@ -189,11 +189,10 @@ class SwordServer(WebApp):
         }
         handle = pkppln.get_connection()
 
-        deposits = pkppln.get_deposit(deposit_uuid, db=handle)
-        if len(deposits) == 0:
+        deposit = pkppln.get_deposit(deposit_uuid, db=handle)
+        if deposit is None:
             return HTTPResponse(status=404)
 
-        deposit = deposits[0]
         if deposit['journal_uuid'] != journal_uuid:
             return HTTPResponse(status=400)
 
@@ -214,6 +213,7 @@ class SwordServer(WebApp):
             parser=XMLParser(encoding='UTF-8')
         )
 
+        title = root.find('entry:title', namespaces).text
         urn_id = root.find('entry:id', namespaces).text
         deposit_uuid = urn_id.replace('urn:uuid:', '')
 

@@ -16,11 +16,20 @@ class PlnError(Exception):
 
     """General purpose error exception."""
 
-    def __init(self, value):
+    def __init__(self, value):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        try:
+            return repr(self.value)
+        except:
+            pass
+        try:
+            value = unicode(self.value)
+            return value.encode("ascii", "backslashreplace")
+        except:
+            pass
+        return '<unprintable %s object>' % type(self.value).__name__
 
 
 """
