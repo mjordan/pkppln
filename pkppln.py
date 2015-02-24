@@ -256,7 +256,7 @@ def get_term_languages(db=None):
         m = 'Found no terms of use languages in the database.'
         log_message(m, logging.CRITICAL)
         raise PlnError(m)
-    return languages
+    return [lang['lang_code'] for lang in languages]
 
 
 def get_term_keys(db=None):
@@ -268,31 +268,26 @@ def get_term_keys(db=None):
         m = 'Found no terms of use keys in the database.'
         log_message(m, logging.CRITICAL)
         raise PlnError(m)
-    return key_codes
+    return [code['key_code'] for code in key_codes]
 
 
 def get_term_details(term_id, db=None):
     """Fetch the details for a single term based on its numeric id."""
-    return db_query("SELECT * FROM terms_of_use WHERE id = %s",
+    terms = db_query("SELECT * FROM terms_of_use WHERE id = %s",
                     [term_id],
                     db=db)
-
+    if len(terms) == 1:
+        return terms[0]
+    return None
 
 def get_term(key_code, lang_code='en-us', db=None):
-    """Get all instances of a term, based on a key. key_code may be a string
-    or hash containing a 'key_code' key. Returns one a single term if there is
-    only one instance of the term in the database, otherwise it returns a 
-    list (which may be empty)."""
-    if isinstance(key_code, dict):
-        code = key_code['key_code']
-    else:
-        code = key_code
-
+    """Get current instance of a term, based on a key. key_code is a string.
+    Returns one a single term if there is one or None."""
     terms = db_query("""
         SELECT * FROM terms_of_use WHERE lang_code = %s AND key_code = %s
         ORDER BY id DESC
         LIMIT 1
-        """, [lang_code.lower(), code], db=db)
+        """, [lang_code.lower(), key_code], db=db)
     if len(terms) == 1:
         return terms[0]
     return None
@@ -301,7 +296,7 @@ def get_term(key_code, lang_code='en-us', db=None):
 def get_all_terms(language='en-us', db=None):
     """Get all of the terms from the database based on the available term
     keys. If there are terms which are not available in the language, then the
-    en-US term will be included and a warning message will be logged.. The 
+    en-US term will be included and a warning message will be logged. The
     result is sorted by term weights."""
     key_codes = get_term_keys(db=db)
     terms = []
@@ -315,7 +310,7 @@ def get_all_terms(language='en-us', db=None):
             else:
                 log_message(
                     'Cannot find term '
-                    + key_code['key_code'] + ' in ' + language,
+                    + key_code + ' in ' + language,
                     logging.WARN
                 )
                 term = get_term(key_code)
@@ -325,13 +320,14 @@ def get_all_terms(language='en-us', db=None):
 
 
 def get_terms_key(key_code, db=None):
-    """Return all of the translated terms for the key in no particular order"""
+    """Return all of the translated terms for the key, starting with the
+    most recent."""
     if isinstance(key_code, dict):
         code = key_code['key_code']
     else:
         code = key_code
     terms = db_query("""
-        SELECT * FROM terms_of_use WHERE key_code = %s
+        SELECT * FROM terms_of_use WHERE key_code = %s ORDER BY id DESC
         """, [code], db=db)
     if len(terms) > 0:
         return terms
@@ -362,10 +358,10 @@ def update_term(term, db=None):
 
 
 def get_deposit(uuid, db=None):
-    """Return a deposit from the database."""
+    """Return a deposit or None from the database."""
     result = db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s',
                       [uuid], db=db)
-    if result is None:
+    if len(result) == 0:
         return None
     return result[0]
 
@@ -381,7 +377,6 @@ def get_deposits(state, db=None):
         """, [state], db=db)
 
 
-# @TODO must add a db parameter here.
 def update_deposit(deposit_uuid, state, result, db=None):
     """
     Update a deposit in the database. Does not do a commit or rollback. The
@@ -472,7 +467,6 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
                         [journal_uuid, title, issn, journal_url, contact_email,
                          publisher_name, publisher_url], db=db)
-    return result == 1
 
 
 def get_journals(db=None):

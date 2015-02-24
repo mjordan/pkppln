@@ -14,7 +14,7 @@ class WebApp(Bottle):
         if header is None:
             return 'en-US'
         locales = [locale.split(';')[0].strip() for locale in header.split(',')]
-        available = [lang['lang_code'] for lang in pkppln.get_term_languages()]
+        available = pkppln.get_term_languages()
 
         for locale in locales:
             if locale in available:
