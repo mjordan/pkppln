@@ -6,64 +6,21 @@ from os.path import abspath, dirname
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 import pkppln
+from tests.pln_testcase import PkpPlnTestCase
+
 
 parser = ET.XMLParser()
 
 
-class TestPkpPln(unittest.TestCase):
-
-    # -----------------------------------------------------------------------------
+class TestPkpPlnJournals(PkpPlnTestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.handle = pkppln.get_connection()
+    def setUpClass(cls):
+        super(TestPkpPlnJournals, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-        pkppln.db_execute('DELETE FROM microservices', db=self.handle)
-        pkppln.db_execute('ALTER TABLE microservices AUTO_INCREMENT=1',
-                          db=self.handle)
-        pkppln.db_execute('DELETE FROM deposits', db=self.handle)
-        pkppln.db_execute('DELETE FROM journals', db=self.handle)
-        sql = """
-INSERT INTO journals (journal_uuid, title, issn,
-journal_url, journal_status, contact_email, publisher_name, publisher_url)
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-        """
-        data = [
-            (
-                '7D3C4239-2A73-29F4-B34D-ABFD53EA147D',
-                'Intl J Test',
-                '9876-5432',
-                'http://ojs1.example.com/index.php/ijt',
-                'healthy',
-                'ijt@example.com',
-                'Publisher institution',
-                'http://publisher.example.com'
-            ), (
-                '8e99d97e-43f0-49ca-97dd-2075c8ef784f',
-                'J Intl Fun',
-                '7777-7777',
-                'http://ojs.example.com/jiffy',
-                'healthy',
-                'jiffy@example.com',
-                'Fun Inst',
-                'http://fun.example.com'
-            )
-        ]
-        self.handle.cursor().executemany(sql, data)
-        self.handle.commit()
-
-    def tearDown(self):
-        pkppln.db_execute('DELETE FROM microservices', db=self.handle)
-        pkppln.db_execute(
-            'ALTER TABLE microservices AUTO_INCREMENT=1', db=self.handle)
-        pkppln.db_execute('DELETE FROM deposits', db=self.handle)
-        pkppln.db_execute('DELETE FROM journals', db=self.handle)
-        self.handle.commit()
+        super(TestPkpPlnJournals, cls).tearDownClass()
 
     def test_get_journal(self):
         jrnl = pkppln.get_journal('8e99d97e-43f0-49ca-97dd-2075c8ef784f')

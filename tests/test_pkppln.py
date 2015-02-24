@@ -8,19 +8,20 @@ from ConfigParser import ConfigParser
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 import pkppln
+from tests.pln_testcase import PkpPlnTestCase
 
 
-class TestPkpPln(unittest.TestCase):
+class TestPkpPln(PkpPlnTestCase):
 
     # -----------------------------------------------------------------------------
 
     @classmethod
-    def setUpClass(self):
-        self.handle = pkppln.get_connection()
+    def setUpClass(cls):
+        super(TestPkpPln, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        super(TestPkpPln, cls).tearDownClass()
 
     def setUp(self):
         pkppln.db_execute('TRUNCATE TABLE terms_of_use', db=self.handle)
