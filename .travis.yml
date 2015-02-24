@@ -10,7 +10,7 @@ before_script:
   - pip -q install -r requirements.txt
   - cp config_test.cfg config.cfg
   - mysql -e 'create database pkpplntest;'
-  - mysql pkpplntest < pkppln.sql
+  - mysql pkpplntest < pkppln-test.sql
   - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
   - sudo touch /var/log/mypln_sword_requests.log
   - sudo touch /var/log/myplnservices.log
