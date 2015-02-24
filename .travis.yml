@@ -11,11 +11,8 @@ before_script:
   - cp config_test.cfg config.cfg
   - mysql -e 'create database pkpplntest;'
   - mysql pkpplntest < pkppln-test.sql
-  - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
-  - sudo touch /var/log/mypln_sword_requests.log
-  - sudo touch /var/log/myplnservices.log
-  - sudo chmod a+rw /var/log/myplnservices.log
-  - sudo chmod a+rw /var/log/mypln_sword_requests.log
+  - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123456'"
+  - sudo touch /var/log/pkppln.log
   - python server.py config_test.cfg > server.log 2>&1 &
   - sleep 4
 
@@ -25,5 +22,4 @@ script:
 after_script:
   - killall python
   - cat server.log
-  - cat /var/log/myplnservices.log
-  
+  - cat /var/log/pkppln.log
