@@ -55,7 +55,7 @@ DROP TABLE IF EXISTS `journals`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `journals` (
   `journal_uuid` char(36) CHARACTER SET ascii NOT NULL,
-  `contact_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `contact_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `notified_date` datetime DEFAULT NULL,
   `title` varchar(256) NOT NULL,
   `issn` varchar(256) NOT NULL,
