@@ -12,17 +12,41 @@ import pkppln
 
 parser = ET.XMLParser()
 
+
 class TestFeeds(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        super(TestFeeds, self).setUpClass()
         self.app = FeedsApp("Feeds")
+        self.handle = pkppln.get_connection()
 
     @classmethod
     def tearDownClass(self):
-        super(TestFeeds, self).tearDownClass()
+        pkppln.db_execute('DELETE FROM microservices', db=self.handle)
+        pkppln.db_execute('ALTER TABLE microservices AUTO_INCREMENT=1', db=self.handle)
+        pkppln.db_execute('DELETE FROM deposits', db=self.handle)
+        pkppln.db_execute('DELETE FROM journals', db=self.handle)
         self.app = None
+
+    def setUp(self):
+        pkppln.db_execute('DELETE FROM microservices', db=self.handle)
+        pkppln.db_execute('ALTER TABLE microservices AUTO_INCREMENT=1', db=self.handle)
+        pkppln.db_execute('DELETE FROM deposits', db=self.handle)
+        pkppln.db_execute('DELETE FROM journals', db=self.handle)
+        sql = """
+INSERT INTO terms_of_use (weight, key_code, lang_code, content)
+VALUES(%s, %s, %s, %s)
+        """
+        data = [
+            ('0', 'utf8.single', 'en-US', u'I am good to go.'),
+            ('1', 'utf8.double', 'en-US', u'U+00E9: \xe9'),
+            ('2', 'utf8.triple', 'en-US', u'U+20AC: \u20AC'),
+            ('3', 'typographic.doublequote', 'en-US', u'U+201C U+201D: \u201c\u201d'),
+            ('4', 'single.anglequote', 'en-US', u'U+2039 U+203A: \u2039\u203a'),
+            (0, 'utf8.single', 'en-CA', u'I am good to go Canada'),
+            (1, 'utf8.double', 'en-CA', u'U+00E9: \xe9 Canada'),
+        ]
+        self.handle.cursor().executemany(sql, data)
 
     def test_setup(self):
         self.assertIsInstance(self.app, FeedsApp, "Saved a feeds app for use.")
@@ -30,7 +54,8 @@ class TestFeeds(unittest.TestCase):
     def test_mimetype(self):
         self.assertEquals(self.app.mimetype('atom'), 'text/xml; charset=utf-8')
         self.assertEquals(self.app.mimetype('rss'), 'text/xml; charset=utf-8')
-        self.assertEquals(self.app.mimetype('json'), 'application/json; charset=utf-8')
+        self.assertEquals(
+            self.app.mimetype('json'), 'application/json; charset=utf-8')
         self.assertEquals(self.app.mimetype('foo'), 'text/plain')
 
     def test_feeds_index(self):
@@ -143,7 +168,6 @@ class TestFeeds(unittest.TestCase):
             entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
         self.assertEquals(
             entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
-
 
 
 pkppln.config_file_name = 'config_test.cfg'
