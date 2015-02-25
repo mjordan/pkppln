@@ -368,7 +368,7 @@ def update_term(term, db=None):
 
 def get_deposit(uuid, db=None):
     """Return a deposit or None from the database."""
-    result = db_query('SELECT * FROM DEPOSITS WHERE deposit_uuid=%s',
+    result = db_query('SELECT * FROM deposits WHERE deposit_uuid=%s',
                       [uuid], db=db)
     if len(result) == 0:
         return None
