@@ -10,7 +10,9 @@ import MySQLdb.cursors
 from os.path import abspath, dirname, getmtime
 import xml.etree.ElementTree as element_tree
 from xml.etree.ElementTree import Element, SubElement
+import warnings
 
+warnings.filterwarnings('error', category=MySQLdb.Warning)
 
 class PlnError(Exception):
 
