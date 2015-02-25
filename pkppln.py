@@ -283,11 +283,12 @@ def get_term_keys(db=None):
 def get_term_details(term_id, db=None):
     """Fetch the details for a single term based on its numeric id."""
     terms = db_query("SELECT * FROM terms_of_use WHERE id = %s",
-                    [term_id],
-                    db=db)
+                     [term_id],
+                     db=db)
     if len(terms) == 1:
         return terms[0]
     return None
+
 
 def get_term(key_code, lang_code='en-us', db=None):
     """Get current instance of a term, based on a key. key_code is a string.
@@ -391,12 +392,11 @@ def update_deposit(deposit_uuid, state, result, db=None):
     Update a deposit in the database. Does not do a commit or rollback. The
     caller must decide to commit or rollback the transaction.
     """
-    result = db_execute("""
+    db_execute("""
         UPDATE deposits SET
         processing_state = %s, outcome = %s
         WHERE deposit_uuid = %s""",
-                        [state, result, deposit_uuid], db=db)
-    return result == 1
+               [state, result, deposit_uuid], db=db)
 
 
 # @TODO must add a db parameter here.
@@ -404,13 +404,12 @@ def record_deposit(deposit, receipt, db=None):
     """Successfully sent deposit to lockssomatic. Record the receipt. Does not
     do a commit or rollback. The caller must decide to commit or rollback
     the transaction."""
-    result = db_execute("""
+    db_execute("""
         UPDATE deposits SET
         deposit_receipt = %s,
         deposited_lom = NOW()
         WHERE deposit_uuid = %s""",
-                        [receipt, deposit['deposit_uuid']], db=db)
-    return result == 1
+               [receipt, deposit['deposit_uuid']], db=db)
 
 
 # @TODO must add a db parameter here.
@@ -418,7 +417,6 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
                    deposit_volume, deposit_issue, deposit_pubdate,
                    deposit_sha1, deposit_url, deposit_size,
                    processing_state, outcome, db=None):
-    log_message('inserting deposit with db ' + str(db))
     """
     Insert a deposit record to the database. Does not do a rollback() on
     failure or a commit() on success - that is the repsonsibility of the
@@ -470,12 +468,12 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
     failure or a commit() on success - that is the repsonsibility of the
     caller.
     """
-    result = db_execute("""
+    db_execute("""
         INSERT INTO journals (journal_uuid, title, issn, journal_url,
         contact_email, publisher_name, publisher_url)
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
-                        [journal_uuid, title, issn, journal_url, contact_email,
-                         publisher_name, publisher_url], db=db)
+               [journal_uuid, title, issn, journal_url, contact_email,
+                publisher_name, publisher_url], db=db)
 
 
 def get_journals(db=None):
