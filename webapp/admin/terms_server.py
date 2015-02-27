@@ -114,7 +114,7 @@ class TermsApp(WebApp):
     def add_term(self, term_id=''):
         """Add a new term."""
         term = {'lang_code': 'en-US', 'key_code': '', 'content': ''}
-        return template('crud_form', form_title='Create a new Term', **term)
+        return template('terms_form', form_title='Create a new Term', **term)
 
     def edit_term(self, key_code, lang_code='en-us'):
         """We need to keep all versions of each term of use."""
@@ -127,7 +127,7 @@ class TermsApp(WebApp):
         if term['lang_code'] != lang_code:
             return template('messages',
                             message='The term does not exist in that language.')
-        return template('crud_form', action='edit',
+        return template('terms_form', action='edit',
                         form_title=form_title, **term)
 
     def save_term(self):

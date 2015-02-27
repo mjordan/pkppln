@@ -26,7 +26,7 @@
     <h2>Languages</h2>
     <div class='list-group row'>
     %for lang in languages:
-      	<a class='list-group-item col-sm-2 {{"disabled" if display_lang == lang['lang_code'] else '' }}' href="?lang={{ lang['lang_code'] }}">{{ lang['lang_code'] }}</a>
+      	<a class='list-group-item col-sm-2 {{"disabled" if display_lang == lang else '' }}' href="?lang={{ lang }}">{{ lang }}</a>
     %end
     </div>
 	
