@@ -10,6 +10,7 @@ from webapp.admin.terms_server import TermsApp
 from webapp.sword.sword_server import SwordServer
 from webapp.static.static_server import StaticApp
 from webapp.feeds.feed_server import FeedsApp
+from webapp.admin.journal_server import JournalsApp
 
 
 def after_request():
@@ -45,6 +46,7 @@ app.add_hook('before_request', before_request)
 app.add_hook('after_request', after_request)
 app.mount('/static/', StaticApp('Static', static_path))
 app.mount('/admin/terms/', TermsApp('Terms'))
+app.mount('/admin/journals/', JournalsApp('JournalsApp'))
 app.mount('/feeds/', FeedsApp('Feeds'))
 app.mount('/api/sword/2.0/', SwordServer('SWORD'))
 

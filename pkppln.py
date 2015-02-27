@@ -593,4 +593,4 @@ def microservice_directory(state, uuid):
         return path
     except Exception as exception:
         logging.exception(exception)
-        sys.exit(1)
+        raise exception
