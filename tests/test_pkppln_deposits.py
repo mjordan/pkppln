@@ -58,7 +58,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
                                   'tested', db=self.handle)
         except:
             raised = True
-        self.assertTrue(raised)
+        self.assertTrue(raised, 'Exception raised')
         self.handle.rollback()
 
     def test_insert_deposit(self):

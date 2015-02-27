@@ -14,6 +14,7 @@ import warnings
 
 warnings.filterwarnings('error', category=MySQLdb.Warning)
 
+
 class PlnError(Exception):
 
     """General purpose error exception."""
@@ -460,6 +461,19 @@ def get_journal(uuid, db=None):
     if len(journals) == 1:
         return journals[0]
     # uuid is a primary key - there can never be more than one.
+
+
+def update_journal(journal, db=None):
+    db_execute("""
+    UPDATE journals SET contact_date=%s, notified_date=%s, title=%s, issn=%s,
+        journal_url=%s, journal_status=%s, contact_email=%s, publisher_name=%s,
+        publisher_url=%s
+    WHERE journal_uuid=%s
+    """, [journal['contact_date'], journal['notified_date'], journal['title'],
+          journal['issn'], journal['journal_url'], journal['journal_status'],
+          journal['contact_email'], journal['publisher_name'],
+          journal['publisher_url'], journal['journal_uuid']])
+    pass
 
 
 # @TODO add a db parameter.
