@@ -48,9 +48,11 @@
 	  <dd>{{ journal['journal_status'] }}</dd>
 	  	  
 	  <dt>Notification sent</dt>
-	  <dd>{{ journal['notified_date'] }}</dd>	  
+	  <dd>{{ journal['notified_date'] }}</dd>	
+	  
+	  <dt>Deposits received</dt>
+	  <dd><a href='/admin/journals/deposits/{{ journal['journal_uuid'] }}'>{{ deposits }}</a></dd>  
 	</dl>
-
 
 	% include('terms_nav.tpl')
 

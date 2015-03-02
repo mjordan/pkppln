@@ -30,6 +30,8 @@ class JournalsApp(WebApp):
         self.route('/health/:uuid', method='GET', callback=self.journal_health)
         self.route(
             '/health/:uuid', method='POST', callback=self.journal_health_update)
+        self.route(
+            '/deposits/:uuid', method='GET', callback=self.journal_deposits)
 
     def journal_list(self):
         handle = pkppln.get_connection()
@@ -54,7 +56,35 @@ class JournalsApp(WebApp):
     def journal_detail(self, uuid):
         handle = pkppln.get_connection()
         journal = pkppln.get_journal(uuid, db=handle)
-        return template('journal_detail', journal=journal)
+        total_result = pkppln.db_query(
+            'SELECT count(*) c FROM deposits WHERE journal_uuid=%s',
+            [uuid],
+            db=handle
+        )
+        total = int(total_result[0]['c'])
+        return template('journal_detail', journal=journal, deposits=total)
+
+    def journal_deposits(self, uuid):
+        handle = pkppln.get_connection()
+        journal = pkppln.get_journal(uuid, db=handle)
+        page = int(request.GET.get('p', '1').strip())
+        if page <= 0:
+            page = 1
+        offset = (page - 1) * PER_PAGE
+        deposits = pkppln.db_query(
+            '''SELECT * FROM deposits WHERE journal_uuid = %s
+            ORDER BY date_deposited DESC LIMIT %s OFFSET %s''',
+            [uuid, PER_PAGE, offset],
+            db=handle)
+        total_result = pkppln.db_query(
+            'SELECT count(*) c FROM deposits WHERE journal_uuid=%s',
+            [uuid],
+            db=handle
+        )
+        total = int(total_result[0]['c'])
+        pages = int(math.ceil(float(total) / PER_PAGE))
+        return template('journal_deposits', page=page, total=total, pages=pages,
+                        journal=journal, deposits=deposits)
 
     def journal_health(self, uuid):
         pass
