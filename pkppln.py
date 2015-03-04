@@ -497,7 +497,9 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
 
 def contacted_journal(journal_uuid, db=None):
     db_execute(
-        'UPDATE journals SET contact_date=now() WHERE journal_uuid=%s',
+        '''UPDATE journals SET
+            contact_date=now(), journal_status='healthy'
+           WHERE journal_uuid=%s''',
         [journal_uuid],
         db=db
     )
