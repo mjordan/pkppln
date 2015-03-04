@@ -4,8 +4,10 @@ import sys
 import bottle
 from bottle import Bottle, request, error, response, Response
 from os.path import abspath, dirname
-import pkppln
 import logging
+
+sys.path.append(dirname(abspath(__file__)))
+import pkppln
 from webapp.admin.terms_server import TermsApp
 from webapp.sword.sword_server import SwordServer
 from webapp.static.static_server import StaticApp
@@ -41,18 +43,18 @@ def before_request():
 
 static_path = dirname(abspath(__file__)) + '/static'
 
-app = bottle.default_app()
-app.add_hook('before_request', before_request)
-app.add_hook('after_request', after_request)
-app.mount('/static/', StaticApp('Static', static_path))
-app.mount('/admin/terms/', TermsApp('Terms'))
-app.mount('/admin/journals/', JournalsApp('JournalsApp'))
-app.mount('/feeds/', FeedsApp('Feeds'))
-app.mount('/api/sword/2.0/', SwordServer('SWORD'))
+application = bottle.default_app()
+application.add_hook('before_request', before_request)
+application.add_hook('after_request', after_request)
+application.mount('/static/', StaticApp('Static', static_path))
+application.mount('/admin/terms/', TermsApp('Terms'))
+application.mount('/admin/journals/', JournalsApp('JournalsApp'))
+application.mount('/feeds/', FeedsApp('Feeds'))
+application.mount('/api/sword/2.0/', SwordServer('SWORD'))
 
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         pkppln.config_file_name = sys.argv[1]
     bottle.debug(True)
-    app.run(host='127.0.0.1', port=9999, reloader=True)
+    application.run(host='127.0.0.1', port=9999, reloader=True)

@@ -44,14 +44,14 @@ VALUES (%s, %s, %s, %s)
         self.handle.commit()
 
     def test_get_request_lang(self):
-        app = WebApp('testapp')
-        lang = app.get_request_lang('da, en-gb;q=0.8, en;q=0.7')
+        application = WebApp('testapp')
+        lang = application.get_request_lang('da, en-gb;q=0.8, en;q=0.7')
         self.assertEquals('en-US', lang)
-        lang = app.get_request_lang('en, en-gb;q=0.8, en-CA;q=0.7')
+        lang = application.get_request_lang('en, en-gb;q=0.8, en-CA;q=0.7')
         self.assertEquals('en-CA', lang)
-        lang = app.get_request_lang('en, en-CA;q=0.8, en-US;q=0.7')
+        lang = application.get_request_lang('en, en-CA;q=0.8, en-US;q=0.7')
         self.assertEquals('en-CA', lang)
-        lang = app.get_request_lang(None)
+        lang = application.get_request_lang(None)
         self.assertEquals('en-US', lang)
 
 
