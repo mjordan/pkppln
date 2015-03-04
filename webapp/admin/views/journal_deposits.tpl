@@ -23,7 +23,7 @@
 
 	% include('terms_nav.tpl')
 
-	  <p>Showing deposits for <a href='{{journal['journal_url']}}'>{{ journal['title'] }}</a></p>
+	  <p>Showing deposits for {{ journal['title'] }}.</p>
 	  
 	  <table class='table table-striped'>
 	    <thead>

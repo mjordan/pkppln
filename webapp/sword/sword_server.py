@@ -60,6 +60,9 @@ class SwordServer(WebApp):
         if journal_url is None:
             return HTTPResponse(status=400, body='Missing Journal-URL header')
 
+        pkppln.contacted_journal(obh, db=handle)
+        handle.commit()
+
         # Get the 'accepting deposits' value.
         accepting = pkppln.check_access(obh)
         terms = pkppln.get_all_terms(language, db=handle)
@@ -148,6 +151,7 @@ class SwordServer(WebApp):
                 handle.rollback()
                 raise
 
+        pkppln.contacted_journal(journal_uuid, db=handle)
         handle.commit()
 
         response.status = 201
@@ -196,6 +200,7 @@ class SwordServer(WebApp):
         if deposit['journal_uuid'] != journal_uuid:
             return HTTPResponse(status=400)
 
+        pkppln.contacted_journal(journal_uuid, db=handle)
         return template('sword_statement', deposit=deposit, states=states)
 
     def edit_deposit(self, journal_uuid, deposit_uuid_param):
@@ -234,6 +239,7 @@ class SwordServer(WebApp):
                 handle.rollback()
                 raise
 
+        pkppln.contacted_journal(journal_uuid, db=handle)
         handle.commit()
 
         response.status = 201

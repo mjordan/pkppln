@@ -495,6 +495,14 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
                 publisher_name, publisher_url], db=db)
 
 
+def contacted_journal(journal_uuid, db=None):
+    db_execute(
+        'UPDATE journals SET contact_date=now() WHERE journal_uuid=%s',
+        [journal_uuid],
+        db=db
+    )
+
+
 def get_journals(db=None):
     """Get all distinct journals from the database, sorted by title"""
     return db_query('''select * from journals order by title''', db=db)
