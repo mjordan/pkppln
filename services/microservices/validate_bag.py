@@ -27,7 +27,7 @@ class ValidateBag(PlnService):
         for name in zfile.namelist():
             self.output(2, ' * ' + name)
             if name.startswith('/') or '..' in name:
-                return 'failure', 'Suspicious filename %s in zipped bag' % (name)
+                raise Exception('Suspicious file name %s in zipped bag' % (name))
 
         expanded_path = pkppln.microservice_directory(self.state_after(), uuid)
         if os.path.exists(expanded_path):
