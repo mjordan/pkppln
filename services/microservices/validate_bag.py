@@ -27,7 +27,9 @@ class ValidateBag(PlnService):
         for name in zfile.namelist():
             self.output(2, ' * ' + name)
             if name.startswith('/') or '..' in name:
-                raise Exception('Suspicious file name %s in zipped bag' % (name))
+                raise Exception(
+                    'Suspicious file name %s in zipped bag' % (name)
+                )
 
         expanded_path = pkppln.microservice_directory(self.state_after(), uuid)
         if os.path.exists(expanded_path):
@@ -35,10 +37,10 @@ class ValidateBag(PlnService):
             shutil.rmtree(expanded_path)
 
         zfile.extractall(expanded_path)
-        bagpath = os.path.join(expanded_path, 'bag')
-        self.output(1, 'extracted to ' + bagpath)
+        bag_path = os.path.join(expanded_path, 'bag')
+        self.output(1, 'extracted to ' + bag_path)
 
-        bag = bagit.Bag(bagpath)
+        bag = bagit.Bag(bag_path)
         if not bag.is_valid():
             raise Exception('Bag is not valid.')
         self.output(2, 'bag is valid.')

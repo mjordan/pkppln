@@ -283,6 +283,7 @@ def get_term_keys(db=None):
     return [code['key_code'] for code in key_codes]
 
 
+# @TODO must process terms[0]['created'] as a datetime to make it utc.
 def get_term_details(term_id, db=None):
     """Fetch the details for a single term based on its numeric id."""
     terms = db_query("SELECT * FROM terms_of_use WHERE id = %s",
@@ -293,6 +294,7 @@ def get_term_details(term_id, db=None):
     return None
 
 
+# @TODO must process terms[0]['created'] as a datetime to make it utc.
 def get_term(key_code, lang_code='en-us', db=None):
     """Get current instance of a term, based on a key. key_code is a string.
     Returns one a single term if there is one or None."""
@@ -332,6 +334,7 @@ def get_all_terms(language='en-us', db=None):
     return terms
 
 
+# @TODO must process terms[*]['created'] as a datetime to make it utc.
 def get_terms_key(key_code, db=None):
     """Return all of the translated terms for the key, starting with the
     most recent."""
