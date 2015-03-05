@@ -4,3 +4,4 @@ clamd==1.0.2
 MySQL-python==1.2.5
 lxml==3.4.1
 requests==2.4.3
+pytz==2012d
