@@ -12,8 +12,8 @@ before_script:
   - mysql -e 'create database pkppln_test;'
   - mysql pkppln_test < pkppln-test.sql
   - sudo mysql -e "grant all on pkppln_test.* to pkppln_test@localhost identified by 'abc123456'"
-  - sudo touch /var/log/pkppln.log
-  - sudo chmod a+w /var/log/pkppln.log
+  - sudo touch /var/log/pkppln_server.log
+  - sudo chmod a+w /var/log/pkppln_server.log
   - python server.py config_test.cfg > server.log 2>&1 &
   - sleep 4
 
