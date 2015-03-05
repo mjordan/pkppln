@@ -144,71 +144,63 @@ class TestSwordServer(PkpPlnTestCase):
         self.assertEquals(1, len(entry_cat))
         self.assertEquals('Original Deposit', entry_cat[0].attrib['label'])
 
-#     def test_edit_deposit(self):
-#         deposit = """
-#  <entry xmlns="http://www.w3.org/2005/Atom"
-#         xmlns:dcterms="http://purl.org/dc/terms/"
-#         xmlns:pkp="http://pkp.sfu.ca/SWORD">
-#     <email>journal_manager@example.com</email>
-#     <title>Journal of Foo Studies</title>
-#     <pkp:issn>1234-123x</pkp:issn>
-#     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
-#     <pkp:publisherName>Publ Name</pkp:publisherName>
-#     <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
-#     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
-#     <updated>2013-10-07T17:17:08Z</updated>
-#     <pkp:content size="102400" checksumType="sha1" volume="4" issue = "3" pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
-# </entry>
-#         """
-#         r = requests.post(
-#             'http://localhost:9999/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
-#             data=deposit,
-#             headers={
-#                 'Content-type': 'text/xml; charset=UTF-8'
-#             }
-#         )
-#         edit = """
-#  <entry xmlns="http://www.w3.org/2005/Atom"
-#         xmlns:dcterms="http://purl.org/dc/terms/"
-#         xmlns:pkp="http://pkp.sfu.ca/SWORD">
-#     <email>journal_manager@example.com</email>
-#     <title>Journal of Bar Studies</title>
-#     <pkp:issn>1234-123x</pkp:issn>
-#     <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
-#     <pkp:publisherName>Publ Name</pkp:publisherName>
-#     <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
-#     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
-#     <updated>2013-10-07T17:17:08Z</updated>
-#     <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" pubdate="2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
-# </entry>
-#         """
-#         r = requests.put(
-#             'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
-#             data=edit,
-#             headers={
-#                 'Content-type': 'text/xml; charset=UTF-8'
-#             }
-#         )
-#         print r.content
-#         self.assertEquals(201, r.status_code)
-#         self.assertEquals(
-#             '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
-#             r.headers['location']
-#         )
-#         mysql = get_connection()
-#         cursor = mysql.cursor()
-#         cursor.execute('SELECT * FROM deposits')
-#         deposits = cursor.fetchall()
-#         self.assertEquals(2, len(deposits))
-#         self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-#                           deposits[0]['deposit_uuid'])
-#         self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-#                           deposits[1]['deposit_uuid'])
-#         self.assertEquals('edit', deposits[1]['action'])
-#         cursor.execute('SELECT * FROM journals')
-#         journals = list(cursor.fetchall())
-#         self.assertEquals(
-#             'http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
+    def test_edit_deposit(self):
+        deposit = """
+ <entry xmlns="http://www.w3.org/2005/Atom"
+        xmlns:dcterms="http://purl.org/dc/terms/"
+        xmlns:pkp="http://pkp.sfu.ca/SWORD">
+    <email>journal_manager@example.com</email>
+    <title>Journal of Foo Studies</title>
+    <pkp:issn>1234-123x</pkp:issn>
+    <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
+    <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    <updated>2013-10-07T17:17:08Z</updated>
+    <pkp:content size="102400" checksumType="sha1" volume="4" issue = "3" pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
+</entry>
+        """
+        r = requests.post(
+            'http://localhost:9999/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
+            data=deposit,
+            headers={
+                'Content-type': 'text/xml; charset=UTF-8'
+            }
+        )
+        edit = """
+ <entry xmlns="http://www.w3.org/2005/Atom"
+        xmlns:dcterms="http://purl.org/dc/terms/"
+        xmlns:pkp="http://pkp.sfu.ca/SWORD">
+    <email>journal_manager@example.com</email>
+    <title>Journal of Bar Studies</title>
+    <pkp:issn>1234-123x</pkp:issn>
+    <pkp:journal_url>http://jfs.example.org/index.php/jfs</pkp:journal_url>
+    <pkp:publisherName>Publ Name</pkp:publisherName>
+    <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
+    <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    <updated>2013-10-07T17:17:08Z</updated>
+    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" pubdate="2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip</pkp:content>
+</entry>
+        """
+        r = requests.put(
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            data=edit,
+            headers={
+                'Content-type': 'text/xml; charset=UTF-8'
+            }
+        )
+        self.assertEquals(201, r.status_code)
+        self.assertEquals(
+            '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            r.headers['location']
+        )
+        mysql = get_connection()
+        cursor = mysql.cursor()
+        cursor.execute('SELECT * FROM deposits')
+        deposits = [d['deposit_uuid'] for d in list(cursor.fetchall())]
+        self.assertEquals(6, len(deposits))
+
+        self.assertTrue('1225c695-cfb8-4ebb-aaaa-80da344efa6a' in deposits)
 
 
 pkppln.config_file_name = 'config_test.cfg'
