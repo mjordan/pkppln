@@ -11,6 +11,7 @@ from os.path import abspath, dirname, getmtime
 import xml.etree.ElementTree as element_tree
 from xml.etree.ElementTree import Element, SubElement
 import warnings
+import pytz
 
 warnings.filterwarnings('error', category=MySQLdb.Warning)
 
@@ -259,6 +260,21 @@ def check_access(uuid):
 # -----------------------------------------------------------------------------
 
 
+def timestamp_utc(dt):
+    """Convert a mysql timestamp field to a UTC datetime."""
+    config = get_config()
+    zone = config.get('General', 'timezone')
+    if zone is None:
+        raise Exception('No timezone configured.')
+    tz = pytz.timezone(zone)
+    local_dt = tz.localize(dt)
+    utc = pytz.timezone('UTC')
+    return local_dt.astimezone(utc)
+
+
+# -----------------------------------------------------------------------------
+
+
 def get_term_languages(db=None):
     """Get a list of language codes (en-CA, en-US, etc.) from the database."""
     languages = db_query("""
@@ -283,18 +299,17 @@ def get_term_keys(db=None):
     return [code['key_code'] for code in key_codes]
 
 
-# @TODO must process terms[0]['created'] as a datetime to make it utc.
 def get_term_details(term_id, db=None):
     """Fetch the details for a single term based on its numeric id."""
     terms = db_query("SELECT * FROM terms_of_use WHERE id = %s",
                      [term_id],
                      db=db)
     if len(terms) == 1:
+        terms[0]['created'] = timestamp_utc(terms[0]['created'])
         return terms[0]
     return None
 
 
-# @TODO must process terms[0]['created'] as a datetime to make it utc.
 def get_term(key_code, lang_code='en-us', db=None):
     """Get current instance of a term, based on a key. key_code is a string.
     Returns one a single term if there is one or None."""
@@ -304,6 +319,7 @@ def get_term(key_code, lang_code='en-us', db=None):
         LIMIT 1
         """, [lang_code.lower(), key_code], db=db)
     if len(terms) == 1:
+        terms[0]['created'] = timestamp_utc(terms[0]['created'])
         return terms[0]
     return None
 
@@ -334,7 +350,6 @@ def get_all_terms(language='en-us', db=None):
     return terms
 
 
-# @TODO must process terms[*]['created'] as a datetime to make it utc.
 def get_terms_key(key_code, db=None):
     """Return all of the translated terms for the key, starting with the
     most recent."""
@@ -346,6 +361,8 @@ def get_terms_key(key_code, db=None):
         SELECT * FROM terms_of_use WHERE key_code = %s ORDER BY id DESC
         """, [code], db=db)
     if len(terms) > 0:
+        for term in terms:
+            term['created'] = timestamp_utc(term['created'])
         return terms
     return None
 
@@ -405,7 +422,6 @@ def update_deposit(deposit_uuid, state, result, db=None):
                [state, result, deposit_uuid], db=db)
 
 
-# @TODO must add a db parameter here.
 def record_deposit(deposit, receipt, db=None):
     """Successfully sent deposit to lockssomatic. Record the receipt. Does not
     do a commit or rollback. The caller must decide to commit or rollback
@@ -418,8 +434,7 @@ def record_deposit(deposit, receipt, db=None):
                [receipt, deposit['deposit_uuid']], db=db)
 
 
-# @TODO must add a db parameter here.
-def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
+def insert_deposit(deposit_uuid, file_uuid, journal_id, deposit_action,
                    deposit_volume, deposit_issue, deposit_pubdate,
                    deposit_sha1, deposit_url, deposit_size,
                    processing_state, outcome, db=None):
@@ -429,11 +444,11 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
     caller.
     """
     result = db_execute("""
-        INSERT INTO deposits (deposit_uuid, journal_uuid, deposit_action,
+        INSERT INTO deposits (deposit_uuid, file_uuid, journal_id, deposit_action,
         deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
         deposit_url, deposit_size, processing_state, outcome, pln_state)
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                        [deposit_uuid, journal_uuid, deposit_action,
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        [deposit_uuid, file_uuid, journal_id, deposit_action,
                          deposit_volume, deposit_issue, deposit_pubdate,
                          deposit_sha1, deposit_url, deposit_size,
                          processing_state, outcome, "inProgress"
@@ -444,15 +459,15 @@ def insert_deposit(deposit_uuid, journal_uuid, deposit_action,
 # -----------------------------------------------------------------------------
 
 
-def get_journal_deposits(journal_uuid, db=None):
+def get_journal_deposits(journal_id, db=None):
     """
     Get the deposits that have the indicated processing state value
     and return them to the microservice for processing.
     """
     return db_query("""
-        SELECT * FROM deposits WHERE journal_uuid = %s
+        SELECT * FROM deposits WHERE journal_id = %s
         ORDER BY date_deposited
-        """, [journal_uuid], db=db)
+        """, [journal_id], db=db)
 
 
 def get_journal(uuid, db=None):
@@ -463,7 +478,7 @@ def get_journal(uuid, db=None):
         return None
     if len(journals) == 1:
         return journals[0]
-    # uuid is a primary key - there can never be more than one.
+    # uuid is a unique key - there can never be more than one.
 
 
 def update_journal(journal, db=None):
@@ -479,7 +494,6 @@ def update_journal(journal, db=None):
     pass
 
 
-# @TODO add a db parameter.
 def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
                    publisher_name, publisher_url, db=None):
     """
@@ -493,6 +507,8 @@ def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
         VALUES(%s, %s, %s, %s, %s, %s, %s)""",
                [journal_uuid, title, issn, journal_url, contact_email,
                 publisher_name, publisher_url], db=db)
+    if db is not None:
+        return db.insert_id()
 
 
 def contacted_journal(journal_uuid, db=None):

@@ -14,9 +14,11 @@ from _elementtree import XMLParser
 import logging
 import bottle
 from bottle import request, template, get, post, put, HTTPResponse, response
+import uuid
 
 import pkppln
 from pkppln import namespaces
+from uuid import uuid4
 
 bottle.TEMPLATE_PATH.insert(0, dirname(__file__) + '/views')
 
@@ -78,8 +80,8 @@ class SwordServer(WebApp):
         else:
             return HTTPResponse(status=404)
 
-    def insert_content(self, deposit_action, deposit_uuid,
-                       journal_uuid, content, db=None):
+    def insert_content(self, deposit_action, deposit_uuid, file_uuid,
+                       journal_id, content, db=None):
         deposit_sha1 = content.get('checksumValue')
         deposit_volume = content.get('volume')
         deposit_issue = content.get('issue')
@@ -88,7 +90,7 @@ class SwordServer(WebApp):
         deposit_url = content.text
 
         return pkppln.insert_deposit(
-            deposit_uuid, journal_uuid, deposit_action,
+            deposit_uuid, file_uuid, journal_id, deposit_action,
             deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1,
             deposit_url, deposit_size, 'depositedByJournal', 'success', db)
 
@@ -129,8 +131,9 @@ class SwordServer(WebApp):
 
         journal = pkppln.get_journal(journal_uuid, db=handle)
         if journal is None:
+            journal = {}
             try:
-                pkppln.insert_journal(
+                journal['id'] = pkppln.insert_journal(
                     journal_uuid, title, issn, journal_url,
                     email, publisher_name, publisher_url, db=handle
                 )
@@ -144,9 +147,10 @@ class SwordServer(WebApp):
         contents = root.findall('pkp:content', namespaces)
 
         for content in contents:
+            file_uuid = uuid.uuid4()
             try:
-                self.insert_content('add', deposit_uuid,
-                                    journal_uuid, content, db=handle)
+                self.insert_content('add', deposit_uuid, file_uuid,
+                                    journal['id'], content, db=handle)
             except:
                 handle.rollback()
                 raise
@@ -196,8 +200,9 @@ class SwordServer(WebApp):
         deposit = pkppln.get_deposit(deposit_uuid, db=handle)
         if deposit is None:
             return HTTPResponse(status=404)
+        journal = pkppln.get_journal(journal_uuid, db=handle)
 
-        if deposit['journal_uuid'] != journal_uuid:
+        if deposit['journal_id'] != journal['id']:
             return HTTPResponse(status=400)
 
         pkppln.contacted_journal(journal_uuid, db=handle)
@@ -232,9 +237,10 @@ class SwordServer(WebApp):
 
         contents = root.findall('pkp:content', namespaces)
         for content in contents:
+            file_uuid = uuid.uuid4()
             try:
-                self.insert_content('edit', deposit_uuid,
-                                    journal_uuid, content, db=handle)
+                self.insert_content('edit', deposit_uuid, file_uuid,
+                                    journal['id'], content, db=handle)
             except:
                 handle.rollback()
                 raise

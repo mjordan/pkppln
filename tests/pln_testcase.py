@@ -23,7 +23,15 @@ class PkpPlnTestCase(unittest.TestCase):
             db=cls.handle
         )
         pkppln.db_execute(
+            'ALTER TABLE deposits AUTO_INCREMENT=1',
+            db=cls.handle
+        )
+        pkppln.db_execute(
             'DELETE FROM journals',
+            db=cls.handle
+        )
+        pkppln.db_execute(
+            'ALTER TABLE journals AUTO_INCREMENT=1',
             db=cls.handle
         )
         pkppln.db_execute(
@@ -86,16 +94,17 @@ VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
         ]
         self.handle.cursor().executemany(sql, data)
         sql = """
-INSERT INTO deposits (deposit_uuid, journal_uuid, date_deposited, 
+INSERT INTO deposits (deposit_uuid, file_uuid, journal_id, date_deposited, 
 deposit_action, deposit_volume, deposit_issue, deposit_pubdate, deposit_sha1, 
 deposit_url, deposit_size, processing_state, outcome, pln_state, deposited_lom, 
 deposit_receipt)
-VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
         data = [
             (
                 '61AEF065-71DE-93AA-02B0-5618ABAC2393',
-                '7D3C4239-2A73-29F4-B34D-ABFD53EA147D',
+                'C7DD3B7D-8AD5-445A-89C1-EFB7CCBD4466',
+                1,
                 '2015-02-17 19:47:37',
                 'add',
                 '44',
@@ -112,7 +121,8 @@ VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             ),
             (
                 '9CDBA9E6-9C04-74DC-4A80-D6972C1A10D0',
-                '7D3C4239-2A73-29F4-B34D-ABFD53EA147D',
+                '86800F0E-C558-40EE-9A92-1537E405C259',
+                1,
                 '2015-02-17 19:47:39',
                 'add',
                 '1',
@@ -128,7 +138,8 @@ VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 'http://lom.dev/web/app_dev.php/api/sword/2.0/cont-iri/7D3C4239-2A73-29F4-B34D-ABFD53EA147D/9CDBA9E6-9C04-74DC-4A80-D6972C1A10D0/edit'),
             (
                 'E89B7617-3201-9D24-51F2-5B46592C6A35',
-                '7D3C4239-2A73-29F4-B34D-ABFD53EA147D',
+                '1631D575-0D7F-4D4C-B38D-8153273FE55E',
+                1,
                 '2015-02-17 19:47:41', 'add',
                 '1',
                 '1',
@@ -144,7 +155,8 @@ VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             ),
             (
                 'EF4D683B-A6DC-E0B6-F454-9E0A7E75F302',
-                '8e99d97e-43f0-49ca-97dd-2075c8ef784f',
+                '797863CA-428F-485A-82B4-0DC584663B8A',
+                2,
                 '2015-02-17 19:47:35',
                 'add',
                 '44',

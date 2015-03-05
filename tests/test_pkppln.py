@@ -5,6 +5,7 @@ import logging
 
 from os.path import abspath, dirname
 from ConfigParser import ConfigParser
+from datetime import datetime
 
 sys.path.append(dirname(dirname(abspath(__file__))))
 import pkppln
@@ -64,6 +65,15 @@ VALUES (%s, %s, %s, %s)
     def test_logger(self):
         logger = pkppln.get_logger()
         self.assertIsInstance(logger, logging.Logger)
+
+
+# -----------------------------------------------------------------------------
+
+    def test_timestamp_utc(self):
+        dt = datetime(2015, 02, 01, 12, 0, 0)
+        ut = pkppln.timestamp_utc(dt)
+        self.assertEquals(ut.tzinfo.zone, 'UTC')
+        self.assertEquals('2015-02-01 20:00:00+00:00', str(ut))
 
 
 pkppln.config_file_name = 'config_test.cfg'

@@ -97,11 +97,12 @@ class TestSwordServer(PkpPlnTestCase):
             r.headers['location']
         )
         cursor = get_connection().cursor()
-        cursor.execute('SELECT * FROM deposits')
-        deposits = list(cursor.fetchall())
+        cursor.execute('SELECT deposit_uuid FROM deposits')
+        deposits = [d['deposit_uuid'] for d in list(cursor.fetchall())]
         self.assertEquals(5, len(deposits))
-        self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-                          deposits[0]['deposit_uuid'])
+
+        self.assertTrue('1225c695-cfb8-4ebb-aaaa-80da344efa6a' in deposits)
+
         cursor.execute('SELECT * FROM journals')
         journals = list(cursor.fetchall())
         self.assertEquals(3, len(journals))

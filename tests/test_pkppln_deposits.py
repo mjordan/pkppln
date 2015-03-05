@@ -19,9 +19,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
         super(TestPkpPlnDeposits, cls).tearDownClass()
 
     def test_get_journal_deposits(self):
-        deposits = pkppln.get_journal_deposits(
-            '8e99d97e-43f0-49ca-97dd-2075c8ef784f'
-        )
+        deposits = pkppln.get_journal_deposits(2)
         self.assertEquals(1, len(deposits))
         self.assertEquals(
             'EF4D683B-A6DC-E0B6-F454-9E0A7E75F302',
@@ -65,6 +63,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
         pkppln.insert_deposit(
             '9a6e5ad9-f783-4166-9e28-6dffc5de83cb',
             '8e99d97e-43f0-49ca-97dd-2075c8ef784f',
+            1,
             'add',
             '4',
             '5',
@@ -87,6 +86,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
             pkppln.insert_deposit(
                 '9a6e5ad9-f783-4166-9e28-6dffc5de83cb',
                 '8e99d97e-43f0-49ca-97dd-2075c8ef784f',
+                1,
                 None,
                 '4',
                 '5',
