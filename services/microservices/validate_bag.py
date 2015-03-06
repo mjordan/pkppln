@@ -17,10 +17,8 @@ class ValidateBag(PlnService):
         return 'bagValidated'
 
     def execute(self, deposit):
-        url = deposit['deposit_url']
-        uuid = deposit['deposit_uuid']
-        filename = pkppln.deposit_filename(url)
-        filepath = pkppln.input_path('harvested', [uuid], filename)
+        filename = deposit['file_uuid']
+        filepath = pkppln.input_path('harvested', filename=filename)
         self.output(1, 'Opening ' + filepath)
 
         zfile = zipfile.ZipFile(filepath)
@@ -31,7 +29,10 @@ class ValidateBag(PlnService):
                     'Suspicious file name %s in zipped bag' % (name)
                 )
 
-        expanded_path = pkppln.microservice_directory(self.state_after(), uuid)
+        expanded_path = pkppln.microservice_directory(
+            self.state_after(),
+            filename
+        )
         if os.path.exists(expanded_path):
             self.output(1, 'Removing old bag ' + expanded_path)
             shutil.rmtree(expanded_path)

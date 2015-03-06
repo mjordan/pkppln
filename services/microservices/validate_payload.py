@@ -15,13 +15,11 @@ class ValidatePayload(PlnService):
         return 'payloadVerified'
 
     def execute(self, deposit):
-        uuid = deposit['deposit_uuid']
         sha1 = deposit['deposit_sha1']
         size = deposit['deposit_size']
-        filename = pkppln.deposit_filename(deposit['deposit_url'])
-        filepath = pkppln.input_path('harvested', [uuid], filename)
+        filename = deposit['file_uuid']
+        filepath = pkppln.input_path('harvested', filename=filename)
         self.output(1, 'validating ' + filename)
-        self.output(2, '  in ' + filepath)
         bs = os.path.getsize(filepath)
         kb = int(math.ceil(float(bs) / 1000.0))
         if size != kb:

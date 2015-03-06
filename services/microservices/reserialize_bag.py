@@ -18,18 +18,23 @@ class ReserializeBag(PlnService):
     def execute(self, deposit):
         config = pkppln.get_config()
 
-        uuid = deposit['deposit_uuid']
-        expanded_path = pkppln.microservice_directory('bagValidated', uuid)
+        file_uuid = deposit['file_uuid']
+        journal = pkppln.get_journal_by_id(
+            deposit['journal_id'],
+            db=self.handle
+        )
+        expanded_path = pkppln.microservice_directory(
+            'bagValidated', file_uuid)
         bag_path = os.path.join(expanded_path, 'bag')
         bag = bagit.Bag(bag_path)
-        bag.info['External-identifier'] = uuid
-        bag.info['PKP-PLN-Journal-UUID'] = deposit['journal_uuid']
-        bag.info['PKP-PLN-Deposit-UUID'] = uuid
+        bag.info['External-identifier'] = file_uuid
+        bag.info['PKP-PLN-Journal-UUID'] = journal['journal_uuid']
+        bag.info['PKP-PLN-Deposit-UUID'] = deposit['deposit_uuid']
         bag.save(manifests=True)
 
         bag.validate()
 
-        tar_filename = '.'.join([deposit['journal_uuid'], uuid, 'tar.gz'])
+        tar_filename = '.'.join([journal['journal_uuid'], file_uuid, 'tar.gz'])
         tar_path = os.path.join(
             config.get('Paths', 'processing_root'),
             self.state_after(),

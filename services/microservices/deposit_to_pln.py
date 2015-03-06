@@ -16,8 +16,13 @@ class DepositToPln(PlnService):
         return 'deposited'
 
     def execute(self, deposit):
-        journal_uuid = deposit['journal_uuid']
-        deposit_uuid = deposit['deposit_uuid']
+        journal = pkppln.get_journal_by_id(
+            deposit['journal_id'],
+            db=self.handle
+        )
+        
+        journal_uuid = journal['journal_uuid']
+        file_uuid = deposit['file_uuid']
         config = pkppln.get_config()
         journal = pkppln.get_journal(deposit['journal_uuid'])
 
@@ -26,7 +31,7 @@ class DepositToPln(PlnService):
             journal_uuid
         )
 
-        filename = '.'.join([journal_uuid, deposit_uuid, 'tar.gz'])
+        filename = '.'.join([journal_uuid, file_uuid, 'tar.gz'])
         filepath = os.path.join(
             config.get('Paths', 'staging_root'),
             deposit['journal_uuid'],

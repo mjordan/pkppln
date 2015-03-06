@@ -44,8 +44,8 @@ class VirusCheck(PlnService):
         srv_status = 'success'
         error = ''
 
-        uuid = deposit['deposit_uuid']
-        expanded_path = pkppln.microservice_directory('bagValidated', uuid)
+        file_uuid = deposit['file_uuid']
+        expanded_path = pkppln.microservice_directory('bagValidated', file_uuid)
         bag_path = os.path.join(expanded_path, 'bag')
         report_path = os.path.join(bag_path, 'data', 'virus_scan.txt')
         report_file = open(report_path, 'w')

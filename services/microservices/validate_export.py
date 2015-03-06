@@ -18,11 +18,8 @@ class ValidateExport(PlnService):
         return 'contentValidated'
 
     def execute(self, deposit):
-        result = 'success'
-        message = ''
-
-        uuid = deposit['deposit_uuid']
-        expanded_path = pkppln.microservice_directory('bagValidated', uuid)
+        file_uuid = deposit['file_uuid']
+        expanded_path = pkppln.microservice_directory('bagValidated', file_uuid)
         bag_path = os.path.join(expanded_path, 'bag')
         bag = bagit.Bag(bag_path)
         # this should probably be bag.entries.items()
@@ -47,6 +44,7 @@ class ValidateExport(PlnService):
             result = dtd.validate(document)
 
             if result is False:
+                message = ''
                 for log in dtd.error_log:
                     message += "----\n"
                     message += ':'.join((payload_file, str(log.line),
@@ -57,7 +55,7 @@ class ValidateExport(PlnService):
             else:
                 self.output(2, 'validation passed')
 
-            journal_xml = pkppln.get_journal_xml(uuid)
+            journal_xml = pkppln.get_journal_xml(file_uuid)
             journal_path = os.path.join(bag_path, 'data', 'journal_info.xml')
             journal_file = open(journal_path, 'w')
             journal_file.write(journal_xml)

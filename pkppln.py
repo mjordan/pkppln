@@ -481,6 +481,17 @@ def get_journal(uuid, db=None):
     # uuid is a unique key - there can never be more than one.
 
 
+def get_journal_by_id(id, db=None):
+    """Get a journal from the database. Returns None or 1 journal."""
+    journals = db_query("SELECT * FROM journals WHERE id = %s",
+                        [id], db=db)
+    if len(journals) == 0:
+        return None
+    if len(journals) == 1:
+        return journals[0]
+    # uuid is a unique key - there can never be more than one.
+
+
 def update_journal(journal, db=None):
     db_execute("""
     UPDATE journals SET contact_date=%s, notified_date=%s, title=%s, issn=%s,
@@ -598,7 +609,7 @@ def file_md5(filepath):
     return calculated_md5.hexdigest()
 
 
-def input_path(in_dir, dirs='', filename=''):
+def input_path(in_dir, dirs=[], filename=''):
     """Calculate an input directory based on the config file and
     any additional information.
 
