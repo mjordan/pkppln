@@ -26,6 +26,6 @@ class ListDeposits(PlnCommand):
                 continue
             if args.outcome is not None and deposit['outcome'] != args.outcome:
                 continue
-            self.output(0, '\t'.join((deposit['deposit_uuid'],
+            self.output(0, '\t'.join((deposit['file_uuid'],
                                       deposit['processing_state'],
                                       deposit['outcome'])))
