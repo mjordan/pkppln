@@ -15,8 +15,17 @@ class Extract(PlnCommand):
         return "Extract the content of one deposit."
 
     def add_args(self, parser):
-        parser.add_argument('deposit',
-                            help='Deposit to process')
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument(
+            '--deposit',
+            help='Deposit to process',
+            action='append',
+        )
+        group.add_argument(
+            '--all',
+            help='Extract all deposits',
+            action='store_true'
+        )
 
     def unzip(self, filepath):
         self.output(1, 'Opening ' + filepath)
@@ -55,8 +64,15 @@ class Extract(PlnCommand):
             )
         fp = os.path.join(path, filename)
         self.output(1, ' * ' + filename)
-        f = open(fp, 'w')
-        f.write(base64.decodestring(embed.text))
+        if embed.text is None:
+            self.output(0, filename + ' has no content')
+            return
+
+        try:
+            f = open(fp, 'w')
+            f.write(base64.decodestring(embed.text))
+        except Exception as e:
+            self.output(0, 'Cannot write ' + filename + ': ' + str(e))
 
     def extract(self, bag):
         for payload_file in bag.payload_files():
@@ -77,11 +93,15 @@ class Extract(PlnCommand):
                 self.write_embed(embed, dirname(payload_xml))
 
     def execute(self, args):
-        if args.deposit is None:
-            return 'No deposit'
-        uuid = args.deposit
+        deposits = args.deposit
+        if args.all:
+            deposits = [d['file_uuid'] for d in pkppln.db_query(
+                'SELECT file_uuid FROM deposits',
+                db=self.handle
+            )]
 
-        filepath = pkppln.input_path('harvested', [uuid], uuid)
-        bag_path = self.unzip(filepath)
-        bag = self.validate_bag(bag_path)
-        self.extract(bag)
+        for file_uuid in deposits:
+            filepath = pkppln.input_path('harvested', [], file_uuid)
+            bag_path = self.unzip(filepath)
+            bag = self.validate_bag(bag_path)
+            self.extract(bag)
