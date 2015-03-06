@@ -57,8 +57,8 @@ class JournalsApp(WebApp):
         handle = pkppln.get_connection()
         journal = pkppln.get_journal(uuid, db=handle)
         total_result = pkppln.db_query(
-            'SELECT count(*) c FROM deposits WHERE journal_uuid=%s',
-            [uuid],
+            'SELECT count(*) c FROM deposits WHERE journal_id=%s',
+            [journal['id']],
             db=handle
         )
         total = int(total_result[0]['c'])
@@ -72,13 +72,13 @@ class JournalsApp(WebApp):
             page = 1
         offset = (page - 1) * PER_PAGE
         deposits = pkppln.db_query(
-            '''SELECT * FROM deposits WHERE journal_uuid = %s
+            '''SELECT * FROM deposits WHERE journal_id = %s
             ORDER BY date_deposited DESC LIMIT %s OFFSET %s''',
-            [uuid, PER_PAGE, offset],
+            [journal['id'], PER_PAGE, offset],
             db=handle)
         total_result = pkppln.db_query(
-            'SELECT count(*) c FROM deposits WHERE journal_uuid=%s',
-            [uuid],
+            'SELECT count(*) c FROM deposits WHERE journal_id=%s',
+            [journal['id']],
             db=handle
         )
         total = int(total_result[0]['c'])

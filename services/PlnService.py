@@ -73,11 +73,11 @@ class PlnService(object):
             if self.args.verbose >= n and message != '':
                 print message
 
-    def log_microservice(self, uuid, start_time, end_time, result, error):
+    def log_microservice(self, deposit_id, start_time, end_time, result, error):
         """Log the service action ot the database."""
         try:
             pkppln.log_microservice(
-                self.name(), uuid, start_time, end_time, result,
+                self.name(), deposit_id, start_time, end_time, result,
                 error, db=self.handle
             )
         except Exception as e:
@@ -102,7 +102,7 @@ class PlnService(object):
                 db=self.handle
             )
             self.log_microservice(
-                deposit['deposit_uuid'], deposit_started, deposit_ended,
+                deposit['id'], deposit_started, deposit_ended,
                 'success', ''
             )
         except Exception as e:
@@ -111,7 +111,7 @@ class PlnService(object):
             self.output(0, str(e))
             self.output(0, traceback.format_exc())
             self.log_microservice(
-                deposit['deposit_uuid'], deposit_started, deposit_started,
+                deposit['id'], deposit_started, deposit_started,
                 'failed', error
             )
             if self.args.force:
@@ -121,7 +121,7 @@ class PlnService(object):
                     db=self.handle
                 )
                 self.log_microservice(
-                    deposit['deposit_uuid'], deposit_started, deposit_started,
+                    deposit['id'], deposit_started, deposit_started,
                     'failed (ignored)', 'FORCED UPDATE ' + error)
         self.handle.commit()
 

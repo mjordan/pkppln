@@ -15,12 +15,12 @@ class Harvest(PlnService):
         return 'harvested'
 
     def execute(self, deposit):
-        uuid = deposit['deposit_uuid']
+        uuid = deposit['file_uuid']
         url = deposit['deposit_url']
         self.output(1, 'Fetching ' + url)
-        filename = pkppln.deposit_filename(url)
+        filename = uuid
 
-        harvest_dir = pkppln.microservice_directory(self.state_after(), uuid)
+        harvest_dir = pkppln.microservice_directory(self.state_after())
         harvest_bag = os.path.join(harvest_dir, filename)
 
         r = requests.get(url, stream=True)
