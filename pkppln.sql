@@ -5,20 +5,9 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
 -- -----------------------------------------------------
--- Schema pkppln
+-- Table `journals`
 -- -----------------------------------------------------
-
--- -----------------------------------------------------
--- Schema pkppln
--- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `pkppln`;
-CREATE SCHEMA IF NOT EXISTS `pkppln` DEFAULT CHARACTER SET utf8 ;
-USE `pkppln` ;
-
--- -----------------------------------------------------
--- Table `pkppln`.`journals`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pkppln`.`journals` (
+CREATE TABLE IF NOT EXISTS `journals` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `journal_uuid` CHAR(36) CHARACTER SET 'ascii' NOT NULL,
   `contact_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -38,9 +27,9 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `pkppln`.`deposits`
+-- Table `deposits`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pkppln`.`deposits` (
+CREATE TABLE IF NOT EXISTS `deposits` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `journal_id` INT NOT NULL,
   `file_uuid` CHAR(36) NOT NULL,
@@ -65,15 +54,15 @@ CREATE TABLE IF NOT EXISTS `pkppln`.`deposits` (
   UNIQUE INDEX `file_uuid_UNIQUE` (`file_uuid` ASC),
   CONSTRAINT `deposits_fk1`
     FOREIGN KEY (`journal_id`)
-    REFERENCES `pkppln`.`journals` (`id`))
+    REFERENCES `journals` (`id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `pkppln`.`microservices`
+-- Table `microservices`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pkppln`.`microservices` (
+CREATE TABLE IF NOT EXISTS `microservices` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `deposit_id` INT NOT NULL,
   `microservice` VARCHAR(255) NOT NULL,
@@ -85,15 +74,15 @@ CREATE TABLE IF NOT EXISTS `pkppln`.`microservices` (
   INDEX `microservices_fk1` (`deposit_id` ASC),
   CONSTRAINT `microservices_fk1`
     FOREIGN KEY (`deposit_id`)
-    REFERENCES `pkppln`.`deposits` (`id`))
+    REFERENCES `deposits` (`id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `pkppln`.`terms_of_use`
+-- Table `terms_of_use`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pkppln`.`terms_of_use` (
+CREATE TABLE IF NOT EXISTS `terms_of_use` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `weight` INT(11) NOT NULL DEFAULT '0',
   `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

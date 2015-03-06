@@ -47,7 +47,7 @@ try:
     command_object = module_class()
 except Exception as error:
     sys.exit('Cannot instantiate command ' + command.capitalize()
-             + "\n" + error.message)
+             + "\n" + str(error))
 
 # run the command.
 try:

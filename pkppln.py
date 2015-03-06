@@ -550,13 +550,13 @@ def get_journal_xml(uuid, db=None):
 # -----------------------------------------------------------------------------
 
 
-def log_microservice(service, uuid, start_time, end_time, result,
+def log_microservice(service, deposit_id, start_time, end_time, result,
                      error, db=None):
     """Log the service action ot the database."""
     db_execute("""
-        INSERT INTO microservices (microservice, deposit_uuid, started_on,
+        INSERT INTO microservices (microservice, deposit_id, started_on,
         finished_on, outcome, error) VALUES(%s, %s, %s, %s, %s, %s)""",
-               [service, uuid, start_time, end_time, result, error], db)
+               [service, deposit_id, start_time, end_time, result, error], db)
 
 
 # -----------------------------------------------------------------------------
@@ -611,9 +611,11 @@ def input_path(in_dir, dirs='', filename=''):
     return path
 
 
-def microservice_directory(state, uuid):
+def microservice_directory(state, uuid=None):
     """Find or create the directory for the microservice to work."""
     config = get_config()
+    if uuid is None:
+        uuid=''
     try:
         processing_root = config.get('Paths', 'processing_root')
         path = os.path.join(processing_root, state, uuid)
