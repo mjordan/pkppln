@@ -481,10 +481,10 @@ def get_journal(uuid, db=None):
     # uuid is a unique key - there can never be more than one.
 
 
-def get_journal_by_id(id, db=None):
+def get_journal_by_id(journal_id, db=None):
     """Get a journal from the database. Returns None or 1 journal."""
-    journals = db_query("SELECT * FROM journals WHERE id = %s",
-                        [id], db=db)
+    journals = db_query("SELECT * FROM journals WHERE journal_id = %s",
+                        [journal_id], db=db)
     if len(journals) == 0:
         return None
     if len(journals) == 1:
@@ -501,8 +501,7 @@ def update_journal(journal, db=None):
     """, [journal['contact_date'], journal['notified_date'], journal['title'],
           journal['issn'], journal['journal_url'], journal['journal_status'],
           journal['contact_email'], journal['publisher_name'],
-          journal['publisher_url'], journal['journal_uuid']])
-    pass
+          journal['publisher_url'], journal['journal_uuid']], db=db)
 
 
 def insert_journal(journal_uuid, title, issn, journal_url, contact_email,
