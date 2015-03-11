@@ -54,17 +54,9 @@ docs/_build/
 target/
 .pydevproject
 .project
+
+# configuration file.
 config.cfg
 
-# PLN Deposits
-deposits/staged/*
-!deposits/staged/.gitkeep
-
-deposits/received/*
-!deposits/received/.gitkeep
-
-deposits/testing/*
-!deposits/testing/.gitkeep
-
-# cconfiguration file.
-config.cfg
+tests/deposits/*
+!tests/deposits/.gitkeep

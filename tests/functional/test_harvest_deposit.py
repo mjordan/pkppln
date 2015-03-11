@@ -90,6 +90,8 @@ class HarvestDepositTestCase(PkpPlnTestCase):
         cmd.set_request_session(self.requests_session)
         cmd.process_deposit(deposit)
 
+        # don't use db=self.handle here. It returns the cached
+        # deposit. Let pkppln get a new db connection instead.
         deposit = pkppln.get_deposit(
             '61AEF065-71DE-93AA-02B0-5618ABAC2393',
         )[0]
