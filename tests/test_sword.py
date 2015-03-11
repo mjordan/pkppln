@@ -51,7 +51,7 @@ class TestSwordServer(PkpPlnTestCase):
                 'On-Behalf-Of': 'b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9'
             }
         )
-        self.assertEquals(400, r.status_code)
+        self.assertEquals(200, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
 
     def test_service_document_no_on_behalf(self):
@@ -77,7 +77,7 @@ class TestSwordServer(PkpPlnTestCase):
     <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
-    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" 
+    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3"
     pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">
         http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip
     </pkp:content>
@@ -93,7 +93,7 @@ class TestSwordServer(PkpPlnTestCase):
         self.assertEquals(201, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
         self.assertEquals(
-            '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
             r.headers['location']
         )
         cursor = get_connection().cursor()
@@ -191,7 +191,7 @@ class TestSwordServer(PkpPlnTestCase):
         )
         self.assertEquals(201, r.status_code)
         self.assertEquals(
-            '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
             r.headers['location']
         )
         mysql = get_connection()

@@ -23,7 +23,7 @@
 
     <workspace>
         <atom:title>PKP PLN deposit for {{on_behalf_of}}</atom:title>
-        <collection href="{{sword_server_base_url}}/api/sword/2.0/col-iri/{{on_behalf_of}}">
+        <collection href="{{sword_server_base_url}}/col-iri/{{on_behalf_of}}">
             <accept>application/atom+xml;type=entry</accept>
             <sword:mediation>true</sword:mediation>
         </collection>

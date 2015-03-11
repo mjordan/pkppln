@@ -10,11 +10,12 @@ class SwordClient(object):
     """Very simple and special purpose SWORD client for the PLN to make
     deposits to LOCKSSOMatic an check on their status."""
 
-    def __init__(self, sd_iri, provider_uuid):
+    def __init__(self, sd_iri, journal_url, provider_uuid):
         """Initialize the client with the service document IRI and a
         content provider UUID."""
         self.sd_iri = sd_iri
         self.col_iri = None
+        self.journal_url = journal_url
         self.provider_uuid = provider_uuid
         self.checksum_type = None
         self.max_upload_size = None
@@ -22,12 +23,18 @@ class SwordClient(object):
     def service_document(self):
         """Fetch a service document and parse it for more information."""
         headers = {
-            'X-On-Behalf-Of': self.provider_uuid
+            'On-Behalf-Of': self.provider_uuid
         }
+        if self.journal_url is not None:
+            headers['Journal-Url'] = self.journal_url
+
         response = requests.get(self.sd_iri, headers=headers)
         if response.status_code != 200:
             print response.content
-            raise Exception(str(response.status_code) + ' ' + response.reason)
+            raise Exception(
+                ' - '.join([str(response.status_code), response.reason,
+                            response.content])
+            )
 
         # check response code here.
         try:
@@ -44,7 +51,7 @@ class SwordClient(object):
         self.col_iri = collection.attrib['href']
 
         checksum_type = root.find(
-            './/lom:uploadChecksumType',
+            './/pkp:uploadChecksumType',
             namespaces=pkppln.namespaces
         )
         self.checksum_type = checksum_type.text

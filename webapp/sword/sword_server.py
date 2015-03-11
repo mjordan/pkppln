@@ -59,8 +59,8 @@ class SwordServer(WebApp):
         if obh is None:
             return HTTPResponse(status=400, body='Missing On-Behalf-Of header')
 
-        if journal_url is None:
-            return HTTPResponse(status=400, body='Missing Journal-URL header')
+#         if journal_url is None:
+# return HTTPResponse(status=400, body='Missing Journal-URL header')
 
         pkppln.contacted_journal(obh, db=handle)
         handle.commit()
@@ -76,7 +76,7 @@ class SwordServer(WebApp):
                 accepting=accepting,
                 on_behalf_of=obh,
                 terms=terms,
-                sword_server_base_url=config.get('URLs', 'sword_server_base_url'))
+                sword_server_base_url=config.get('URLs', 'sword_base_url'))
         else:
             return HTTPResponse(status=404)
 
@@ -157,18 +157,18 @@ class SwordServer(WebApp):
 
         pkppln.contacted_journal(journal_uuid, db=handle)
         handle.commit()
+        sword_base_url = config.get('URLs', 'sword_base_url')
 
         response.status = 201
-        response.set_header('Location', '/'.join((
-            '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid,
-            deposit_uuid, 'edit')
-        ))
+        response.set_header(
+            'Location',
+            sword_base_url + ('/'.join((
+                '', 'cont-iri', journal_uuid, deposit_uuid, 'edit'))))
+
         response.content_type = 'text/xml; charset=UTF-8'
         return template('deposit_receipt', journal_uuid=journal_uuid,
                         deposit_uuid=deposit_uuid, journal_title=title,
-                        sword_server_base_url=config.get(
-                            'URLs', 'sword_server_base_url')
-                        )
+                        sword_base_url=sword_base_url)
 
     def sword_statement(self, journal_uuid, deposit_uuid):
         """
@@ -197,9 +197,10 @@ class SwordServer(WebApp):
         }
         handle = pkppln.get_connection()
 
-        deposit = pkppln.get_deposit(deposit_uuid, db=handle)
-        if deposit is None:
+        deposits = pkppln.get_deposit(deposit_uuid, db=handle)
+        if len(deposits) == 0:
             return HTTPResponse(status=404)
+        deposit = deposits[0]
         journal = pkppln.get_journal(journal_uuid, db=handle)
 
         if deposit['journal_id'] != journal['id']:
@@ -247,15 +248,14 @@ class SwordServer(WebApp):
 
         pkppln.contacted_journal(journal_uuid, db=handle)
         handle.commit()
+        sword_base_url = config.get('URLs', 'sword_base_url')
 
         response.status = 201
-        response.set_header('Location', '/'.join((
-            '', 'api', 'sword', '2.0', 'cont-iri', journal_uuid,
-            deposit_uuid, 'edit')
-        ))
+        response.set_header(
+            'Location',
+            sword_base_url + ('/'.join((
+                '', 'cont-iri', journal_uuid, deposit_uuid, 'edit'))))
         response.content_type = 'text/xml'
         return template('deposit_receipt', journal_uuid=journal_uuid,
                         deposit_uuid=deposit_uuid, journal_title=title,
-                        sword_server_base_url=config.get(
-                            'URLs', 'sword_server_base_url')
-                        )
+                        sword_base_url=sword_base_url)

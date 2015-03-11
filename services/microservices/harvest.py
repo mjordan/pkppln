@@ -8,11 +8,18 @@ class Harvest(PlnService):
 
     """Harvest a deposit from an OJS instance."""
 
+    def __init__(self):
+        super(Harvest, self).__init__()
+        self.request_session = requests.session()
+
     def state_before(self):
         return 'depositedByJournal'
 
     def state_after(self):
         return 'harvested'
+
+    def set_request_session(self, request_session):
+        self.request_session = request_session
 
     def execute(self, deposit):
         uuid = deposit['file_uuid']
@@ -23,7 +30,7 @@ class Harvest(PlnService):
         harvest_dir = pkppln.microservice_directory(self.state_after())
         harvest_bag = os.path.join(harvest_dir, filename)
 
-        r = requests.get(url, stream=True)
+        r = self.request_session.get(url, stream=True)
         self.output(2, 'HTTP ' + str(r.status_code))
         if r.status_code == 404:
             raise Exception("Deposit URL %s not found" % (url))

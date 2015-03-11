@@ -27,7 +27,7 @@ class DepositToPln(PlnService):
         journal = pkppln.get_journal(deposit['journal_uuid'])
 
         client = SwordClient(
-            config.get('URLs', 'sword_server_base_url'),
+            config.get('URLs', 'lom_base_url'),
             journal_uuid
         )
 

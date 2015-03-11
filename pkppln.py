@@ -50,7 +50,7 @@ namespaces = {
     'entry': 'http://www.w3.org/2005/Atom',
     'pkp': 'http://pkp.sfu.ca/SWORD',
     'dcterms': 'http://purl.org/dc/terms/',
-    'sword': 'http://purl.org/net/sword/',
+    'sword': 'http://purl.org/net/sword/terms/',
     'app': 'http://www.w3.org/2007/app',
     'lom': 'http://lockssomatic.info/SWORD2',
     'oph': 'http://www.editeur.org/onix/serials/SOH',
@@ -396,7 +396,7 @@ def get_deposit(uuid, db=None):
                       [uuid], db=db)
     if len(result) == 0:
         return None
-    return result[0]
+    return result
 
 
 def get_deposits(state, db=None):

@@ -27,7 +27,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
         )
 
     def test_get_deposit(self):
-        deposit = pkppln.get_deposit('E89B7617-3201-9D24-51F2-5B46592C6A35')
+        deposit = pkppln.get_deposit('E89B7617-3201-9D24-51F2-5B46592C6A35')[0]
         self.assertIsNotNone(deposit)
         self.assertEquals(
             'E89B7617-3201-9D24-51F2-5B46592C6A35',
@@ -44,7 +44,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
         pkppln.update_deposit('E89B7617-3201-9D24-51F2-5B46592C6A35', 'testing',
                               'tested', db=self.handle)
         deposit = pkppln.get_deposit('E89B7617-3201-9D24-51F2-5B46592C6A35',
-                                     db=self.handle)
+                                     db=self.handle)[0]
         self.assertEquals('testing', deposit['processing_state'])
         self.assertEquals('tested', deposit['outcome'])
         self.handle.rollback()
@@ -53,7 +53,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
         raised = False
         try:
             pkppln.update_deposit('E89B7617-3201-9D24-51F2-5B46592C6A35', None,
-                                  'tested', db=self.handle)
+                                  'tested', db=self.handle)[0]
         except:
             raised = True
         self.assertTrue(raised, 'Exception raised')
@@ -76,7 +76,7 @@ class TestPkpPlnDeposits(PkpPlnTestCase):
             db=self.handle
         )
         self.handle.commit()
-        deposit = pkppln.get_deposit('9a6e5ad9-f783-4166-9e28-6dffc5de83cb')
+        deposit = pkppln.get_deposit('9a6e5ad9-f783-4166-9e28-6dffc5de83cb')[0]
         self.assertIsNotNone(deposit)
         self.assertEquals('depositedByJournal', deposit['processing_state'])
 
