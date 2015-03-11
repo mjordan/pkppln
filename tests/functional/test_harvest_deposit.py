@@ -14,7 +14,11 @@ from services.microservices.harvest import Harvest
 import requests
 from urllib import url2pathname
 
+base_path = dirname(dirname(dirname(abspath(__file__))))
+
+
 class LocalFileAdapter(requests.adapters.BaseAdapter):
+
     """Protocol Adapter to allow Requests to GET file:// URLs
 
     @todo: Properly handle non-empty hostname portions.
@@ -61,6 +65,7 @@ class LocalFileAdapter(requests.adapters.BaseAdapter):
     def close(self):
         pass
 
+
 class HarvestDepositTestCase(PkpPlnTestCase):
 
     @classmethod
@@ -71,15 +76,15 @@ class HarvestDepositTestCase(PkpPlnTestCase):
 
     @classmethod
     def tearDownClass(self):
-        #super(HarvestDepositTestCase, self).tearDownClass()
-        pass
+        super(HarvestDepositTestCase, self).tearDownClass()
 
     def test_harvest(self):
         deposit = pkppln.get_deposit(
             '61AEF065-71DE-93AA-02B0-5618ABAC2393',
             db=self.handle
         )[0]
-        deposit['deposit_url'] = 'file:///Users/mjoyce/Sites/pkppln2/tests/data/402a6e97-dbd2-4aba-a3e4-234aabb4314c'
+        deposit['deposit_url'] = 'file://' + base_path + \
+            '/tests/data/402a6e97-dbd2-4aba-a3e4-234aabb4314c'
         cmd = Harvest()
         cmd.args = Namespace(verbose=2, force=False, dry_run=False)
         cmd.set_request_session(self.requests_session)
@@ -88,8 +93,7 @@ class HarvestDepositTestCase(PkpPlnTestCase):
         deposit = pkppln.get_deposit(
             '61AEF065-71DE-93AA-02B0-5618ABAC2393',
         )[0]
-        print deposit
-        
+
         self.assertEquals('harvested', deposit['processing_state'])
 
 
