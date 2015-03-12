@@ -10,6 +10,9 @@ import logging
 def parse_arguments(arglist=None):
     argparser = argparse.ArgumentParser(description='Run a staging command')
 
+    argparser.add_argument('-c', '--config', type=str, default='config.cfg',
+                           help='Config file to use.')
+
     verbosity_group = argparser.add_mutually_exclusive_group()
 
     verbosity_group.add_argument('-v', '--verbose', action='count', default=0,
@@ -38,8 +41,9 @@ class PlnCommand(object):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
-        self.args = None
+    def __init__(self, args):
+        self.args = args
+        pkppln.config_file_name = args.config
         self.handle = pkppln.get_connection()
 
     def name(self):
@@ -72,15 +76,14 @@ class PlnCommand(object):
     def add_args(self, parser):
         pass
 
-    def run(self, args):
-        self.args = args
+    def run(self):
         parser = argparse.ArgumentParser(
             description=self.description(),
             usage='%(prog)s [global options] ' +
             self.module() + ' [command options]'
         )
         self.add_args(parser)
-        cmdargs = parser.parse_args(args.subargs)
+        cmdargs = parser.parse_args(self.args.subargs)
         # args is a list of the unparsed arguments from the command line.
         # parse them out here and then call self.execute()
         self.execute(cmdargs)

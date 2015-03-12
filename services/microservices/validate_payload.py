@@ -8,6 +8,9 @@ class ValidatePayload(PlnService):
 
     """Validate a harvested deposit by checking file size and checksum"""
 
+    def __init__(self, args):
+        PlnService.__init__(self, args)
+
     def state_before(self):
         return 'harvested'
 
@@ -29,5 +32,5 @@ class ValidatePayload(PlnService):
         # Verify SHA-1 checksum reported in the SWORD deposit.
         calculated_sha1 = pkppln.file_sha1(filepath)
         if sha1 != calculated_sha1:
-            raise 'SHA-1 does not match: \n\t%s expected\n\t%s calculated' % (sha1, calculated_sha1)
+            raise Exception('SHA-1 does not match: \n\t%s expected\n\t%s calculated' % (sha1, calculated_sha1))
         self.output(1, 'Checksums match')

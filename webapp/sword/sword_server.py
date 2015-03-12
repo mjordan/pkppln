@@ -198,7 +198,7 @@ class SwordServer(WebApp):
         handle = pkppln.get_connection()
 
         deposits = pkppln.get_deposit(deposit_uuid, db=handle)
-        if len(deposits) == 0:
+        if deposits is None or len(deposits) == 0:
             return HTTPResponse(status=404)
         deposit = deposits[0]
         journal = pkppln.get_journal(journal_uuid, db=handle)

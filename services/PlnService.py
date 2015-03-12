@@ -11,7 +11,8 @@ def parse_arguments(arglist=None):
     argparser = argparse.ArgumentParser(description='Run a staging service')
     argparser.add_argument(
         'service', type=str, help='Name of the service to run')
-
+    argparser.add_argument('-c', '--config', type=str, default='config.cfg',
+                           help='Config file to use.')
     verbosity_group = argparser.add_mutually_exclusive_group()
 
     verbosity_group.add_argument('-v', '--verbose', action='count', default=0,
@@ -24,7 +25,8 @@ def parse_arguments(arglist=None):
     update_group.add_argument('-f', '--force', action='store_true',
                               help='Force updates to the deposit states.')
     argparser.add_argument('-d', '--deposit', action='append',
-                           default=None, help='Run the service on one or more deposits')
+                           default=None, 
+                           help='Run the service on one or more deposits')
     args = argparser.parse_args(arglist)
     if args.quiet:
         args.verbose = -1
@@ -41,8 +43,9 @@ class PlnService(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
-        self.args = None
+    def __init__(self, args):
+        self.args = args
+        pkppln.config_file_name = args.config
         self.handle = pkppln.get_connection()
 
     def name(self):
@@ -125,21 +128,20 @@ class PlnService(object):
                     'failed (ignored)', 'FORCED UPDATE ' + error)
         self.handle.commit()
 
-    def run(self, args):
+    def run(self):
         """
         Run the service. Fetches the deposits for the service and calls
         execute() for each one. execute() is expectd to return a pair:
         (result, message) where result is 'success' if the service succeeded or
         'failure' if the service failed. An optional message may be returned.
         """
-        self.args = args
         deposits = pkppln.get_deposits(self.state_before(), self.handle)
 
         self.output(2, 'Found ' + str(len(deposits)) +
-                    ' deposits for service ' + args.service)
+                    ' deposits for service ' + self.args.service)
 
         for deposit in deposits:
-            if (args.deposit is not None and
-                    deposit['deposit_uuid'] not in args.deposit):
+            if (self.args.deposit is not None and
+                    deposit['deposit_uuid'] not in self.args.deposit):
                 continue
             self.process_deposit(deposit)

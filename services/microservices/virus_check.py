@@ -15,8 +15,8 @@ class VirusCheck(PlnService):
     mime-encoded content to a temporary directory and scans each one with
     clamd."""
 
-    def __init__(self):
-        PlnService.__init__(self)
+    def __init__(self, args):
+        PlnService.__init__(self, args)
         clam_socket = pkppln.get_config().get('Paths', 'clamd_socket')
         self.clam = clamd.ClamdUnixSocket(path=clam_socket)
         self.filecount = 0

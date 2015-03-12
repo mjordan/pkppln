@@ -1,7 +1,6 @@
 
 import unittest
 import sys
-import xml.etree.ElementTree as ET
 from os.path import abspath, dirname
 import os.path
 from argparse import Namespace
@@ -84,9 +83,10 @@ class HarvestDepositTestCase(PkpPlnTestCase):
             db=self.handle
         )[0]
         deposit['deposit_url'] = 'file://' + base_path + \
-            '/tests/data/402a6e97-dbd2-4aba-a3e4-234aabb4314c'
-        cmd = Harvest()
-        cmd.args = Namespace(verbose=2, force=False, dry_run=False)
+            '/tests/data/C7DD3B7D-8AD5-445A-89C1-EFB7CCBD4466'
+        args = Namespace(verbose=1, force=False, 
+                         dry_run=False, config='config_test.cfg')
+        cmd = Harvest(args)
         cmd.set_request_session(self.requests_session)
         cmd.process_deposit(deposit)
 

@@ -8,8 +8,8 @@ class Harvest(PlnService):
 
     """Harvest a deposit from an OJS instance."""
 
-    def __init__(self):
-        super(Harvest, self).__init__()
+    def __init__(self, args):
+        super(Harvest, self).__init__(args)
         self.request_session = requests.session()
 
     def state_before(self):

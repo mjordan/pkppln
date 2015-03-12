@@ -9,6 +9,9 @@ class DepositToPln(PlnService):
     """Deposit a reserialized bag into LOCKSSOMatic for eventual deposit
     into the PLN."""
 
+    def __init__(self, args):
+        PlnService.__init__(self, args)
+
     def state_before(self):
         return 'staged'
 

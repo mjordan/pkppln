@@ -44,14 +44,14 @@ except AttributeError as error:
     sys.exit('Cannot find class ' + classname + ' in ' + command_module)
 
 try:
-    command_object = module_class()
+    command_object = module_class(args)
 except Exception as error:
     sys.exit('Cannot instantiate command ' + command.capitalize()
              + "\n" + str(error))
 
 # run the command.
 try:
-    command_object.run(args)
+    command_object.run()
 except Exception as error:
     print traceback.format_exc()
     sys.exit('Command run failed: ' + str(error.message))

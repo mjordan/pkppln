@@ -46,14 +46,14 @@ except AttributeError as error:
     sys.exit('Cannot find class ' + classname + ' in ' + service_module)
 
 try:
-    service_object = module_class()
+    service_object = module_class(args)
 except Exception as error:
     sys.exit('Cannot instantiate service ' + microservice.capitalize()
-             + "\n" + error.message)
+             + "\n" + str(error))
 
 # run the service.
 try:
-    service_object.run(args)
+    service_object.run()
 except Exception as error:
     print traceback.format_exc()
     sys.exit('Service run failed: ' + str(error.message))

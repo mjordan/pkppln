@@ -10,6 +10,9 @@ class ValidateBag(PlnService):
 
     """Validate a bag in a deposit"""
 
+    def __init__(self, args):
+        PlnService.__init__(self, args)
+
     def state_before(self):
         return 'payloadVerified'
 
