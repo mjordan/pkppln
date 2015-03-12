@@ -47,6 +47,7 @@ class PlnService(object):
         self.args = args
         pkppln.config_file_name = args.config
         self.handle = pkppln.get_connection()
+        self.messages = []
 
     def name(self):
         """The name of the service, identical to the class name."""
@@ -72,9 +73,7 @@ class PlnService(object):
 
     def output(self, n, message=''):
         """Output a message at verbosity n."""
-        if self.args is not None:
-            if self.args.verbose >= n and message != '':
-                print message
+        self.messages.append([n, message])
 
     def log_microservice(self, deposit_id, start_time, end_time, result, error):
         """Log the service action ot the database."""
@@ -86,7 +85,6 @@ class PlnService(object):
         except Exception as e:
             self.log_message('Cannot log microservice: ' + str(e),
                              logging.CRITICAL)
-            traceback.print_stack(self.run)
             self.handle.rollback()
             raise e
 
@@ -128,6 +126,12 @@ class PlnService(object):
                     'failed (ignored)', 'FORCED UPDATE ' + error)
         self.handle.commit()
 
+    def process_messages(self):
+        for message in self.messages:
+            if self.args is not None:
+                if self.args.verbose >= message[0] and message[1] != '':
+                    print message[1]
+
     def run(self):
         """
         Run the service. Fetches the deposits for the service and calls
@@ -145,3 +149,4 @@ class PlnService(object):
                     deposit['deposit_uuid'] not in self.args.deposit):
                 continue
             self.process_deposit(deposit)
+        self.process_messages()

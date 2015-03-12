@@ -188,6 +188,7 @@ def __request_logger(log_type='server_log'):
     log_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     log_filehandle.setFormatter(log_formatter)
+    logger.handlers = []
     logger.addHandler(log_filehandle)
     return logger
 
@@ -453,7 +454,6 @@ def insert_deposit(deposit_uuid, file_uuid, journal_id, deposit_action,
                          deposit_sha1, deposit_url, deposit_size,
                          processing_state, outcome, "inProgress"
                          ], db=db)
-    return result == 1
 
 
 # -----------------------------------------------------------------------------

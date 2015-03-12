@@ -30,7 +30,6 @@ class SwordClient(object):
 
         response = requests.get(self.sd_iri, headers=headers)
         if response.status_code != 200:
-            print response.content
             raise Exception(
                 ' - '.join([str(response.status_code), response.reason,
                             response.content])
@@ -40,8 +39,6 @@ class SwordClient(object):
         try:
             root = ET.fromstring(response.content)
         except:
-            print '>>>>' + self.sd_iri
-            print response.content
             raise
 
         collection = root.find(
@@ -123,7 +120,6 @@ class SwordClient(object):
             raise Exception(str(response.status_code) +
                             ' ' + response.reason + '\n' + response.content)
 
-        print response.headers['location']
         return response.headers['location'], response.content
 
     def modify_deposit(self, url, deposit):
