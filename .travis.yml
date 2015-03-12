@@ -23,4 +23,4 @@ script:
 after_script:
   - killall python
   - cat server.log
-  - cat /var/log/pkppln.log
+  - cat /var/log/pkppln_server.log
