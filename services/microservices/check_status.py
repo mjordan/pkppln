@@ -9,9 +9,6 @@ class CheckStatus(PlnService):
 
     """Check the status of a deposit in a LOCKSSOMatic instance."""
 
-    def __init__(self, args):
-        PlnService.__init__(self, args)
-
     def state_before(self):
         return 'deposited'
 

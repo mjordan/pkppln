@@ -11,9 +11,6 @@ class ValidateExport(PlnService):
     """Validate the XML exported from OJS. Also inserts some journal metaadata
     into the bag."""
 
-    def __init__(self, args):
-        PlnService.__init__(self, args)
-
     def state_before(self):
         return 'virusChecked'
 

@@ -9,9 +9,6 @@ class StageBag(PlnService):
     """Move the serialized bag file into the staging area, so that
     LOCKSSOMatic may harvest it later."""
 
-    def __init__(self, args):
-        PlnService.__init__(self, args)
-
     def state_before(self):
         return 'reserialized'
 

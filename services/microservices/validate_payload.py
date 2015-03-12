@@ -8,9 +8,6 @@ class ValidatePayload(PlnService):
 
     """Validate a harvested deposit by checking file size and checksum"""
 
-    def __init__(self, args):
-        PlnService.__init__(self, args)
-
     def state_before(self):
         return 'harvested'
 

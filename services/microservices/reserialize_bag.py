@@ -9,9 +9,6 @@ class ReserializeBag(PlnService):
 
     """Reserialize/repackage a bag into a .tar.gz file."""
 
-    def __init__(self, args):
-        PlnService.__init__(self, args)
-
     def state_before(self):
         return 'contentValidated'
 
