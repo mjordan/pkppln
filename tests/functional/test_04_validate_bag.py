@@ -22,7 +22,6 @@ class ValidateBagTestCase(PkpPlnTestCase):
     def tearDownClass(self):
         super(ValidateBagTestCase, self).tearDownClass()
 
-
     def test_validate_bag(self):
         deposit = pkppln.get_deposit(
             '61AEF065-71DE-93AA-02B0-5618ABAC2393',
@@ -38,7 +37,7 @@ class ValidateBagTestCase(PkpPlnTestCase):
         deposit = pkppln.get_deposit(
             '61AEF065-71DE-93AA-02B0-5618ABAC2393',
         )[0]
-
+        cmd.process_messages()
         self.assertEquals('bagValidated', deposit['processing_state'])
 
 
