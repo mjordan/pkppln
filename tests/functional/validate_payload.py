@@ -2,24 +2,26 @@
 import unittest
 import sys
 from os.path import abspath, dirname
-import os.path
 from argparse import Namespace
 
 sys.path.append(dirname(dirname(dirname(abspath(__file__)))))
 import pkppln
-from tests.pln_testcase import PkpPlnTestCase
+from tests.processing_testcase import ProcessingTestCase
 from services.microservices.validate_payload import ValidatePayload
 
 
-class ValidatePayloadTest(PkpPlnTestCase):
+class ValidatePayloadTestCase(ProcessingTestCase):
 
     @classmethod
     def setUpClass(self):
-        super(ValidatePayloadTest, self).setUpClass()
+        super(ValidatePayloadTestCase, self).setUpClass()
 
     @classmethod
     def tearDownClass(self):
-        super(ValidatePayloadTest, self).tearDownClass()
+        super(ValidatePayloadTestCase, self).tearDownClass()
+
+    def runTest(self):
+        self.test_validate_payload()
 
     def test_validate_payload(self):
         deposit = pkppln.get_deposit(
@@ -28,7 +30,7 @@ class ValidatePayloadTest(PkpPlnTestCase):
         )[0]
 
         deposit['processing_state'] = 'harvested'
-        args = Namespace(verbose=1, force=False, 
+        args = Namespace(verbose=1, force=False,
                          dry_run=False, config='config_test.cfg')
         cmd = ValidatePayload(args)
 

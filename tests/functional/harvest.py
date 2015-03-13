@@ -1,17 +1,16 @@
-
 import unittest
 import sys
 from os.path import abspath, dirname
 import os.path
 from argparse import Namespace
+import requests
+from urllib import url2pathname
 
 sys.path.append(dirname(dirname(dirname(abspath(__file__)))))
 import pkppln
-from tests.pln_testcase import PkpPlnTestCase
+from tests.processing_testcase import ProcessingTestCase
 from services.microservices.harvest import Harvest
 
-import requests
-from urllib import url2pathname
 
 base_path = dirname(dirname(dirname(abspath(__file__))))
 
@@ -65,17 +64,20 @@ class LocalFileAdapter(requests.adapters.BaseAdapter):
         pass
 
 
-class HarvestDepositTestCase(PkpPlnTestCase):
+class HarvestTestCase(ProcessingTestCase):
 
     @classmethod
     def setUpClass(self):
-        super(HarvestDepositTestCase, self).setUpClass()
+        super(HarvestTestCase, self).setUpClass()
         self.requests_session = requests.session()
         self.requests_session.mount('file://', LocalFileAdapter())
 
     @classmethod
     def tearDownClass(self):
-        super(HarvestDepositTestCase, self).tearDownClass()
+        super(HarvestTestCase, self).tearDownClass()
+
+    def runTest(self):
+        self.test_harvest()
 
     def test_harvest(self):
         deposit = pkppln.get_deposit(
