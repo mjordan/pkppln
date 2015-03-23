@@ -7,6 +7,8 @@ virtualenv:
   system_site_packages: true
 
 before_script:
+  - sudo apt-get install clamav-daemon -y
+  - sudo service clamav-daemon start
   - pip -q install -r requirements.txt
   - cp config_test.cfg config.cfg
   - mysql -e 'create database pkppln_test;'
@@ -14,7 +16,7 @@ before_script:
   - sudo mysql -e "grant all on pkppln_test.* to pkppln_test@localhost identified by 'abc123456'"
   - sudo touch /var/log/pkppln_server.log
   - sudo chmod a+w /var/log/pkppln_server.log
-  - python server.py config_test.cfg > server.log 2>&1 &
+  - python server.py config_test.cfg > server.log 2>&1 &  
   - sleep 4
 
 script:
