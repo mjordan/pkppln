@@ -20,7 +20,7 @@ class DepositToPln(PlnService):
             deposit['journal_id'],
             db=self.handle
         )
-        
+
         journal_uuid = journal['journal_uuid']
         file_uuid = deposit['file_uuid']
         config = pkppln.get_config()
