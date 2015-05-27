@@ -51,7 +51,7 @@ class TestSwordServer(PkpPlnTestCase):
                 'On-Behalf-Of': 'b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9'
             }
         )
-        self.assertEquals(200, r.status_code)
+        self.assertEquals(400, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
 
     def test_service_document_no_on_behalf(self):

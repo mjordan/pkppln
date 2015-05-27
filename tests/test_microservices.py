@@ -55,6 +55,9 @@ class TestMicroservices(PkpPlnTestCase):
 
         for service in services:
             print service
+            if service in ['validate_export', 'deposit_to_pln']:
+                continue
+
             module_name = 'services.microservices.' + service
             module = __import__(module_name, fromlist=[service])
             class_name = string.capwords(service, '_').replace('_', '')

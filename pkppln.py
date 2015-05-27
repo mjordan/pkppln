@@ -223,12 +223,6 @@ def check_access(uuid):
  those files which start with a semicolon or are blank are ignored.
 """
     config = get_config()
-    # whitelist.txt and blacklist.txt contain journal UUIDs to allow or block,
-    # respectively, one UUID per line. If the files don't exist, we define
-    # sensible default values for the lists.
-
-    # Get the SWORD-server level value of accepting_deposits. If this is set to
-    # 'No', don't bother checking the white or black lists.
     whitelist_path = config.get('Deposits', 'pln_accept_deposits_whitelist')
     if os.path.exists(whitelist_path):
         whitelist = [
@@ -479,7 +473,7 @@ def get_journal(uuid, db=None):
 
 def get_journal_by_id(journal_id, db=None):
     """Get a journal from the database. Returns None or 1 journal."""
-    journals = db_query("SELECT * FROM journals WHERE journal_id = %s",
+    journals = db_query("SELECT * FROM journals WHERE id = %s",
                         [journal_id], db=db)
     if len(journals) == 0:
         return None
