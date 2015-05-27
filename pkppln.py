@@ -214,11 +214,10 @@ def log_message(message, level=logging.INFO, log_type='server_log'):
 
 def check_access(uuid):
     """Check access to the PLN for a journal UUID.
- * If the config file is not accepting, then never accept.
- * If there is no whitelist file, then all uuids are whitelisted.
- * If there is a whitelist file, then the uuid must be listed in the file.
- * If there is no blacklist file, then no uuids are blacklisted.
- * If there is a blacklist file, then the uuid must not be listed there.
+
+* If the uuid is in whitelist.txt, then the pln is accepting.
+* If the uuid is in blacklist.txt, then the pln is not accepting.
+* The pln is accepting if the config file says so.
 
  The whitelist and blacklist files are not required to exist. Lines in
  those files which start with a semicolon or are blank are ignored.
@@ -230,33 +229,30 @@ def check_access(uuid):
 
     # Get the SWORD-server level value of accepting_deposits. If this is set to
     # 'No', don't bother checking the white or black lists.
-    accepting = config.get('Deposits', 'pln_accept_deposits')
-    if accepting == 'No':
-        return 'No'
-
     whitelist_path = config.get('Deposits', 'pln_accept_deposits_whitelist')
     if os.path.exists(whitelist_path):
-        whitelist = [w.strip() for w in tuple(open(whitelist_path))
-                     if not w.startswith(';') and w != '\n'
-                     ]
+        whitelist = [
+            w.strip() for w in tuple(open(whitelist_path))
+            if not w.startswith(';') and w != '\n'
+        ]
     else:
-        whitelist = ['all']
+        whitelist = []
+    if uuid in whitelist:
+        return 'Yes'
 
     blacklist_path = config.get('Deposits', 'pln_accept_deposits_blacklist')
     if os.path.exists(blacklist_path):
-        blacklist = [w.strip() for w in tuple(open(blacklist_path))
-                     if not w.startswith(';') and w != '\n'
-                     ]
+        blacklist = [
+            w.strip() for w in tuple(open(blacklist_path))
+            if not w.startswith(';') and w != '\n'
+        ]
     else:
         blacklist = []
-
-    # 'Yes' or 'No' gets inserted into the <pkp:pln_accepting> element in the
-    # service document; the create and update deposit calls also check.
-    if (uuid in whitelist or whitelist[0] == 'all') and uuid not in blacklist:
-        return 'Yes'
-    else:
+    if uuid in blacklist:
         return 'No'
 
+    accepting = config.get('Deposits', 'pln_accept_deposits')
+    return accepting
 
 # -----------------------------------------------------------------------------
 
@@ -625,7 +621,7 @@ def microservice_directory(state, uuid=None):
     """Find or create the directory for the microservice to work."""
     config = get_config()
     if uuid is None:
-        uuid=''
+        uuid = ''
     try:
         processing_root = config.get('Paths', 'processing_root')
         path = os.path.join(processing_root, state, uuid)

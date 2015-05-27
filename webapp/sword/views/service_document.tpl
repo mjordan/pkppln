@@ -8,8 +8,7 @@
     <pkp:uploadChecksumType>SHA-1</pkp:uploadChecksumType>
     % if accepting == 'Yes':
     <pkp:pln_accepting is_accepting="{{accepting}}">The PKP PLN is currently accepting deposits.</pkp:pln_accepting>
-    % end
-    % if accepting == 'No':
+    % else:
     <pkp:pln_accepting is_accepting="{{accepting}}">The PKP PLN is currently in pilot phase and is only accepting deposits from members of the pilot.</pkp:pln_accepting>
     % end
 

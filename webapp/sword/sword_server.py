@@ -59,8 +59,8 @@ class SwordServer(WebApp):
         if obh is None:
             return HTTPResponse(status=400, body='Missing On-Behalf-Of header')
 
-#         if journal_url is None:
-# return HTTPResponse(status=400, body='Missing Journal-URL header')
+        if journal_url is None:
+            return HTTPResponse(status=400, body='Missing Journal-URL header')
 
         pkppln.contacted_journal(obh, db=handle)
         handle.commit()
