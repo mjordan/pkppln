@@ -8,22 +8,21 @@
     <pkp:uploadChecksumType>SHA-1</pkp:uploadChecksumType>
     % if accepting == 'Yes':
     <pkp:pln_accepting is_accepting="{{accepting}}">The PKP PLN is currently accepting deposits.</pkp:pln_accepting>
-    % end
-    % if accepting == 'No':
+    % else:
     <pkp:pln_accepting is_accepting="{{accepting}}">The PKP PLN is currently in pilot phase and is only accepting deposits from members of the pilot.</pkp:pln_accepting>
     % end
 
     <pkp:terms_of_use>
         % for term in terms:
-        <pkp:{{term['key']}} updated="{{term['last_updated']}}">
-          {{term['text']}}
-        </pkp:{{term['key']}}>
+        <pkp:{{term['key_code']}} updated="{{term['created']}}">
+          {{term['content']}}
+        </pkp:{{term['key_code']}}>
         % end
     </pkp:terms_of_use>
 
     <workspace>
         <atom:title>PKP PLN deposit for {{on_behalf_of}}</atom:title>
-        <collection href="{{sword_server_base_url}}/api/sword/2.0/col-iri/{{on_behalf_of}}">
+        <collection href="{{sword_server_base_url}}/col-iri/{{on_behalf_of}}">
             <accept>application/atom+xml;type=entry</accept>
             <sword:mediation>true</sword:mediation>
         </collection>

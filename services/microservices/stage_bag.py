@@ -16,11 +16,16 @@ class StageBag(PlnService):
         return 'staged'
 
     def execute(self, deposit):
-        journal_uuid = deposit['journal_uuid']
-        deposit_uuid = deposit['deposit_uuid']
+        journal = pkppln.get_journal_by_id(
+            deposit['journal_id'],
+            db=self.handle
+        )
+        
+        journal_uuid = journal['journal_uuid']
+        file_uuid = deposit['file_uuid']
         config = pkppln.get_config()
 
-        filename = '.'.join([journal_uuid, deposit_uuid, 'tar.gz'])
+        filename = '.'.join([journal_uuid, file_uuid, 'tar.gz'])
 
         source_file = pkppln.input_path('reserialized', '', filename)
 
@@ -34,11 +39,6 @@ class StageBag(PlnService):
 
         self.output(2, 'Staging to ' + dest_file)
 
-        try:
-            if not os.path.exists(dest_path):
-                os.makedirs(dest_path)
-            shutil.move(source_file, dest_file)
-        except Exception as error:
-            return 'failed', str(error)
-
-        return 'success', ''
+        if not os.path.exists(dest_path):
+            os.makedirs(dest_path)
+        shutil.copy(source_file, dest_file)

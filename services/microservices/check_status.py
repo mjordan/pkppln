@@ -16,10 +16,12 @@ class CheckStatus(PlnService):
         return 'lockssAgreement'
 
     def execute(self, deposit):
-        journal_uuid = deposit['journal_uuid']
+        journal = pkppln.get_journal_by_id(deposit['journal_id'])
+        journal_uuid = journal['journal_uuid']
         config = pkppln.get_config()
         client = SwordClient(
-            config.get('URLs', 'lockssomatic_base_url'),
+            config.get('URLs', 'lom_base_url'),
+            journal['journal_url'],
             journal_uuid
         )
         statement = client.statement(deposit)
@@ -29,5 +31,4 @@ class CheckStatus(PlnService):
         for status in statuses:
             url = urlparse(status.attrib['src'])
             print ':'.join([url.hostname, status.attrib['state']])
-
-        return 'failed', ''
+            # DO STUFF HERE.

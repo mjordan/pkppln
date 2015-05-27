@@ -7,9 +7,9 @@
     <title>PKP PLN Terms of Use</title>
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
-    <link href="/css/jquery-ui.min.css" rel='stylesheet'>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="/static/css/jquery-ui.min.css" rel='stylesheet'>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -26,10 +26,7 @@
 	  <div class="alert alert-success" role="alert">{{ message }}</div>
     %end
 
-    <p class="text-right">
-      <a href="/admin/terms/add_term/new">Add new term</a> | 
-      <a href="/admin/terms/list">List all terms</a>
-    </p>
+	% include('terms_nav.tpl')
 
 	<p>Drag and drop the terms below to set their order. This form will only
 	show the current English-language terms, but will apply the sorting to all
@@ -40,10 +37,10 @@
 	
 	<ul class="list-group" id='list-order'>
     %for term in terms:    
-    <li class="list-group-item" id="{{term['key']}}">
-    	{{term['text']}}
+    <li class="list-group-item" id="{{term['key_code']}}">
+    	{{term['content']}}
     	<br>
-    	<span class='text-muted'>{{term['key']}}</span>
+    	<span class='text-muted'>{{term['key_code']}}</span>
     </li>
     %end
     </ul>
@@ -53,11 +50,15 @@
     </div>
     </form>
 
+	% include('terms_nav.tpl')
+
+	</div>
+
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-ui.min.js"></script>
 
     <!-- Simple confirm delete function. -->
     <script>

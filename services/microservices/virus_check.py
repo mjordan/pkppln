@@ -15,8 +15,10 @@ class VirusCheck(PlnService):
     mime-encoded content to a temporary directory and scans each one with
     clamd."""
 
-    def __init__(self):
-        self.clam = clamd.ClamdUnixSocket(path='/var/run/clamd.ctl')
+    def __init__(self, args):
+        PlnService.__init__(self, args)
+        clam_socket = pkppln.get_config().get('Paths', 'clamd_socket')
+        self.clam = clamd.ClamdUnixSocket(path=clam_socket)
         self.filecount = 0
         self.report = {}
 
@@ -42,8 +44,8 @@ class VirusCheck(PlnService):
         srv_status = 'success'
         error = ''
 
-        uuid = deposit['deposit_uuid']
-        expanded_path = pkppln.microservice_directory('bagValidated', uuid)
+        file_uuid = deposit['file_uuid']
+        expanded_path = pkppln.microservice_directory('bagValidated', file_uuid)
         bag_path = os.path.join(expanded_path, 'bag')
         report_path = os.path.join(bag_path, 'data', 'virus_scan.txt')
         report_file = open(report_path, 'w')

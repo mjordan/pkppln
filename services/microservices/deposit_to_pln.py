@@ -16,41 +16,38 @@ class DepositToPln(PlnService):
         return 'deposited'
 
     def execute(self, deposit):
-        journal_uuid = deposit['journal_uuid']
-        deposit_uuid = deposit['deposit_uuid']
+        journal = pkppln.get_journal_by_id(
+            deposit['journal_id'],
+            db=self.handle
+        )
+
+        journal_uuid = journal['journal_uuid']
+        file_uuid = deposit['file_uuid']
         config = pkppln.get_config()
-        journal = pkppln.get_journal(deposit['deposit_uuid'])
+        journal = pkppln.get_journal_by_id(deposit['journal_id'])
 
         client = SwordClient(
-            config.get('URLs', 'lockssomatic_base_url'),
+            config.get('URLs', 'lom_base_url'),
+            journal['journal_url'],
             journal_uuid
         )
 
-        filename = '.'.join([journal_uuid, deposit_uuid, 'tar.gz'])
+        filename = '.'.join([journal_uuid, file_uuid, 'tar.gz'])
         filepath = os.path.join(
             config.get('Paths', 'staging_root'),
-            deposit['journal_uuid'],
+            journal_uuid,
             filename
         )
 
         url = '/'.join([
-            config.get('URLs', 'sword_server_base_url'),
+            config.get('URLs', 'lom_base_url'),
             'mypln',
             journal_uuid,
             filename
         ])
 
-        try:
-            receipt, content = client.create_deposit(
-                url, filepath, deposit, journal
-            )
-        except Exception as exception:
-            return 'failed', exception.message
+        receipt, content = client.create_deposit(
+            url, filepath, deposit, journal
+        )
 
-        mysql = pkppln.get_connection()
-        if pkppln.record_deposit(deposit, receipt) is False:
-            mysql.rollback()
-            return 'failed', 'database update failed '
-
-        mysql.commit()
-        return 'success', ''
+        pkppln.record_deposit(deposit, receipt, db=self.handle)

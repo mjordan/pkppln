@@ -7,8 +7,8 @@
     <title>PKP PLN Terms of Use</title>
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -22,31 +22,14 @@
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
 
-    % if section == 'no_terms':
-    <div>{{message}}</div>
-    % end
+	% include('terms_nav.tpl')
 
-    % if section == 'term_deleted':
     <div>{{message}}</div>
-    % end
 
-    % if section == 'term_added':
-    <div>{{message}}</div>
-    % end
-
-    % if section == 'term_updated':
-    <div>{{message}}</div>
-    % end
-
-    % if section == 'invalid_parameter':
-    <div>{{message}}</div>
-    % end
-
-    <p class="text-left"><a href="/admin/terms/list">Return to list</a></p>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
   </body>
 </html>

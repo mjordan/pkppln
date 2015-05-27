@@ -7,8 +7,8 @@
     <title>PKP PLN Terms of Use</title>
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -20,16 +20,27 @@
   <body>
     <div class="container">
     <h1>PKP PLN Terms of Use</h1>
-    <p class="text-right">
-      <a href="/admin/terms/add_term/new">Add new term</a> | 
-      <a href="/admin/terms/sort">Sort the terms</a>
-    </p>
+
+	% include('terms_nav.tpl')
+
+    <h2>Languages</h2>
+    <div class='list-group row'>
+    %for lang in languages:
+      	<a class='list-group-item col-sm-2 {{"disabled" if display_lang == lang else '' }}' href="?lang={{ lang }}">{{ lang }}</a>
+    %end
+    </div>
+	
+	% if display_lang != 'en-US':
+	  <a href="/admin/terms/translate?lang={{ display_lang }}">Edit translation</a>
+    % else:
+      <a href="/admin/terms/translate">New translation</a>
+	% end
+
 
     <table class="table table-striped">
     <thead>
     <tr>
       <th>ID</th>
-      <th>Current version</th>
       <th>Last updated</th>
       <th>Key</th>
       <th>Locale</th>
@@ -41,28 +52,28 @@
     %for term in terms:
     <tr>
     <td>{{term['id']}}</td>
-    <td>{{term['current_version']}}</td>
-    <td>{{term['last_updated']}}</td>
-    <td>{{term['key']}}</td>
-    <td>{{term['language']}}</td>
-    <td>{{term['text']}}</td>
+    <td>{{term['created']}}</td>
+    <td>{{term['key_code']}}</td>
+    <td>{{term['lang_code']}}</td>
+    <td>{{term['content']}}</td>
     <td>
-      <a href="/admin/terms/edit_term/{{term['id']}}">Edit</a> /
-      <a href="/admin/terms/add_term/{{term['id']}}">Clone</a> /
-      <a class="confirm-delete" href="/admin/terms/delete_term/{{term['id']}}">Delete</a>
+      <a href="/admin/terms/edit_term/{{term['key_code']}}/{{ term['lang_code']}}">Edit</a><br>
+      <a href="/admin/terms/detail/{{term['key_code']}}">History</a>
     </td>
     %end
     </tr>
     %end
     </tbody>
     </table>
-    <p class="text-right"><a href="/admin/terms/add_term/new">Add new term</a></p>
+
+	% include('terms_nav.tpl')
+
     </div>
 
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
 
     <!-- Simple confirm delete function. -->
     <script>

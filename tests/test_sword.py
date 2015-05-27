@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: <encoding name> -*-
-
 """Tests for the Feeds module"""
 
 import unittest
@@ -8,48 +5,28 @@ import sys
 import xml.etree.ElementTree as ET
 from os.path import abspath, dirname
 from _elementtree import XMLParser
-sys.path.append(dirname(dirname(abspath(__file__))))
 import requests
+
+sys.path.append(dirname(dirname(abspath(__file__))))
 import pkppln
 from pkppln import namespaces, get_connection
+from tests.pln_testcase import PkpPlnTestCase
 
 with_server = False
 
 
-class TestSwordServer(unittest.TestCase):
+class TestSwordServer(PkpPlnTestCase):
+    @classmethod
+    def setUpClass(self):
+        super(TestSwordServer, self).setUpClass()
 
-    def setUp(self):
-        unittest.TestCase.setUp(self)
-        mysql = get_connection()
-        cursor = mysql.cursor()
-        cursor.executemany(
-            """
-            INSERT INTO terms_of_use (current_version, last_updated, `key`, language, `text`)
-            VALUES ('Yes', '2014-09-20', %s, 'en-US', %s)
-            """,
-            [
-                ('utf8.single', u'I am good to go.'),
-                ('utf8.double', u'U+00E9: \xe9'),
-                ('utf8.triple', u'U+20AC: \u20AC'),
-                ('typographic.doublequote',  u'U+201C U+201D: \u201c\u201d'),
-                ('single.anglequote', u'U+2039 U+203A: \u2039\u203a')
-            ]
-        )
-        mysql.commit()
-
-    def tearDown(self):
-        unittest.TestCase.tearDown(self)
-        mysql = get_connection()
-        cursor = mysql.cursor()
-        cursor.execute('DELETE FROM journals')
-        cursor.execute('DELETE FROM deposits')
-        cursor.execute('DELETE FROM microservices')
-        cursor.execute('DELETE FROM terms_of_use')
-        mysql.commit()
+    @classmethod
+    def tearDownClass(self):
+        super(TestSwordServer, self).tearDownClass()
 
     def test_service_document(self):
         r = requests.get(
-            'http://localhost:8080/api/sword/2.0/sd-iri',
+            'http://localhost:9999/api/sword/2.0/sd-iri',
             headers={
                 'Journal-URL': 'http://jrnl.example.com',
                 'On-Behalf-Of': 'b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9'
@@ -63,13 +40,13 @@ class TestSwordServer(unittest.TestCase):
         self.assertEquals(entries[1].text.strip(), u'U+00E9: \xe9')
         self.assertEquals(entries[2].text.strip(), u'U+20AC: \u20AC')
         self.assertEquals(
-            entries[3].text.strip(), u'U+201C U+201D: \u201c\u201d')
+            entries[3].text.strip(), u'U+201C U+201D: \u201c \u201d')
         self.assertEquals(
-            entries[4].text.strip(), u'U+2039 U+203A: \u2039\u203a')
+            entries[4].text.strip(), u'U+2039 U+203A: \u2039 \u203a')
 
     def test_service_document_no_journal_url(self):
         r = requests.get(
-            'http://localhost:8080/api/sword/2.0/sd-iri',
+            'http://localhost:9999/api/sword/2.0/sd-iri',
             headers={
                 'On-Behalf-Of': 'b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9'
             }
@@ -79,7 +56,7 @@ class TestSwordServer(unittest.TestCase):
 
     def test_service_document_no_on_behalf(self):
         r = requests.get(
-            'http://localhost:8080/api/sword/2.0/sd-iri',
+            'http://localhost:9999/api/sword/2.0/sd-iri',
             headers={
                 'Journal-URL': 'http://jrnl.example.com',
             }
@@ -100,14 +77,14 @@ class TestSwordServer(unittest.TestCase):
     <pkp:publisherUrl>http://pub.example.com</pkp:publisherUrl>
     <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
     <updated>2013-10-07T17:17:08Z</updated>
-    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3" 
+    <pkp:content size="102400" checksumType="sha1" volume="4" issue="3"
     pubdate = "2011-04-25" checksumValue="bd4a9b642562547754086de2dab26b7d">
         http://jfs.example.org/download/1225c695-cfb8-4ebb-aaaa-80da344efa6a.zip
     </pkp:content>
 </entry>
         """
         r = requests.post(
-            'http://localhost:8080/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
+            'http://localhost:9999/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
             data=deposit,
             headers={
                 'Content-type': 'text/xml; charset=UTF-8'
@@ -116,20 +93,22 @@ class TestSwordServer(unittest.TestCase):
         self.assertEquals(201, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
         self.assertEquals(
-            '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
             r.headers['location']
         )
         cursor = get_connection().cursor()
-        cursor.execute('SELECT * FROM deposits')
-        deposits = list(cursor.fetchall())
-        self.assertEquals(1, len(deposits))
-        self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-                          deposits[0]['deposit_uuid'])
+        cursor.execute('SELECT deposit_uuid FROM deposits')
+        deposits = [d['deposit_uuid'] for d in list(cursor.fetchall())]
+        self.assertEquals(5, len(deposits))
+
+        self.assertTrue('1225c695-cfb8-4ebb-aaaa-80da344efa6a' in deposits)
+
         cursor.execute('SELECT * FROM journals')
         journals = list(cursor.fetchall())
-        self.assertEquals(1, len(journals))
-        self.assertEquals(
-            'http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
+        self.assertEquals(3, len(journals))
+        jrnl = pkppln.get_journal('b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9')
+        self.assertEquals('b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9', jrnl['journal_uuid'])
+        self.assertEquals('http://jfs.example.org/index.php/jfs', jrnl['journal_url'])
 
     def test_statement(self):
         deposit = """
@@ -148,14 +127,14 @@ class TestSwordServer(unittest.TestCase):
 </entry>
         """
         r = requests.post(
-            'http://localhost:8080/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
+            'http://localhost:9999/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
             data=deposit,
             headers={
                 'Content-type': 'text/xml; charset=UTF-8'
             }
         )
         r = requests.get(
-            'http://localhost:8080/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/state')
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/state')
         self.assertEquals(200, r.status_code)
         self.assertEquals('UTF-8', r.encoding)
         root = ET.fromstring(r.content, parser=XMLParser(encoding='UTF-8'))
@@ -182,7 +161,7 @@ class TestSwordServer(unittest.TestCase):
 </entry>
         """
         r = requests.post(
-            'http://localhost:8080/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
+            'http://localhost:9999/api/sword/2.0/col-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9',
             data=deposit,
             headers={
                 'Content-type': 'text/xml; charset=UTF-8'
@@ -204,7 +183,7 @@ class TestSwordServer(unittest.TestCase):
 </entry>
         """
         r = requests.put(
-            'http://localhost:8080/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
             data=edit,
             headers={
                 'Content-type': 'text/xml; charset=UTF-8'
@@ -212,23 +191,16 @@ class TestSwordServer(unittest.TestCase):
         )
         self.assertEquals(201, r.status_code)
         self.assertEquals(
-            '/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
+            'http://localhost:9999/api/sword/2.0/cont-iri/b83b87bd-c70f-46e7-ae5e-6ecfeadad4d9/1225c695-cfb8-4ebb-aaaa-80da344efa6a/edit',
             r.headers['location']
         )
         mysql = get_connection()
         cursor = mysql.cursor()
         cursor.execute('SELECT * FROM deposits')
-        deposits = cursor.fetchall()
-        self.assertEquals(2, len(deposits))
-        self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-                          deposits[0]['deposit_uuid'])
-        self.assertEquals('1225c695-cfb8-4ebb-aaaa-80da344efa6a',
-                          deposits[1]['deposit_uuid'])
-        self.assertEquals('edit', deposits[1]['action'])
-        cursor.execute('SELECT * FROM journals')
-        journals = list(cursor.fetchall())
-        self.assertEquals(
-            'http://jfs.example.org/index.php/jfs', journals[0]['journal_url'])
+        deposits = [d['deposit_uuid'] for d in list(cursor.fetchall())]
+        self.assertEquals(6, len(deposits))
+
+        self.assertTrue('1225c695-cfb8-4ebb-aaaa-80da344efa6a' in deposits)
 
 
 pkppln.config_file_name = 'config_test.cfg'

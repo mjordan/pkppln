@@ -13,10 +13,9 @@ class ListCommands(PlnCommand):
         files = [basename(p) for p in glob(path + '/*.py')]
         files = [p.replace('.py', '') for p in files]
         files.sort()
-        output = 'usage: pln-command.py [-h] [-v | -q] command ...\n'
-        output += 'where command is one of \n'
+        self.output(0, 'usage: pln-command.py [-h] [-v | -q] command ...')
+        self.output(0, 'where command is one of')
         for f in files:
             if f == '__init__':
                 continue
-            output += '  ' + f + '\n'
-        return output
+            self.output(0, '  ' + f)

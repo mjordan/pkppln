@@ -1,115 +1,100 @@
--- MySQL dump 10.13  Distrib 5.6.20, for osx10.8 (x86_64)
---
--- Host: localhost    Database: mypln
--- ------------------------------------------------------
--- Server version	5.6.20-log
+-- MySQL Workbench Forward Engineering
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
---
--- Table structure for table `deposits`
---
+-- -----------------------------------------------------
+-- Table `journals`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `journals` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `journal_uuid` CHAR(36) CHARACTER SET 'ascii' NOT NULL,
+  `contact_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `notified_date` DATETIME,
+  `title` VARCHAR(256) NOT NULL,
+  `issn` VARCHAR(256) NOT NULL,
+  `journal_url` VARCHAR(256) NOT NULL,
+  `journal_status` VARCHAR(16) NOT NULL DEFAULT 'healthy',
+  `contact_email` VARCHAR(256) NOT NULL,
+  `publisher_name` VARCHAR(255) NOT NULL,
+  `publisher_url` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `journal_status_idx` (`journal_status` ASC),
+  INDEX `journal_contact_idx` (`contact_date` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
-DROP TABLE IF EXISTS `deposits`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `deposits` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `action` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_volume` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_issue` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_pubdate` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `journal_uuid` varchar(38) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `sha1_value` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `size` int(11) NOT NULL,
-  `processing_state` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `pln_state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `deposited_lom` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `deposit_receipt` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `journals`
---
+-- -----------------------------------------------------
+-- Table `deposits`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `deposits` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `journal_id` INT NOT NULL,
+  `file_uuid` CHAR(36) NOT NULL,
+  `deposit_uuid` CHAR(36) CHARACTER SET 'ascii' NOT NULL,
+  `date_deposited` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deposit_action` VARCHAR(5) NOT NULL,
+  `deposit_volume` VARCHAR(256) NOT NULL,
+  `deposit_issue` VARCHAR(256) NOT NULL,
+  `deposit_pubdate` VARCHAR(10) NOT NULL,
+  `deposit_sha1` VARCHAR(40) NOT NULL,
+  `deposit_url` VARCHAR(256) NOT NULL,
+  `deposit_size` INT(11) NOT NULL,
+  `processing_state` VARCHAR(32) NOT NULL,
+  `outcome` VARCHAR(255) NOT NULL,
+  `pln_state` VARCHAR(255) NOT NULL,
+  `deposited_lom` TIMESTAMP NULL DEFAULT NULL,
+  `deposit_receipt` VARCHAR(255) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `deposits_proc_idx` (`processing_state` ASC),
+  INDEX `deposits_outcome_idx` (`outcome` ASC),
+  INDEX `deposits_fk1` (`journal_id` ASC),
+  UNIQUE INDEX `file_uuid_UNIQUE` (`file_uuid` ASC),
+  CONSTRAINT `deposits_fk1`
+    FOREIGN KEY (`journal_id`)
+    REFERENCES `journals` (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
-DROP TABLE IF EXISTS `journals`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `journals` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `journal_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
-  `title` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `issn` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `journal_url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `contact_email` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
-  `date_deposited` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `publisher_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `publisher_url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `microservices`
---
+-- -----------------------------------------------------
+-- Table `microservices`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `microservices` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `deposit_id` INT NOT NULL,
+  `microservice` VARCHAR(255) NOT NULL,
+  `started_on` DATETIME NOT NULL,
+  `finished_on` DATETIME NOT NULL,
+  `outcome` VARCHAR(255) NOT NULL,
+  `error` LONGTEXT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `microservices_fk1` (`deposit_id` ASC),
+  CONSTRAINT `microservices_fk1`
+    FOREIGN KEY (`deposit_id`)
+    REFERENCES `deposits` (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
-DROP TABLE IF EXISTS `microservices`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `microservices` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `microservice` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `deposit_uuid` varchar(38) COLLATE utf8_unicode_ci NOT NULL,
-  `started_on` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `finished_on` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `outcome` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `error` longtext COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=722 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `terms_of_use`
---
+-- -----------------------------------------------------
+-- Table `terms_of_use`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `terms_of_use` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `weight` INT(11) NOT NULL DEFAULT '0',
+  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `key_code` VARCHAR(256) NOT NULL,
+  `lang_code` VARCHAR(8) NOT NULL,
+  `content` TEXT NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 8
+DEFAULT CHARACTER SET = utf8;
 
-DROP TABLE IF EXISTS `terms_of_use`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `terms_of_use` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `current_version` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `key` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `language` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  `text` text COLLATE utf8_unicode_ci NOT NULL,
-  `weight` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2015-01-26 12:56:44
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

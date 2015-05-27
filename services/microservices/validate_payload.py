@@ -15,22 +15,19 @@ class ValidatePayload(PlnService):
         return 'payloadVerified'
 
     def execute(self, deposit):
-        uuid = deposit['deposit_uuid']
-        sha1 = deposit['sha1_value']
-        size = deposit['size']
-        filename = pkppln.deposit_filename(deposit['deposit_url'])
-        filepath = pkppln.input_path('harvested', [uuid], filename)
+        sha1 = deposit['deposit_sha1']
+        size = deposit['deposit_size']
+        filename = deposit['file_uuid']
+        filepath = pkppln.input_path('harvested', filename=filename)
         self.output(1, 'validating ' + filename)
-        self.output(2, 'looking for\n' + filepath)
         bs = os.path.getsize(filepath)
         kb = int(math.ceil(float(bs) / 1000.0))
         if size != kb:
-            return 'failure', 'File sizes do not match: \n\t%s expected\n\t%s actual' % (size, kb)
+            raise Exception('File sizes do not match: \n\t%s expected\n\t%s actual' % (size, kb))
         self.output(1, 'File sizes match')
 
         # Verify SHA-1 checksum reported in the SWORD deposit.
         calculated_sha1 = pkppln.file_sha1(filepath)
         if sha1 != calculated_sha1:
-            return 'failure', 'SHA-1 does not match: \n\t%s expected\n\t%s calculated' % (sha1, calculated_sha1)
+            raise Exception('SHA-1 does not match: \n\t%s expected\n\t%s calculated' % (sha1, calculated_sha1))
         self.output(1, 'Checksums match')
-        return 'success', ''

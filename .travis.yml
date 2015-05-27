@@ -7,16 +7,16 @@ virtualenv:
   system_site_packages: true
 
 before_script:
+  - sudo apt-get install clamav-daemon -y
+  - sudo service clamav-daemon start
   - pip -q install -r requirements.txt
   - cp config_test.cfg config.cfg
-  - mysql -e 'create database pkpplntest;'
-  - mysql pkpplntest < pkppln.sql
-  - sudo mysql -e "grant all on pkpplntest.* to pkpplntest@localhost identified by 'abc123'"
-  - sudo touch /var/log/mypln_sword_requests.log
-  - sudo touch /var/log/myplnservices.log
-  - sudo chmod a+rw /var/log/myplnservices.log
-  - sudo chmod a+rw /var/log/mypln_sword_requests.log
-  - python server.py config_test.cfg > server.log 2>&1 &
+  - mysql -e 'create database pkppln_test;'
+  - mysql pkppln_test < pkppln-test.sql
+  - sudo mysql -e "grant all on pkppln_test.* to pkppln_test@localhost identified by 'abc123456'"
+  - sudo touch /var/log/pkppln_server.log
+  - sudo chmod a+w /var/log/pkppln_server.log
+  - python server.py config_test.cfg > server.log 2>&1 &  
   - sleep 4
 
 script:
@@ -25,5 +25,4 @@ script:
 after_script:
   - killall python
   - cat server.log
-  - cat /var/log/myplnservices.log
-  
+  - cat /var/log/pkppln_server.log

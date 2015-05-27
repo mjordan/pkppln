@@ -25,27 +25,23 @@ class JournalInfo(PlnCommand):
 
     def execute(self, args):
         uuid = args.uuid
-        entries = self.get_journal_entries(uuid)
-        if len(entries) == 0:
-            mysql = pkppln.get_connection()
-            cursor = mysql.cursor()
-            cursor.execute(
-                'SELECT * FROM journals WHERE deposit_uuid=%s',
-                [uuid]
-            )
-            journal = cursor.fetchone()
-            if journal:
-                entries = self.get_journal_entries(journal['journal_uuid'])
+        journal = pkppln.get_journal(uuid)
+        if journal is None:
+            deposit = pkppln.get_deposit(uuid)
+            if deposit is not None:
+                journal = pkppln.get_journal(deposit['journal_uuid'])
 
-        if len(entries) == 0:
-            return 'No journal found.'
-
-        output = ''
-        for entry in entries:
-            output += 'Title:     ' + entry['title'] + '\n'
-            output += 'ISSN:      ' + entry['issn'] + '\n'
-            output += 'URL:       ' + entry['journal_url'] + '\n'
-            output += 'Email:     ' + entry['contact_email'] + '\n'
-            output += '\n'
-
-        return output
+        if journal is None:
+            self.output(0, 'No journal found.')
+            return
+        
+        self.output(0, 'UUID:          ' + journal['journal_uuid'])
+        self.output(0, 'Contact date:  ' + str(journal['contact_date']))
+        self.output(0, 'Notified date: ' + str(journal['notified_date']))
+        self.output(0, 'Title:         ' + journal['title'])
+        self.output(0, 'ISSN:          ' + journal['issn'])
+        self.output(0, 'URL:           ' + journal['journal_url'])
+        self.output(0, 'Status:        ' + journal['journal_status'])
+        self.output(0, 'Contact:       ' + journal['contact_email'])
+        self.output(0, 'Publisher:     ' + journal['publisher_name'])
+        self.output(0, 'Publisher:     ' + journal['publisher_url'])
